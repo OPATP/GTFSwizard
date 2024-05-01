@@ -1,2 +1,7 @@
+S3method(transport_moment,default)
+S3method(transport_moment,list)
+S3method(transport_moment,gtfs)
+S3method(transport_moment,wizardgtfs)
 export(read_gtfs)
 export(gtfs_to_wizard)
+export(transport_moment)
