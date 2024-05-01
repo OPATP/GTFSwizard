@@ -108,7 +108,7 @@ create_dates_services_table <- function(gtfs_list){
   
   gtfs_list[['dates_services']] <- seqs_table(calendar_intervals$period) %>% 
     unnest('date') %>% 
-    mutate(wday = label_wday(wday(date,week_start = 1))) %>% 
+    mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
     left_join(
       week_days_services,
       by = c('period','wday')
