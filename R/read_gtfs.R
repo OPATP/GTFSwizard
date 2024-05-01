@@ -1,12 +1,9 @@
-file.path = 'ber_gtfs.zip'
 
-read_gtfs <- function(file.path, files = NULL, fields = NULL, skip = NULL, quiet = TRUE, 
-                      encoding = "unknown"){
+
+read_gtfs <- function(file.path, files = NULL, quiet = TRUE, ...){
   
-  obj <- gtfstools::read_gtfs(path = file.path, files = files, fields = fields, skip= skip, quiet = quiet,
-                       encoding = encoding)
-  obj <- structure(obj,class = 'gtfs_obj')
+  obj <- gtfsio::import_gtfs(path = file.path,files = files, quiet = quiet, ...)
+  obj <- gtfs_to_wizard(obj)
   return(obj)
   
 }
-

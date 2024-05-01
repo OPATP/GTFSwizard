@@ -1,14 +1,20 @@
 file.path = 'ber_gtfs.zip'
+gtfs <- tidytransit::read_gtfs(file.path)
 gtfs <- read_gtfs(file.path)
-transport_moment <- function( gtfs,route_id = 'all', week_day=c("monday", "tuesday", "wednesday", "thursday", "friday", 
-                                                   "saturday", "sunday"), by_wd = FALSE ){
-  checkmate::assert_class(gtfs,'gtfs_obj')
+transport_moment <- function( gtfs , day = NULL){
+  
   checkmate::assert_names(week_day,subset.of = c("monday", "tuesday", "wednesday", "thursday", "friday", 
                                                  "saturday", "sunday"))
   checkmate::assert_string(route_id)
   checkmate::assert_logical(by_wd, len = 1, any.missing = F)
   
+  new_gtfs <- tidytransit::filter_feed_by_date(gtfs, extract_date = day)
+  
+  
+  a <- tibble(route=names(a),value=a)
+  
   if('calendar'%in%names(gtfs)){
+    
     relevant_service <- lapply(week_day, function(x){
       gtfs$calendar[eval(parse(text = paste0(x,"==","1")))]
     })
@@ -26,7 +32,7 @@ transport_moment <- function( gtfs,route_id = 'all', week_day=c("monday", "tuesd
     }
     
   }else{
-    warning('There are no days of the week in calendar.txt')
+    warning('Missing values for days of the week in calendar.txt')
   }
   
   
