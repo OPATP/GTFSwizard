@@ -25,14 +25,16 @@ transport_moment.default <- function(gtfs, dates = Sys.Date(), routes = NULL, by
 
 transport_moment.wizardgtfs <- function(gtfs, dates = Sys.Date(), routes = NULL, by_route = FALSE, simplify = FALSE){
   
+  verify_tables(gtfs,c('routes','trips','dates_services','shapes'))
+  
   if(is.null(routes)){
     routes <- gtfs$routes$route_id
   }
   if(is.character(dates)){
     dates = as.POSIXct(dates)
   }
-  checkmate::assert_string(routes)
-  checkmate::assert_posixct(dates)
+  checkmate::assert_character(routes)
+  #checkmate::assert(is.POSIXct(dates),is.Date(dates))
   checkmate::assert_logical(by_route, len = 1, any.missing = F)
   checkmate::assert_logical(simplify, len = 1, any.missing = F)
   
