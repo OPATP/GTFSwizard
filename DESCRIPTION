@@ -4,8 +4,7 @@ Title: yet to be defined.
 Version: 0.1.0
 Authors@R: c(
     person(given="Nelson de O.", family="Quesado Filho", email="nquesado@gmail.com",role=c("aut")),
-    person(given="Caio G. C.", family="Guimarães", email="caiogcg.mobilidade@gmail.com",role=c("aut"))
-)
+    person(given="Caio G. C.", family="Guimarães", email="caiogcg.mobilidade@gmail.com",role=c("aut")))
 Maintainer: Gustavo Guimarães <caiogcg.mobilidade@gmail.com> Nelson Quesado <nquesado@gmail.com>
 BugReports: https://github.com/opaTP/GTFSPlanner/issues
 Description: yet to be defined.
