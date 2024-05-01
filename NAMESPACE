@@ -1,6 +1,2 @@
-S3method(get_browser,default)
-S3method(translate_text,character)
-S3method(translate_text,factor)
-export(get_browser)
-export(translate_text)
-export(close_browser)
+export(read_gtfs)
+export(gtfs_to_wizard)
