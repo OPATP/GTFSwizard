@@ -5,17 +5,29 @@ print.wizardgtfs <- function(){
   
 }
 
-
 gtfs_to_wizard <- function(gtfs_list){
+  UseMethod('gtfs_to_wizard')
+}
+
+gtfs_to_wizard.tidygtfs <- function(gtfs_list){
+  gtfs_list[['dates_services']] <- gtfs_list$.$dates_services %>% 
+    group_by(date) %>% 
+    reframe(service_id = list(service_id))
+  gtfs_list<-gtfs_list[names(gtfs_list)!='.']
+  class(gtfs_list) <- c('wizardgtfs','gtfs','list')
+  return(gtfs_list)
+}
+
+gtfs_to_wizard.list <- function(gtfs_list){
   duplicate_ids <- has_duplicate_primary(gtfs_list)
   if(any(unlist(duplicate_ids))){
     warning("Duplicated ids found in: ", paste0(names(duplicate_ids[duplicate_ids]), 
                                                 collapse = ", "), "\n", "The returned object is not a wizardgtfs object.")
     return(gtfs_list)
   }else{
-    gtfs_obj <- convert_to_tibble(gtfs_list)
-    gtfs_obj <- convert_times_and_dates(gtfs_obj)
-    gtfs_obj <- create_dates_services_table(gtfs_obj)
+    gtfs_obj <- convert_to_tibble(gtfs_list) %>% 
+      convert_times_and_dates() %>% 
+      create_dates_services_table()
     gtfs_obj <- gtfsio::new_gtfs(gtfs_obj)
     class(gtfs_obj) <- c('wizardgtfs','gtfs','list')
     return(gtfs_obj)
@@ -39,7 +51,7 @@ primary_ids <- function(){
 }
 
 convert_to_tibble <- function(x){
-  lapply(x, as_tibble)
+  purrr::map(x, as_tibble)
 }
 
 convert_times_and_dates <- function(gtfs_list){
@@ -55,10 +67,10 @@ convert_times_and_dates <- function(gtfs_list){
       date_to_posixct(gtfs_list$calendar_dates$date)
   }
   if('stop_times'%in%names(gtfs_list)){
-    gtfs_list$stop_times$arrival_time <- 
-      chr_to_hms(gtfs_list$stop_times$arrival_time)
-    gtfs_list$stop_times$departure_time <- 
-      chr_to_hms(gtfs_list$stop_times$departure_time)
+    # gtfs_list$stop_times$arrival_time <- 
+    #   chr_to_hms(gtfs_list$stop_times$arrival_time)
+    # gtfs_list$stop_times$departure_time <- 
+    #   chr_to_hms(gtfs_list$stop_times$departure_time)
   }
   return(gtfs_list)
 }
@@ -71,16 +83,29 @@ date_to_posixct <- function(x) {
       "%Y/%m/%d"
     ))
 }
+
+chr_to_segs <- function(x){
+  x <- as.numeric(x)
+  return(x[1]*60*60+x[2]*60+x[3])
+}
+
 chr_to_hms <- function(x){
   x[nchar(x)==0] <- NA
-  hms::as_hms(x)
+  x <- purrr::map_vec(str_split(x,':'),function(y){
+    ifelse(
+        sum(is.na(y))==0,
+        NA,
+        chr_to_segs(y) 
+      )
+    }) 
+  hms::hms(x)
 }
 
 seqs_table <- function(intervals){
   tibble(
     period=unique(intervals)
   ) %>% 
-    mutate(date = lapply(period,function(x) seq(int_start(x),int_end(x),'1 day')))
+    mutate(date = purrr::map(period,function(x) seq(int_start(x),int_end(x),'1 day')))
 }
 
 
@@ -92,7 +117,7 @@ get_wday_services <- function(x){
   resp <- tibble(
     wday = label_wday()
   )
-  resp$service_id <- lapply(label_wday(), function(y){
+  resp$service_id <- purrr::map(label_wday(), function(y){
     list(x$service_id[x[,y]==1])
   })
   resp
@@ -117,4 +142,12 @@ create_dates_services_table <- function(gtfs_list){
   return(gtfs_list)
 }
 
-
+verify_tables <- function(x,tables){
+  ls <- rep(FALSE,length(tables))
+  ls <- tables%in%names(x)==FALSE
+  names(ls) <- tables
+  if(any(ls)){
+    stop(paste0("The following tables are missing in gtfs: ", paste0(names(ls[ls]), 
+                                                collapse = ", "), "\n", "Fix this problem before proceeding."))
+  }
+}
