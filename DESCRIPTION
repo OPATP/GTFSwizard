@@ -9,7 +9,7 @@ Maintainer: Gustavo Guimarães <caiogcg.mobilidade@gmail.com> Nelson Quesado <nq
 BugReports: https://github.com/opaTP/GTFSPlanner/issues
 Description: yet to be defined.
 Imports: tidyverse, gtfstools, tidytransit, lubridate, sf, tidyr, data.table, tibble
-Depends: 
+Depends: tidyverse, sf, data.table
 License: None
 Encoding: UTF-8
 LazyData: true
