@@ -25,10 +25,17 @@ transport_moment.default <- function(gtfs, dates, routes, by_route){
 
 transport_moment.wizardgtfs <- function( gtfs, dates , routes, by_route , simplify){
   
-  checkmate::assert_names(week_day,subset.of = c("monday", "tuesday", "wednesday", "thursday", "friday", 
-                                                 "saturday", "sunday"))
+  
   checkmate::assert_string(routes)
   checkmate::assert_logical(by_route, len = 1, any.missing = F)
+  checkmate::assert_logical(simplify, len = 1, any.missing = F)
+  
+  if(is.null(routes)){
+    routes <- gtfs$routes$route_id
+  }
+  if(is.character(dates)){
+    dates = as.POSIXct(dates)
+  }
   
   services_dates_routes <- 
     gtfs$dates_services %>% 
