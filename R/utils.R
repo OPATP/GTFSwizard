@@ -18,7 +18,7 @@ gtfs_to_wizard.tidygtfs <- function(gtfs_list){
   return(gtfs_list)
 }
 
-gtfs_to_wizard.list <- function(gtfs_list){
+gtfs_to_wizard.default <- function(gtfs_list){
   duplicate_ids <- has_duplicate_primary(gtfs_list)
   if(any(unlist(duplicate_ids))){
     warning("Duplicated ids found in: ", paste0(names(duplicate_ids[duplicate_ids]), 
