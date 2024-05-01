@@ -7,7 +7,7 @@ Authors@R: c(person(given="Nelson de O.", family="Quesado Filho", email="nquesad
 Maintainer: Gustavo Guimarães <caiogcg.mobilidade@gmail.com> Nelson Quesado <nquesado@gmail.com>
 BugReports: https://github.com/opaTP/GTFSPlanner/issues
 Description: yet to be defined.
-Imports: tidyverse, gtfstools, tidytransit
+Imports: tidyverse, gtfstools, tidytransit, lubridate
 Depends: 
 License: None
 Encoding: UTF-8
