@@ -66,9 +66,9 @@ convert_times_and_dates <- function(gtfs_list){
 date_to_posixct <- function(x) {
   as.character(x) %>% 
     as.POSIXct(tryFormats = c(
+      "%Y%m%d",
       "%Y-%m-%d",
-      "%Y/%m/%d",
-      "%Y%m%d"
+      "%Y/%m/%d"
     ))
 }
 chr_to_hms <- function(x){
@@ -76,29 +76,45 @@ chr_to_hms <- function(x){
   hms::as_hms(x)
 }
 
-create_dates_services_table <- function(gtfs_list){
-  
-  gtfs_list[['dates_services']] <- gtfs_list$calendar %>% 
-    mutate(period = interval(start_date,end_date)) %>% 
-    mutate(date = lapply(period,function(x) seq(int_start(x),int_end(x),'1 day'))) %>% 
-    select(-period) %>% 
-    unnest('date') %>% 
-    mutate(wday = lubridate::wday(date,week_start = 1)) %>% 
-    filter((wday==1&monday==1)|
-             (wday==2&tuesday==1)|
-             (wday==3&wednesday==1)|
-             (wday==4&thursday==1)|
-             (wday==5&friday==1)|
-             (wday==6&saturday==1)|
-             (wday==7&sunday==1)) %>% 
-    group_by(date) %>% 
-    reframe(service_id=list(service_id)) %>% 
-    as_tibble()
-  return(gtfs_list)
+seqs_table <- function(intervals){
+  tibble(
+    period=unique(intervals)
+  ) %>% 
+    mutate(date = lapply(period,function(x) seq(int_start(x),int_end(x),'1 day')))
 }
 
-label_wday <- function(x){
-  c('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')[xççççççç]
-} 
+
+label_wday <- function(x=1:7){
+  c('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')[x]
+}
+
+get_wday_services <- function(x){
+  resp <- tibble(
+    wday = label_wday()
+  )
+  resp$service_id <- lapply(label_wday(), function(y){
+    list(x$service_id[x[,y]==1])
+  })
+  resp
+}
+
+create_dates_services_table <- function(gtfs_list){
+  calendar_intervals <- gtfs_list$calendar %>% 
+    mutate(period = interval(start_date,end_date))
+  
+  week_days_services <- calendar_intervals %>% 
+    group_by(period) %>% 
+    reframe(get_wday_services(.))
+  
+  gtfs_list[['dates_services']] <- seqs_table(calendar_intervals$period) %>% 
+    unnest('date') %>% 
+    mutate(wday = label_wday(wday(date,week_start = 1))) %>% 
+    left_join(
+      week_days_services,
+      by = c('period','wday')
+    ) %>% 
+    select(date,service_id)
+  return(gtfs_list)
+}
 
 
