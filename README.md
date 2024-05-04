@@ -8,6 +8,9 @@ Its main purpose is to provide researchers and practitioners with a seamless and
 
 ## Installation
 ``` r
+install.packages('remotes')
+# wait for the installation to complete
+
 remotes::install_github('OPATP/GTFSwizard')
 ```
 ## Cheat Sheet
