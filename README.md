@@ -7,6 +7,10 @@ GTFSwizard is a set of tools for visualizing and manipulating General Feed Trans
 Its main purpose is to provide researchers and practitioners with a seamless and easy way to simulate changes in frequency, headway, dwell time, speed, and routes within a GTFS file.
 
 ## Installation
+``` r
+remotes::install_github('OPATP/GTFSwizard')
+```
+## Cheat Sheet
 
 ## Usage
 
