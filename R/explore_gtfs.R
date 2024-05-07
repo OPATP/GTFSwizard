@@ -39,9 +39,9 @@ explore_gtfs <- function(gtfs){
       )
     
     output$overview_map <- renderLeaflet({
-      leaflet() %>%
-        addPolylines(data = trips.shp) %>%
-        addTiles()
+      leaflet::leaflet() %>%
+        leaflet::addPolylines(data = trips.shp) %>%
+        leaflet::addTiles()
     })
     
     output$freq.sparkline <- renderPlotly({
@@ -79,7 +79,7 @@ explore_gtfs <- function(gtfs){
               axis.ticks = element_blank()
         )
       
-      ggplotly(p, height = 50 * length(unique(gtfs$routes$route_id)))
+      plotly::ggplotly(p, height = 50 * length(unique(gtfs$routes$route_id)))
       
     })
     
