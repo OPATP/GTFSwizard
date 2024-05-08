@@ -1,17 +1,29 @@
-explore_gtfs <- function(gtfs){
+explore_gtfs <- 
+#explore_gtfs_dev <-
+  function(gtfs){
   
   ui <- shiny::navbarPage(
+    h1('GTFS Exploration Dashboard'),
     title = "GTFS wizard",
     tabPanel(
       'Overview',
       column(
         width = 7,
-        leafletOutput('overview_map',height = '75vh'),
+        leafletOutput('overview_map1',height = '75vh'),
         tags$style(
-          'div#overview_map{
+          'div#overview_map1{
           width:100%;
           heigth:60vh;
-          border:solid orange;
+          border:solid green;
+          border-radius:10px;
+          }'
+        ),
+        leafletOutput('overview_map2',height = '75vh'),
+        tags$style(
+          'div#overview_map2{
+          width:100%;
+          heigth:60vh;
+          border:solid green;
           border-radius:10px;
           }'
         )
@@ -38,10 +50,43 @@ explore_gtfs <- function(gtfs){
                          unlist()
       )
     
-    output$overview_map <- renderLeaflet({
+    output$overview_map1 <- renderLeaflet({
       leaflet::leaflet() %>%
+        leaflet::addTiles(group = "OSM") %>% 
+        leaflet::addProviderTiles(providers$CartoDB.Positron,group = 'Carto-Light') %>% 
+        leaflet::addProviderTiles(providers$CartoDB.DarkMatter, group = 'Carto - Dark') %>% 
+        leaflet::addLayersControl(baseGroups = c('Carto - Light','Carto - Dark','OSM')) %>% 
         leaflet::addPolylines(data = trips.shp) %>%
-        leaflet::addTiles()
+        leaflet.extras::addFullscreenControl() %>% 
+        leaflet.extras::addResetMapButton() %>% 
+        leaflet.extras::addControlGPS() %>% 
+        leaflet.extras::addSearchOSM()
+      
+    })
+    
+    stops.shp <- 
+      tidytransit::gtfs_as_sf(gtfs) %>% 
+      .$stops %>% 
+      dplyr::left_join(
+        gtfs$stop_times %>%
+          group_by(stop_id) %>%
+          reframe(`# trips` = n())
+      )
+    
+    output$overview_map2 <- renderLeaflet({
+      leaflet::leaflet() %>% 
+        addTiles(group = "OSM") %>% 
+        addProviderTiles(providers$CartoDB.Positron,group = 'Carto-Light') %>% 
+        addProviderTiles(providers$CartoDB.DarkMatter, group = 'Carto - Dark') %>% 
+        addLayersControl(baseGroups = c('Carto - Light','Carto - Dark','OSM')) %>% 
+        leaflet::addAwesomeMarkers(data = stops.shp,
+                                   popup = ~paste0('# trips ', `# trips`),
+                                   clusterOptions = markerClusterOptions()
+        ) %>% 
+        leaflet.extras::addFullscreenControl() %>% 
+        leaflet.extras::addResetMapButton() %>% 
+        leaflet.extras::addControlGPS() %>% 
+        leaflet.extras::addSearchOSM()
     })
     
     output$freq.sparkline <- renderPlotly({
@@ -89,4 +134,4 @@ explore_gtfs <- function(gtfs){
   
 }
 
-#explore_gtfs(gtfs)
+#explore_gtfs_dev(gtfs)
