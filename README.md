@@ -33,7 +33,7 @@ names(gtfs)
 `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
 
 ```r
-> class(gtfs)
+class(gtfs)
 #> [1] "wizardgtfs" "gtfs" "list"
 ```
 
