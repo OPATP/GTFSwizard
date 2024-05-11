@@ -1,9 +1,26 @@
 
 
 
-print.wizardgtfs <- function(){
+print.wizardgtfs <- function(gtfs){
+  
+  
+  
+  lapply(gtfs,tibble:::print.tbl_df, n=5)
+}
+
+print.summary.wizardgtfs <- function(){
   
 }
+
+summary.wizardgtfs <- function(){
+  
+}
+
+plot.wizardgtfs <- function(){
+  
+  
+}
+
 
 gtfs_to_wizard <- function(gtfs_list){
   UseMethod('gtfs_to_wizard')
@@ -11,7 +28,7 @@ gtfs_to_wizard <- function(gtfs_list){
 
 gtfs_to_wizard.tidygtfs <- function(gtfs_list){
   gtfs_list[['dates_services']] <- gtfs_list$.$dates_services %>% 
-    group_by(date) %>% 
+    dplyr::group_by(date) %>% 
     reframe(service_id = list(service_id))
   gtfs_list<-gtfs_list[names(gtfs_list)!='.']
   class(gtfs_list) <- c('wizardgtfs','gtfs','list')
@@ -20,6 +37,16 @@ gtfs_to_wizard.tidygtfs <- function(gtfs_list){
 
 gtfs_to_wizard.default <- function(gtfs_list){
   duplicate_ids <- has_duplicate_primary(gtfs_list)
+  
+  if('calendar'%in%names(gtfs_list)|'calendar_dates'%in%names(gtfs_list)==FALSE){
+    ## Tentar formatar com cor e itálico
+    
+    
+    warning(paste0("Can't find calendar nor calendar_dates tables in GTFS.\nReturning a gtfs object."))
+    return(gtfs_list)
+    
+    
+  }
   if(any(unlist(duplicate_ids))){
     warning("Duplicated ids found in: ", paste0(names(duplicate_ids[duplicate_ids]), 
                                                 collapse = ", "), "\n", "The returned object is not a wizardgtfs object.")
@@ -28,7 +55,7 @@ gtfs_to_wizard.default <- function(gtfs_list){
     gtfs_obj <- convert_to_tibble(gtfs_list) %>% 
       convert_times_and_dates() %>% 
       create_dates_services_table()
-    gtfs_obj <- gtfsio::new_gtfs(gtfs_obj)
+    #gtfs_obj <- gtfsio::new_gtfs(gtfs_obj)
     class(gtfs_obj) <- c('wizardgtfs','gtfs','list')
     return(gtfs_obj)
   }
@@ -38,10 +65,13 @@ has_duplicate_primary <- function(gtfs_list){
   duplicated_ids <- as.list(rep(FALSE,length(gtfs_list)))
   names(duplicated_ids) <- names(gtfs_list)
   for (table_name in names(primary_ids())) {
-    primary_vec <- gtfs_list[[table_name]] %>% select(primary_ids()[table_name])
-    if(anyDuplicated(primary_vec)>0){
-      duplicated_ids[[table_name]] <- TRUE
+    if(table_name %in% names(duplicated_ids)){
+      primary_vec <- gtfs_list[[table_name]] %>% dplyr::select(primary_ids()[table_name])
+      if(anyDuplicated(primary_vec)>0){
+        duplicated_ids[[table_name]] <- TRUE
+      }
     }
+    
   }
   return(unlist(duplicated_ids))
 }
@@ -105,12 +135,16 @@ seqs_table <- function(intervals){
   tibble(
     period=unique(intervals)
   ) %>% 
-    mutate(date = purrr::map(period,function(x) seq(int_start(x),int_end(x),'1 day')))
+    dplyr::mutate(date = purrr::map(period,function(x) seq(int_start(x),int_end(x),'1 day')))
 }
 
 
 label_wday <- function(x=1:7){
   c('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')[x]
+}
+
+without <- function(x,y){
+  x[! x %in% y]
 }
 
 get_wday_services <- function(x){
@@ -124,22 +158,109 @@ get_wday_services <- function(x){
 }
 
 create_dates_services_table <- function(gtfs_list){
-  calendar_intervals <- gtfs_list$calendar %>% 
-    mutate(period = interval(start_date,end_date))
   
-  week_days_services <- calendar_intervals %>% 
-    group_by(period) %>% 
-    reframe(get_wday_services(.))
+  if('calendar'%in%names(gtfs_list)&'calendar_dates'%in%names(gtfs_list)){
+    
+    calendar_intervals <- gtfs_list$calendar %>% 
+      dplyr::mutate(period = lubridate::interval(start_date,end_date))
+    
+    week_days_services <- calendar_intervals %>% 
+      dplyr::group_by(period) %>% 
+      reframe(get_wday_services(.))
+    
+    dates_services_regular <- seqs_table(calendar_intervals$period) %>% 
+      unnest('date') %>% 
+      dplyr::mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
+      left_join(
+        week_days_services,
+        by = c('period','wday')
+      ) %>% 
+      dplyr::select(date,service_id)
+    
+    aditional_services <- gtfs_list$calendar_dates %>% 
+      filter(exception_type==1) %>% 
+      dplyr::group_by(date) %>% 
+      reframe(service_id = list(service_id))
+    
+    removed_services<- gtfs_list$calendar_dates %>% 
+      filter(exception_type==2) %>% 
+      dplyr::group_by(date) %>% 
+      reframe(service_id = list(service_id))
+    
+    if(nrow(aditional_services)>0){
+      full_services <- bind_rows(
+        dates_services_regular,
+        aditional_services
+      ) %>% 
+        dplyr::group_by(date) %>% 
+        reframe(
+          service_id = list(unique(unlist(service_id)))
+        )
+    }else{
+      full_services <- dates_services_regular
+    }
+    
+    if(nrow(removed_services)>0){
+      full_services <- bind_rows(
+        full_services %>% dplyr::mutate(type = 1),
+        removed_services %>% dplyr::mutate(type = 2)
+      ) %>% 
+        dplyr::group_by(date) %>% 
+        reframe(service_id = list(without(unlist(service_id[type==1]),unlist(service_id[type==2]))))
+      
+    }
+    
+    gtfs_list[['dates_services']] <- full_services
+    
+    return(gtfs_list)
+    
+  }else{
+    
+    if('calendar'%in%names(gtfs_list)){
+      
+      calendar_intervals <- gtfs_list$calendar %>% 
+        dplyr::mutate(period = interval(start_date,end_date))
+      
+      week_days_services <- calendar_intervals %>% 
+        dplyr::group_by(period) %>% 
+        reframe(get_wday_services(.))
+      
+      gtfs_list[['dates_services']] <- seqs_table(calendar_intervals$period) %>% 
+        unnest('date') %>% 
+        dplyr::mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
+        left_join(
+          week_days_services,
+          by = c('period','wday')
+        ) %>% 
+        dplyr::select(date,service_id)
+      return(gtfs_list)
+      
+    }else{
+      
+      aditional_services <- gtfs_list$calendar_dates %>% 
+        filter(exception_type==1) %>% 
+        dplyr::group_by(date) %>% 
+        reframe(service_id = list(service_id))
+      
+      removed_services<- gtfs_list$calendar_dates %>% 
+        filter(exception_type==2) %>% 
+        dplyr::group_by(date) %>% 
+        reframe(service_id = list(service_id))
+      
+      gtfs_list[['dates_services']] <- bind_rows(
+        aditional_services %>% dplyr::mutate(type = 1),
+        removed_services %>% dplyr::mutate(type = 2)
+      ) %>% 
+        dplyr::group_by(date) %>% 
+        reframe(service_id = list(without(unlist(service_id[type==1]),unlist(service_id[type==2]))))
+      
+      return(gtfs_list)
+      
+    }
+    
+  }
   
-  gtfs_list[['dates_services']] <- seqs_table(calendar_intervals$period) %>% 
-    unnest('date') %>% 
-    mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
-    left_join(
-      week_days_services,
-      by = c('period','wday')
-    ) %>% 
-    select(date,service_id)
-  return(gtfs_list)
+  
 }
 
 verify_tables <- function(x,tables){
@@ -151,3 +272,21 @@ verify_tables <- function(x,tables){
                                                 collapse = ", "), "\n", "Fix this problem before proceeding."))
   }
 }
+
+
+
+geom_shapes <- function(obj){
+  if('sf'%in%class(obj)){
+    st_crs(obj) <- 4326
+    return(obj)
+  }else{
+    obj %>% 
+      group_by(shape_id) %>% 
+      reframe(wkt = paste0(shape_pt_lon,' ',shape_pt_lat)) %>% 
+      group_by(shape_id) %>% 
+      reframe(wkt = paste0('LINESTRING(',paste0(wkt,collapse = ', '), ')')) %>% 
+      st_as_sf(wkt = 'wkt',crs=4326)
+  }
+}
+
+

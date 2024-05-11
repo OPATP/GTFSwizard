@@ -30,16 +30,43 @@ transport_moment.wizardgtfs <- function(gtfs, dates = Sys.Date(), routes = NULL,
   if(is.null(routes)){
     routes <- gtfs$routes$route_id
   }
-  if(is.character(dates)){
-    dates = as.POSIXct(dates)
-  }
+  
   checkmate::assert_character(routes)
-  #checkmate::assert(is.POSIXct(dates),is.Date(dates))
+  checkmate::assert(is.POSIXct(dates),is.Date(dates),is.character(dates))
   checkmate::assert_logical(by_route, len = 1, any.missing = F)
   checkmate::assert_logical(simplify, len = 1, any.missing = F)
   
+  if(is.character(dates)){
+    dates = as.POSIXct(dates, tryFormats = c(
+      "%Y%m%d",
+      "%Y-%m-%d",
+      "%Y/%m/%d"
+    ))
+  }
   
-  
+  if(any(dates%in%gtfs$dates_services==FALSE)){
+    warning('Some dates have no services')
+  }
+  if(any(dates%in%gtfs$dates_services)==FALSE){
+    warning('There are no services on any date')
+    if(simplify){
+      return(
+        tibble(
+          date = NULL,
+          route_id = NULL,
+          transport_moment=NULL
+        )
+      )
+    }else{
+      return(
+        tibble(
+          date = NULL,
+          transport_moment=NULL
+        )
+      )
+    }
+    
+  }
   
   services_dates_routes <- 
     gtfs$dates_services %>% 
@@ -52,12 +79,7 @@ transport_moment.wizardgtfs <- function(gtfs, dates = Sys.Date(), routes = NULL,
       reframe(n_trips = n())
   })
   
-  shapes_length <- gtfs$shapes %>% 
-    group_by(shape_id) %>% 
-    reframe(wkt = paste0(shape_pt_lon,' ',shape_pt_lat)) %>% 
-    group_by(shape_id) %>% 
-    reframe(wkt = paste0('LINESTRING(',paste0(wkt,collapse = ', '), ')')) %>% 
-    st_as_sf(wkt = 'wkt',crs=4326) %>% 
+  shapes_length <- geom_shapes(gtfs$shapes) %>% 
     mutate(length = st_length(.)) %>% 
     st_drop_geometry() %>% as_tibble()
   if(by_route){
