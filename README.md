@@ -2,7 +2,7 @@
 [![Lifecycle:
 experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
-GTFSwizard is a set of tools for visualizing and manipulating General Transit Feed Specification (GTFS) files in R.
+GTFSwizard is a set of tools for exploring and manipulating General Transit Feed Specification (GTFS) files in R.
 
 Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes in  frequency, headway, dwell time, speed, and routes within a GTFS file.
 
