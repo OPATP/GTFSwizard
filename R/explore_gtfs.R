@@ -1,6 +1,6 @@
 
 
-exploreGTFS <- function(gtfs){
+explore_gtfs <- function(gtfs){
   
   ui <- shiny::navbarPage(
     title = "Explore GTFS",
