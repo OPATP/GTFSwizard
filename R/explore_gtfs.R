@@ -43,7 +43,6 @@ explore_gtfs <- function(gtfs){
   
 }
 
-exploreGTFS(gtfs_list)
 
 
 
