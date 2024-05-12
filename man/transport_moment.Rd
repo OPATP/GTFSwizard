@@ -50,22 +50,16 @@ transport_moment(gtfs, dates = Sys.Date(), routes = NULL, by_route = FALSE, simp
 }
 \examples{
 
-## The function is currently defined as
-function (gtfs, dates = Sys.Date(), routes = NULL, by_route = FALSE, 
-    simplify = FALSE) 
-{
-    UseMethod("transport_moment")
-}
 
-gtfs_path <- "path_to_my_gtfs.zip"
+gtfs_path <- system.file("extdata", "for_gtfs.zip", package = "GTFSwizard")
 
 gtfs <- read_gtfs(gtfs_path)
 
 moment <- transport_moment(gtfs)
 
 moment <- transport_moment(gtfs,
-          dates = seq(as.POSIXct("2023-10-01"),
-          as.POSIXct("2023-10-22"),"1 day"),
+          dates = seq(as.POSIXct("2020-11-19"),
+          as.POSIXct("2020-11-30"),"1 day"),
           by_routes = TRUE)
 
 }

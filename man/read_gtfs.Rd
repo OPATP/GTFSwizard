@@ -51,7 +51,7 @@ gtfs_to_wizard
 }
 \examples{
 
-gtfs_path <- "path_to_my_gtfs.zip"
+gtfs_path <- system.file("extdata", "for_gtfs.zip", package = "GTFSwizard")
 
 gtfs <- read_gtfs(gtfs_path)
 
