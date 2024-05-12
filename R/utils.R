@@ -38,7 +38,7 @@ gtfs_to_wizard.tidygtfs <- function(gtfs_list){
 gtfs_to_wizard.default <- function(gtfs_list){
   duplicate_ids <- has_duplicate_primary(gtfs_list)
   
-  if('calendar'%in%names(gtfs_list)|'calendar_dates'%in%names(gtfs_list)==FALSE){
+  if(('calendar'%in%names(gtfs_list)==FALSE)&('calendar_dates'%in%names(gtfs_list)==FALSE)){
     ## Tentar formatar com cor e itálico
     
     
