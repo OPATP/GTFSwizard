@@ -1,10 +1,10 @@
 
 
-exploreGTFS <- function(gtfs){
+explore_gtfs <- function(gtfs){
   
   ui <- shiny::navbarPage(
     title = "Explore GTFS",
-    tabPanel(
+    shiny::tabPanel(
       'Overview',
       column(
         width = 7,
@@ -24,7 +24,7 @@ exploreGTFS <- function(gtfs){
         plotlyOutput('overview_plot_freq')
       )
     ),
-    tabPanel('By Route')
+    shiny::tabPanel('By Route')
   )
   
   server <- function(input, output, session) {
