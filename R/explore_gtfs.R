@@ -40,7 +40,8 @@ explore_gtfs <-
     
     # agency ----
     agency <-
-      gtfs %>% .$agency
+      gtfs$agency %>% 
+      filter(agency_id %in% c(gtfs$routes$agency_id %>% unique))
     
     output$agency_table <- renderTable({agency})
     
@@ -135,5 +136,5 @@ explore_gtfs <-
   
 }
 
-#explore_gtfs_dev(gtfs)
+#explore_gtfs(gtfs)
 
