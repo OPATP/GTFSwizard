@@ -1,5 +1,3 @@
-
-
 explore_gtfs <- function(gtfs){
   
   ui <- shiny::navbarPage(
@@ -8,8 +6,8 @@ explore_gtfs <- function(gtfs){
       'Overview',
       column(
         width = 7,
-        leafletOutput('overview_map',height = '75vh'),
-        tags$style(
+        leaflet::leafletOutput('overview_map',height = '75vh'),
+        shiny::tags$style(
           'div#overview_map{
           width:100%;
           heigth:60vh;
@@ -21,7 +19,7 @@ explore_gtfs <- function(gtfs){
       ),
       column(
         width = 5,
-        plotlyOutput('overview_plot_freq')
+        plotly::plotlyOutput('overview_plot_freq')
       )
     ),
     shiny::tabPanel('By Route')
@@ -30,9 +28,9 @@ explore_gtfs <- function(gtfs){
   server <- function(input, output, session) {
     
     output$overview_map <- renderLeaflet({
-      leaflet() %>% 
-        addPolylines(data = geom_shapes(gtfs$shapes)) %>% 
-        addTiles()
+      leaflet::leaflet() %>% 
+        leaflet::addPolylines(data = geom_shapes(gtfs$shapes)) %>% 
+        leaflet::addTiles()
     })
     
     
@@ -42,8 +40,3 @@ explore_gtfs <- function(gtfs){
   
   
 }
-
-exploreGTFS(gtfs_list)
-
-
-
