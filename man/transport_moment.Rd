@@ -1,5 +1,5 @@
 \name{transport_moment}
-
+\alias{transport_moment}
 \title{
 Compute the transport moment
 }
