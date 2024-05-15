@@ -27,9 +27,7 @@ read_gtfs(
  Can be used to pass on arguments to gtfsio::import_gtfs(). The parameters files and quiet are passed on by default
 }
 }
-\details{
-%%  ~~ If necessary, more details than the description above ~~
-}
+
 \value{
 A wizardgtfs object: a list of tibbles in which each entry represents a txt file read from the .zip archive and additionally a tibble containing the services for each date (dates_services).
 }
@@ -40,9 +38,7 @@ tidytransit::read_gtfs
 \author{
 "Guimarães, Gustavo <caiogcg.mobilidade@gmail.com>"
 }
-\note{
-%%  ~~further notes~~
-}
+
 
 
 
@@ -57,4 +53,3 @@ gtfs <- read_gtfs(gtfs_path)
 
 summary(gtfs)
 }
-
