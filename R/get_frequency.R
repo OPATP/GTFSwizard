@@ -8,7 +8,7 @@ get_frequency <- function(gtfs){
         dplyr::select(route_id, service_id, trip_id, shape_id)
     ) %>% 
     # filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
-    dplyr::mutate(hour = str_extract(departure, '\\d+') %>% as.numeric()) %>% 
+    dplyr::mutate(hour = str_extract(as.character(departure), '\\d+') %>% as.numeric()) %>% 
     dplyr::group_by(route_id, hour) %>% 
     dplyr::reframe(frequency = n())
   
