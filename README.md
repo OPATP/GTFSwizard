@@ -23,19 +23,19 @@ library(GTFSwizard)
 gtfs <- read_gtfs('path-to-gtfs.zip')
 
 names(gtfs)
-#> [1] "agency"          "calendar"
-#> [3] "calendar_dates"  "fare_attributes"
-#> [5] "fare_rules"      "routes"
-#> [7] "shapes"          "stop_times"
-#> [9] "stops"           "trips"
-#> [11] "dates_services"
+# [1] "agency"          "calendar"
+# [3] "calendar_dates"  "fare_attributes"
+# [5] "fare_rules"      "routes"
+# [7] "shapes"          "stop_times"
+# [9] "stops"           "trips"
+# [11] "dates_services"
 ```
 
 `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
 
 ```r
 class(gtfs)
-#> [1] "wizardgtfs" "gtfs" "list"
+# [1] "wizardgtfs" "gtfs" "list"
 ```
 
 GTFS feeds are explored using the `explore_gtfs()` function:
