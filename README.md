@@ -30,6 +30,7 @@ names(gtfs)
 #> [9] "stops"           "trips"
 #> [11] "dates_services"
 ```
+
 `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
 
 ```r
@@ -40,6 +41,26 @@ class(gtfs)
 GTFS feeds are explored using the `explore_gtfs()` function:
 ``` r
 explore_gtfs(gtfs)
+```
+
+Routes frequency are calculated using the `get_frequency()` function:
+``` r
+get_frquency(gtfs)
+# A tibble: 6,097 × 3
+#   route_id  hour frequency
+#   <chr>    <dbl>     <int>
+# 1 004          7         2
+# 2 004          8         4
+# 3 004          9         4
+# 4 004         10         4
+# 5 004         11         4
+# 6 004         12         4
+# 7 004         13         4
+# 8 004         14         5
+# 9 004         15         4
+#10 004         16         4
+# ℹ 6,087 more rows
+# ℹ Use `print(n = ...)` to see more rows
 ```
 
 ## Related Packages
