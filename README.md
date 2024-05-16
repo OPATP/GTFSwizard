@@ -45,7 +45,7 @@ explore_gtfs(gtfs)
 
 Routes frequency are calculated using the `get_frequency()` function:
 ``` r
-get_frquency(gtfs)
+get_frequency(gtfs)
 # A tibble: 6,097 × 3
 #   route_id  hour frequency
 #   <chr>    <dbl>     <int>
