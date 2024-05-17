@@ -51,14 +51,6 @@ explore_gtfs <-
     trips.shp <- 
       tidytransit::shapes_as_sf(gtfs$shapes)
     
-    trips.shp <-
-      trips.shp %>% 
-      dplyr::bind_cols(.,
-                       `# trips` = sf::st_intersects(trips.shp, trips.shp) %>% 
-                         lapply(., length) %>% 
-                         unlist()
-      )
-    
     stops.shp <- 
       tidytransit::gtfs_as_sf(gtfs) %>% 
       .$stops %>% 
@@ -88,24 +80,7 @@ explore_gtfs <-
     
     # frequency ----
     output$freq.sparkline <- plotly::renderPlotly({
-      overall.freq <- 
-        gtfs$stop_times %>% 
-        dplyr::group_by(trip_id) %>% 
-        dplyr::reframe(departure = arrival_time[1]) %>% 
-        dplyr::left_join(
-          gtfs$trips %>% 
-            dplyr::select(route_id, service_id, trip_id, shape_id)
-        ) %>% 
-        # filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
-        dplyr::mutate(hour = str_extract(departure, '\\d+') %>% as.numeric()) %>% 
-        #group_by(route_id, hour, shape_id, service_id) %>% 
-        dplyr::group_by(route_id, hour) %>% 
-        dplyr::reframe(frequency = n()) %>% 
-        dplyr::arrange(hour) %>%  
-        tidyr::pivot_wider(., names_from = hour, values_from = frequency, values_fill = 0) %>% 
-        dplyr::arrange(route_id) %>%
-        tidyr::pivot_longer(., cols = 2:ncol(.), names_to = "hour", values_to = "frequency") %>% 
-        dplyr::mutate(hour = as.numeric(hour))
+      overall.freq <- get_frequency(gtfs)
       
       freq.hline <-
         mean(dplyr::group_by(overall.freq, hour) %>%
@@ -139,5 +114,5 @@ explore_gtfs <-
   
 }
 
-#explore_gtfs(gtfs)
+#explore_gtfs_dev(gtfs)
 
