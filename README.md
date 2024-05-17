@@ -43,10 +43,10 @@ GTFS feeds are explored using the `explore_gtfs()` function:
 explore_gtfs(gtfs)
 ```
 
-Routes frequency are calculated using the `get_frequency()` function:
+Routes frequency and dell times are calculated using the `get_frequency()` and the `get_dwelltime` functions:
 ``` r
 get_frequency(gtfs)
-# A tibble: 6,097 × 3
+## A tibble: 6,097 × 3
 #   route_id  hour frequency
 #   <chr>    <dbl>     <int>
 # 1 004          7         2
@@ -59,8 +59,25 @@ get_frequency(gtfs)
 # 8 004         14         5
 # 9 004         15         4
 #10 004         16         4
-# ℹ 6,087 more rows
-# ℹ Use `print(n = ...)` to see more rows
+## ℹ 6,087 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+get_dwelltime(gtfs)
+## A tibble: 2,199,154 × 4
+#   route_id stop_id  hour dwell_time
+#   <chr>    <fct>   <dbl>      <dbl>
+# 1 011      3500        5         20
+# 2 011      1013        5         20
+# 3 011      1015        5         20
+# 4 011      4251        5         20
+# 5 011      990         5         20
+# 6 011      991         5         20
+# 7 011      989         5         20
+# 8 011      1600        5         20
+# 9 011      1608        5         20
+#10 011      4767        5         20
+## ℹ 2,199,144 more rows
+## ℹ Use `print(n = ...)` to see more rows
 ```
 
 ## Related Packages
