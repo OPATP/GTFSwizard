@@ -1,3 +1,4 @@
+
 \name{transport_moment}
 \alias{transport_moment}
 \title{
@@ -7,7 +8,11 @@ Compute the transport moment
 Receives a wizardgtfs object and computes the transportation time (Nº. of trips * Route length) for a given date or a list. 
 }
 \usage{
-transport_moment(gtfs, dates = Sys.Date(), routes = NULL, by_route = FALSE, simplify = FALSE)
+transport_moment(gtfs,
+                 dates = Sys.Date(),
+                 routes = NULL,
+                 by_route = FALSE,
+                 simplify = FALSE)
 }
 
 \arguments{
