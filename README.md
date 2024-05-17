@@ -63,20 +63,20 @@ get_frequency(gtfs)
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_dwelltime(gtfs)
-## A tibble: 2,199,154 × 4
+## A tibble: 1,736 × 4
 #   route_id stop_id  hour dwell_time
 #   <chr>    <fct>   <dbl>      <dbl>
-# 1 011      3500        5         20
-# 2 011      1013        5         20
-# 3 011      1015        5         20
-# 4 011      4251        5         20
-# 5 011      990         5         20
-# 6 011      991         5         20
-# 7 011      989         5         20
-# 8 011      1600        5         20
-# 9 011      1608        5         20
-#10 011      4767        5         20
-## ℹ 2,199,144 more rows
+# 1 164      M19         6          0
+# 2 164      M10         6         28
+# 3 164      M18         6         22
+# 4 164      M17         6         28
+# 5 164      M16         6         26
+# 6 164      M15         6         27
+# 7 164      M14         6         25
+# 8 164      M13         6         41
+# 9 164      M38         6         23
+#10 164      M39         6         22
+## ℹ 1,726 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
