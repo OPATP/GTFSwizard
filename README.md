@@ -43,7 +43,7 @@ GTFS feeds are explored using the `explore_gtfs()` function:
 explore_gtfs(gtfs)
 ```
 
-Routes frequency and dell times are calculated using the `get_frequency()` and the `get_dwelltime` functions:
+Routes frequency and dell times are calculated using the `get_frequency()` and the `get_dwelltime()` functions:
 ``` r
 get_frequency(gtfs)
 ## A tibble: 6,097 × 3
