@@ -1,4 +1,4 @@
-get_dwelltime <- function(gtfs, max.dwelltime = 60){
+get_dwelltime <- function(gtfs, max.dwelltime = 90){
   
   dwell_time <- 
     gtfs$stop_times %>% 
