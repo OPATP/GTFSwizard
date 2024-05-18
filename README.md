@@ -62,7 +62,7 @@ get_frequency(gtfs)
 ## ℹ 6,087 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-get_dwelltime(gtfs)
+get_dwelltime(gtfs, max.dwelltime = 60)
 ## A tibble: 1,736 × 4
 #   route_id stop_id  hour dwell_time
 #   <chr>    <fct>   <dbl>      <dbl>
