@@ -22,4 +22,4 @@ get_frequency <- function(gtfs){
   return(freq)
 }
 
-get_frequency(gtfs)
+#get_frequency(gtfs)
