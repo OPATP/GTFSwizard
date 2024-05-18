@@ -1,5 +1,7 @@
 get_dwelltime <- function(gtfs, max.dwelltime = 90){
   
+  if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+  
   dwell_time <- 
     gtfs$stop_times %>% 
     dplyr::select(arrival_time, departure_time, stop_id, trip_id)  %>% 
