@@ -1,4 +1,6 @@
 get_frequency <- function(gtfs){
+  
+    if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
 
     freq <-
     gtfs$stop_times %>% 
