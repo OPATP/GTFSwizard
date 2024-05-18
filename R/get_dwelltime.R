@@ -1,4 +1,4 @@
-get_dwelltime <- function(gtfs, max.dwelltime = 90){
+get_dwelltime <- function(gtfs, max.dwelltime = 60){
   
   dwell_time <- 
     gtfs$stop_times %>% 
@@ -26,7 +26,14 @@ get_dwelltime <- function(gtfs, max.dwelltime = 90){
     ) %>% 
     dplyr::filter(dwell_time <= max.dwelltime) %>%
     dplyr::left_join(gtfs$trips) %>% 
-    dplyr::select(route_id, stop_id, hour, dwell_time)
+    dplyr::select(route_id, stop_id, hour, dwell_time, service_id) %>% 
+    dplyr::left_join(
+      gtfs$dates_services$service_id %>%
+        unlist %>%
+        table %>%
+        as_tibble %>% 
+        stats::setNames(c('service_id', 'service_frequency'))
+    )
   
   return(dwell_time)
   
