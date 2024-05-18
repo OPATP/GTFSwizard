@@ -8,7 +8,6 @@ get_frequency <- function(gtfs){
       gtfs$trips %>% 
         dplyr::select(route_id, service_id, trip_id)
     ) %>% 
-    
     dplyr::mutate(hour = str_extract(as.character(departure), '\\d+') %>% as.numeric()) %>% 
     dplyr::group_by(route_id, hour, service_id) %>% 
     dplyr::reframe(frequency = n()) %>% 
