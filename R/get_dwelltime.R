@@ -1,4 +1,4 @@
-get_dwelltime <- function(gtfs){
+get_dwelltime <- function(gtfs, max.dwelltime = 300){
   
   dwell_time <- 
     gtfs$stop_times %>% 
@@ -24,7 +24,7 @@ get_dwelltime <- function(gtfs){
                     na.omit(),
                   dwell_time = departure_time - arrival_time
     ) %>% 
-    dplyr::filter(dwell_time <= 300) %>% # máximo 5 minutos
+    dplyr::filter(dwell_time <= max.dwelltime) %>%
     dplyr::left_join(gtfs$trips) %>% 
     dplyr::select(route_id, stop_id, hour, dwell_time)
   
