@@ -9,8 +9,8 @@ get_speed <- function(gtfs){
   speed <-
     gtfs$stop_times %>% 
     dplyr::select(trip_id, arrival_time, departure_time, stop_id)  %>% 
-    dplyr::mutate(stop_id = as_factor(stop_id)) %>% 
     dplyr::filter(!arrival_time == '') %>% 
+    dplyr::mutate(stop_id = as_factor(stop_id)) %>% 
     dplyr::mutate(hour = str_extract(arrival_time, "\\d+"),
                   arrival_time = gtfs$stop_times$arrival_time %>% 
                     stringr::str_split(":") %>% 
