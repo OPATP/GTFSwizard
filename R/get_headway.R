@@ -23,7 +23,14 @@ get_headway <- function(gtfs){
       dplyr::filter(headway.minutes >= 0) %>% 
       dplyr::group_by(route_id, stop_id, service_id, hour) %>% 
       dplyr::reframe(average.headway.minutes = mean(headway.minutes),
-                     hour = as.numeric(hour)) # %>% filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
+                     hour = as.numeric(hour)) %>%  # %>% filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
+      dplyr::left_join(
+        gtfs$dates_services$service_id %>%
+          unlist %>%
+          table %>%
+          as_tibble %>% 
+          stats::setNames(c('service_id', 'service_frequency'))
+      )
   
   return(hw)
 }
