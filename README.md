@@ -40,7 +40,7 @@ GTFS feeds are explored using the `explore_gtfs()` function:
 explore_gtfs(gtfs)
 ```
 
-Routes frequency, headway and dell times are calculated using the `get_frequency()`, the `get_headway()`, and the `get_dwelltime()` functions:
+Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headway()`, the `get_dwelltime()`, and the `get_speed()` functions:
 ``` r
 get_frequency(gtfs)
 ## A tibble: 15,522 × 5
