@@ -43,55 +43,54 @@ explore_gtfs(gtfs)
 Routes frequency, headway and dell times are calculated using the `get_frequency()`, the `get_headway()`, and the `get_dwelltime()` functions:
 ``` r
 get_frequency(gtfs)
-## A tibble: 6,097 × 3
-#   route_id  hour frequency
-#   <chr>    <dbl>     <int>
-# 1 004          7         2
-# 2 004          8         4
-# 3 004          9         4
-# 4 004         10         4
-# 5 004         11         4
-# 6 004         12         4
-# 7 004         13         4
-# 8 004         14         5
-# 9 004         15         4
-#10 004         16         4
-## ℹ 6,087 more rows
+## A tibble: 15,522 × 5
+#   route_id  hour service_id frequency service_frequency
+#   <chr>    <dbl> <chr>          <int>             <int>
+# 1 004          7 U                  2               586
+# 2 004          8 U                  4               586
+# 3 004          9 U                  4               586
+# 4 004         10 U                  4               586
+# 5 004         11 U                  4               586
+# 6 004         12 U                  4               586
+# 7 004         13 U                  4               586
+# 8 004         14 U                  5               586
+# 9 004         15 U                  4               586
+#10 004         16 U                  4               586
+## ℹ 15,512 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
- get_headway(gtfs)
-#Joining with `by = join_by(trip_id)`
-## A tibble: 664,746 × 5
-#   route_id stop_id service_id hour  average.headway.minutes
-#   <chr>    <fct>   <chr>      <chr>                   <dbl>
-# 1 004      3330    U          08                       149 
-# 2 004      3330    U          09                       148 
-# 3 004      3330    U          10                       143 
-# 4 004      3330    U          11                       179 
-# 5 004      3330    U          12                       112.
-# 6 004      3330    U          13                       116.
-# 7 004      3330    U          14                       146 
-# 8 004      3330    U          15                       144 
-# 9 004      3330    U          16                       141 
-#10 004      3303    U          08                       149 
+get_headway(gtfs)
+## A tibble: 664,746 × 6
+#   route_id stop_id service_id  hour average.headway.minutes service_frequency
+#   <chr>    <fct>   <chr>      <dbl>                   <dbl>             <int>
+# 1 004      3330    U              8                    149                586
+# 2 004      3330    U              9                    148                586
+# 3 004      3330    U             10                    143                586
+# 4 004      3330    U             11                    179                586
+# 5 004      3330    U             12                    112.               586
+# 6 004      3330    U             13                    116.               586
+# 7 004      3330    U             14                    146                586
+# 8 004      3330    U             15                    144                586
+# 9 004      3330    U             16                    141                586
+#10 004      3303    U              8                    149                586
 ## ℹ 664,736 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_dwelltime(gtfs, max.dwelltime = 60)
-## A tibble: 1,736 × 4
-#   route_id stop_id  hour dwell_time
-#   <chr>    <fct>   <dbl>      <dbl>
-# 1 164      M19         6          0
-# 2 164      M10         6         28
-# 3 164      M18         6         22
-# 4 164      M17         6         28
-# 5 164      M16         6         26
-# 6 164      M15         6         27
-# 7 164      M14         6         25
-# 8 164      M13         6         41
-# 9 164      M38         6         23
-#10 164      M39         6         22
-## ℹ 1,726 more rows
+# A tibble: 2,198,547 × 6
+#   route_id stop_id  hour dwell_time service_id service_frequency
+#   <chr>    <fct>   <dbl>      <dbl> <chr>                  <int>
+# 1 011      3500        5         10 D                        121
+# 2 011      1013        5         20 D                        121
+# 3 011      1015        5         20 D                        121
+# 4 011      4251        5         20 D                        121
+# 5 011      990         5         10 D                        121
+# 6 011      991         5         10 D                        121
+# 7 011      989         5         20 D                        121
+# 8 011      1600        5         20 D                        121
+# 9 011      1608        5         30 D                        121
+#10 011      4767        5         20 D                        121
+## ℹ 2,198,537 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
