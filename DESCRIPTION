@@ -9,7 +9,7 @@ Maintainer: Gustavo Guimarães <caiogcg.mobilidade@gmail.com> Nelson Quesado <nq
 URL: https://github.com/OPATP/GTFSwizard
 BugReports: https://github.com/OPATP/GTFSwizard/issues
 Description: A set of tools for exploring and manipulating GTFS files.
-Imports: tidyverse, gtfstools, tidytransit, lubridate, sf, tidyr, data.table, tibble, shiny, plotly, leaflet, leaflet.extras
+Imports: tidyverse, gtfstools, tidytransit, lubridate, sf, tidyr, data.table, tibble, shiny, plotly, leaflet, leaflet.extras, crayon
 Depends: R (>= 3.5.0)
 License: None
 Encoding: UTF-8
