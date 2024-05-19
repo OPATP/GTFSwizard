@@ -1,6 +1,7 @@
 explore_gtfs <- 
   function(gtfs){
-  # ui ----
+    if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+    # ui ----
   ui <- shiny::navbarPage(
     #theme = bs_theme(bootswatch = 'cosmo'),
     title = "GTFSwizard",
@@ -25,12 +26,20 @@ explore_gtfs <-
         
       ),
       shiny::column(
-        width = 12,
+        width = 7,
         plotly::plotlyOutput('freq.sparkline')
       ),
       shiny::column(
-        width = 12,
+        width = 5,
+        plotly::plotlyOutput('hist.freq')
+      ),
+      shiny::column(
+        width = 7,
         plotly::plotlyOutput('dt.sparkline')
+      ),
+      shiny::column(
+        width = 5,
+        plotly::plotlyOutput('hist.dt')
       )
     ),
     shiny::tabPanel('By Route')
@@ -79,11 +88,12 @@ explore_gtfs <-
     })
     
     # frequency ----
+    overall.freq <-
+      get_frequency(gtfs) %>% 
+      dplyr::group_by(route_id, hour) %>% 
+      dplyr::reframe(average.frequency = weighted.mean(frequency, service_frequency))
+    
     output$freq.sparkline <- plotly::renderPlotly({
-      overall.freq <-
-        get_frequency(gtfs) %>% 
-        dplyr::group_by(route_id, hour) %>% 
-        dplyr::reframe(average.frequency = weighted.mean(frequency, service_frequency))
       
       freq.hline <-
         mean(overall.freq$average.frequency, na.rm = T)
@@ -108,21 +118,32 @@ explore_gtfs <-
       
     })
     
+    output$hist.freq <- plotly::renderPlotly({
+      
+      p.hist.freq <-
+        ggplot2::ggplot() +
+        ggplot2::geom_histogram(data = overall.freq, ggplot2::aes(x = average.frequency)) +
+        ggplot2::geom_vline(ggplot2::aes(xintercept = mean(overall.freq$average.frequency, na.rm = T), color = paste('Overall\naverage\nhourly\nfrequency of\n', mean(overall.freq$average.frequency, na.rm = T) %>% round, 'departure \nper hour')), linetype = 'dashed', linewidth = .75) +
+        ggplot2::labs(title = 'Hourly Frequency Distribution', x = 'Departures', y = 'Frequency (# route.hour)', colour = '') +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = 'red')
+      
+      
+      plotly::ggplotly(p.hist.freq)
+      
+    })
     
     # dwell time ----
+    dwell_time <- 
+      get_dwelltime(gtfs)
+    
     output$dt.sparkline <- plotly::renderPlotly({
-      
-      dwell_time <- 
-        get_dwelltime(gtfs)
-      
-      dt.hline <-
-        mean(dwell_time$dwell_time)
       
       p.dt.sparkline <- 
         ggplot2::ggplot() +
         ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
         ggplot2::geom_boxplot(data = dwell_time, ggplot2::aes(x = hour, y = dwell_time, color = 'Hourly\nDistribution\n', group = hour)) +
-        ggplot2::geom_hline(ggplot2::aes(yintercept = dt.hline, color = 'Overall\nAverage\nDwell Time\n'), linetype = 'dashed', linewidth = .75) +
+        ggplot2::geom_hline(ggplot2::aes(yintercept = mean(dwell_time$dwell_time), color = 'Overall\nAverage\nDwell Time\n'), linetype = 'dashed', linewidth = .75) +
         ggplot2::geom_line(data = dplyr::group_by(dwell_time, hour) %>% dplyr::reframe(dwell_time = mean(dwell_time)), ggplot2::aes(hour, dwell_time, color = 'Hourly\nAverage\nDwell Time\n'), linewidth = 1) +
         ggplot2::labs(x = 'Hour of the day', y = 'Hourly dwell time', colour = '', title = 'System Dwell Time') +
         ggplot2::theme_linedraw() +
@@ -132,12 +153,26 @@ explore_gtfs <-
           panel.grid.major.y = element_blank(),
           axis.ticks.x = element_blank()
         ) +
-        scale_color_manual(values = c('blue4', 'gray', 'red'))
+        ggplot2::scale_color_manual(values = c('blue4', 'gray', 'red'))
       
       plotly::ggplotly(p.dt.sparkline)
       
     })
     
+    output$hist.dt <- plotly::renderPlotly({
+      
+      p.hist.dt <-
+        ggplot2::ggplot() +
+        ggplot2::geom_histogram(data = dwell_time, ggplot2::aes(x = dwell_time)) +
+        ggplot2::geom_vline(ggplot2::aes(xintercept = mean(dwell_time$dwell_time, na.rm = T), color = paste('Overall\nAverage\nDwell Time\n', mean(dwell_time$dwell_time, na.rm = T) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
+        ggplot2::labs(title = 'Dwell Time Distribution', x = 'Dwell time (s)', y = 'Frequency (# stops)', colour = '') +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = 'red')
+    
+    
+      plotly::ggplotly(p.hist.dt)
+      
+      })
     
   }
 
@@ -145,5 +180,4 @@ explore_gtfs <-
   
 }
 
-# explore_gtfsgtfs)
-
+#explore_gtfs(gtfs)
