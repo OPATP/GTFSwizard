@@ -16,7 +16,8 @@ remotes::install_github('OPATP/GTFSwizard')
 ## Cheat Sheet
 
 ## Usage
-GTFS feeds are read using the `read_gtfs()` function:
+GTFS feeds are read using the `read_gtfs()` function.\
+`read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
 ``` r
 library(GTFSwizard)
 
@@ -29,11 +30,7 @@ names(gtfs)
 # [7] "shapes"          "stop_times"
 # [9] "stops"           "trips"
 # [11] "dates_services"
-```
 
-`read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
-
-```r
 class(gtfs)
 # [1] "wizardgtfs" "gtfs" "list"
 ```
