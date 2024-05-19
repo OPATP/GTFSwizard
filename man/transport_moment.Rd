@@ -1,4 +1,3 @@
-
 \name{transport_moment}
 \alias{transport_moment}
 \title{
@@ -26,6 +25,21 @@ transport_moment(gtfs, dates = Sys.Date(), routes = NULL, by_route = FALSE, simp
 }
   \item{simplify}{
   A logical. Whether to return a simplified result.
+}
+  \item{rt2shp}{
+  A function. Function to convert route_id into shape_id when necessary.
+    \itemize{
+    \cr
+    In some GTFS files, the shape_id is not present in the "trips" table. When this        happens, the function considers reoute_id=shape_id, which is not necessarily true.
+    \itemize{
+    This function allows a conversion between route_id and shape_id it must receive        route_id and return the corresponding id for the shape_id.
+    }
+    \item {Example: } {
+    \cr
+    function(route_id) paste0('Shape_',route_id)
+    }
+  }
+    
 }
 }
 \details{
@@ -58,8 +72,9 @@ moment <- transport_moment(for_gtfs)
 moment <- transport_moment(for_gtfs,
           dates = seq(as.POSIXct("2020-11-19"),
           as.POSIXct("2020-11-30"),"1 day"),
-          by_route = TRUE)
+          by_routes = TRUE)
 
 }
+
 
 
