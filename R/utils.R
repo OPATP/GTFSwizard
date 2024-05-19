@@ -1,26 +1,6 @@
 
 
 
-print.wizardgtfs <- function(gtfs){
-  
-  
-  
-  lapply(gtfs,tibble:::print.tbl_df, n=5)
-}
-
-print.summary.wizardgtfs <- function(){
-  
-}
-
-summary.wizardgtfs <- function(){
-  
-}
-
-plot.wizardgtfs <- function(){
-  
-  
-}
-
 
 gtfs_to_wizard <- function(gtfs_list){
   UseMethod('gtfs_to_wizard')
@@ -42,14 +22,14 @@ gtfs_to_wizard.default <- function(gtfs_list){
     ## Tentar formatar com cor e itálico
     
     
-    warning(paste0("Can't find calendar nor calendar_dates tables in GTFS.\nReturning a gtfs object."))
+    warning(crayon::italic(crayon::red(paste0("Can't find calendar nor calendar_dates tables in GTFS files.\nReturning a gtfs object."))))
     return(gtfs_list)
     
     
   }
   if(any(unlist(duplicate_ids))){
     warning("Duplicated ids found in: ", paste0(names(duplicate_ids[duplicate_ids]), 
-                                                collapse = ", "), "\n", "The returned object is not a wizardgtfs object.")
+                                                collapse = ", "), "\n", crayon::red("The returned object is not a wizardgtfs object."))
     return(gtfs_list)
   }else{
     gtfs_obj <- convert_to_tibble(gtfs_list) %>% 
@@ -171,11 +151,18 @@ create_dates_services_table <- function(gtfs_list){
     dates_services_regular <- seqs_table(calendar_intervals$period) %>% 
       unnest('date') %>% 
       dplyr::mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
-      left_join(
+      dplyr::left_join(
         week_days_services,
         by = c('period','wday')
       ) %>% 
       dplyr::select(date,service_id)
+    
+    if(anyDuplicated(dates_services_regular$date)>0){
+      dates_services_regular <- unique(dates_services_regular) %>% 
+        group_by(date) %>% 
+        reframe(service_id = list(unique(unlist(service_id))))
+    }
+    
     
     aditional_services <- gtfs_list$calendar_dates %>% 
       filter(exception_type==1) %>% 
@@ -210,7 +197,7 @@ create_dates_services_table <- function(gtfs_list){
       
     }
     
-    gtfs_list[['dates_services']] <- full_services
+    gtfs_list[['dates_services']] <- unique(full_services)
     
     return(gtfs_list)
     
@@ -225,14 +212,22 @@ create_dates_services_table <- function(gtfs_list){
         dplyr::group_by(period) %>% 
         reframe(get_wday_services(.))
       
-      gtfs_list[['dates_services']] <- seqs_table(calendar_intervals$period) %>% 
+      dates_services_regular <- seqs_table(calendar_intervals$period) %>% 
         unnest('date') %>% 
         dplyr::mutate(wday = label_wday(lubridate::wday(date,week_start = 1))) %>% 
-        left_join(
+        dplyr::left_join(
           week_days_services,
           by = c('period','wday')
         ) %>% 
         dplyr::select(date,service_id)
+      
+      if(anyDuplicated(dates_services_regular$date)>0){
+        dates_services_regular <- unique(dates_services_regular) %>% 
+          group_by(date) %>% 
+          reframe(service_id = list(unique(unlist(service_id))))
+      }
+      
+      gtfs_list[['dates_services']] <- dates_services_regular
       return(gtfs_list)
       
     }else{
@@ -267,13 +262,20 @@ verify_tables <- function(x,tables){
   ls <- rep(FALSE,length(tables))
   ls <- tables%in%names(x)==FALSE
   names(ls) <- tables
-  if(any(ls)){
-    stop(paste0("The following tables are missing in gtfs: ", paste0(names(ls[ls]), 
-                                                collapse = ", "), "\n", "Fix this problem before proceeding."))
-  }
+  return(ls)
 }
 
+verify_field <- function(tbl,x){
+  x %in% names(tbl)
+}
 
+field_if_exist <- function(tbl,x){
+  if(x %in% names(tbl)){
+    return(x)
+  }else{
+    return(NULL)
+  }
+}
 
 geom_shapes <- function(obj){
   if('sf'%in%class(obj)){
@@ -288,5 +290,41 @@ geom_shapes <- function(obj){
       st_as_sf(wkt = 'wkt',crs=4326)
   }
 }
+
+geom_stops <- function(obj){
+  if('sf'%in%class(obj)){
+    st_crs(obj) <- 4326
+    return(obj)
+  }else{
+    obj %>% 
+      st_as_sf(coords = c('stop_lon','stop_lat'),crs = 4326) %>% 
+      return()
+  }
+}
+
+
+
+get_stop_dists <- function(gtfs){
+  gtfs$stop_times %>%
+    dplyr::left_join(gtfs$trips %>% select('route_id','trip_id', 'direction_id'[verify_field(gtfs$trips,'direction_id')]),by = 'trip_id') %>% 
+    dplyr::arrange('trip_id','stop_sequence',field_if_exist(.,'direction_id')) %>% 
+    dplyr::select(route_id,stop_id) %>% 
+    unique() %>% 
+    dplyr::left_join(gtfs$stops %>% select(stop_id,stop_lon,stop_lat), by = 'stop_id') %>% 
+    dplyr::group_by(route_id) %>% 
+    dplyr::reframe(dists = list(get_trip_stops_dist(stop_lon,stop_lat))) %>% 
+    .$dists %>% unlist() %>% median(na.rm = T) %>% 
+    round(1)
+}
+
+
+get_trip_stops_dist <- function(lon,lat){
+  coords<-matrix(c(lon,lat),ncol = 2)
+  coord_pairs <- cbind(coords[-nrow(coords), ], coords[-1, ])
+  # Aplicar distGeo a cada par de coordenadas consecutivas
+  distancias <- apply(coord_pairs, 1, function(row) geosphere::distHaversine(row[1:2], row[3:4]))
+  return(distancias)
+}
+
 
 
