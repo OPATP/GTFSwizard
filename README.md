@@ -92,6 +92,23 @@ get_dwelltime(gtfs, max.dwelltime = 60)
 #10 011      4767        5         20 D                        121
 ## ℹ 2,198,537 more rows
 ## ℹ Use `print(n = ...)` to see more rows
+
+get_speed(gtfs)
+## A tibble: 2,114,523 × 9
+#   route_id  hour service_id from_stop_id to_stop_id duration distance speed service_frequency
+#   <fct>    <dbl> <chr>      <chr>        <chr>         <dbl>    <dbl> <dbl>             <int>
+# 1 011          5 D          3500         1013            120     376.  11.3               121
+# 2 011          5 D          1013         1015             60     240.  14.4               121
+# 3 011          5 D          1015         4251             60     265.  15.9               121
+# 4 011          5 D          4251         990              60     244.  14.7               121
+# 5 011          5 D          990          991              60     266.  16.0               121
+# 6 011          5 D          991          989              60     282.  16.9               121
+# 7 011          5 D          989          1600            120     627.  18.8               121
+# 8 011          5 D          1600         1608            120     338.  10.1               121
+# 9 011          5 D          1608         4767             60     337.  20.2               121
+#10 011          5 D          4767         6450             60     260.  15.6               121
+## ℹ 2,114,513 more rows
+## ℹ Use `print(n = ...)` to see more rows
 ```
 
 ## Related Packages
