@@ -35,6 +35,7 @@ get_speed <- function(gtfs){
     na.omit() %>% 
     dplyr::left_join(distance.matrix) %>% 
     dplyr::mutate(speed = (distance/1000) / (duration/3600)) %>% 
+    filter(speed > 0) %>% 
     dplyr::left_join(gtfs$trips) %>% 
     dplyr::select(route_id, hour, service_id, from_stop_id, to_stop_id, duration, distance, speed) %>% 
     dplyr::mutate(route_id = forcats::as_factor(route_id),

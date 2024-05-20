@@ -27,11 +27,27 @@ explore_gtfs <-
       ),
       shiny::column(
         width = 7,
+        plotly::plotlyOutput('speed.sparkline')
+      ),
+      shiny::column(
+        width = 5,
+        plotly::plotlyOutput('hist.speed')
+      ),
+      shiny::column(
+        width = 7,
         plotly::plotlyOutput('freq.sparkline')
       ),
       shiny::column(
         width = 5,
         plotly::plotlyOutput('hist.freq')
+      ),
+      shiny::column(
+        width = 7,
+        plotly::plotlyOutput('hw.sparkline')
+      ),
+      shiny::column(
+        width = 5,
+        plotly::plotlyOutput('hist.hw')
       ),
       shiny::column(
         width = 7,
@@ -42,14 +58,6 @@ explore_gtfs <-
         plotly::plotlyOutput('hist.dt')
       )
     ),
-    shiny::column(
-      width = 7,
-      plotly::plotlyOutput('hw.sparkline')
-    ),
-    shiny::column(
-      width = 5,
-      plotly::plotlyOutput('hist.hw')
-  ),
     shiny::tabPanel('By Route')
     )
   
@@ -95,22 +103,69 @@ explore_gtfs <-
       
     })
     
+    #speed ----
+    
+    speed <- 
+      get_speed(gtfs) %>% 
+      dplyr::group_by(route_id, hour) %>% 
+      dplyr::reframe(average.speed = COINr::a_hmean(x = speed, w = service_frequency))
+    
+    output$speed.sparkline <- plotly::renderPlotly({
+      
+      hline <-
+        mean(speed$average.speed, na.rm = T)
+      
+      p.speed.sparkline <- 
+        ggplot2::ggplot() +
+        ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
+        ggplot2::geom_boxplot(data = speed, ggplot2::aes(x = hour, y = average.speed, color = 'Hourly\nDistribution\n', group = hour), fill = NA) +
+        ggplot2::geom_hline(ggplot2::aes(yintercept = hline, color = 'Overall\nAverage\nSpeed\n'), linetype = 'dashed', linewidth = .75) +
+        ggplot2::geom_line(data = dplyr::group_by(speed, hour) %>% dplyr::reframe(speed = mean(average.speed)), ggplot2::aes(hour, speed, color = 'Hourly\nAverage\nSpeed\n'), linewidth = 1) +
+        ggplot2::labs(x = 'Hour of the day', y = 'Average Speed (km/h)', colour = '', title = 'System Speed') +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24)) +
+        ggplot2::theme(
+          panel.grid.major.x = element_blank(),
+          panel.grid.major.y = element_blank(),
+          axis.ticks.x = element_blank()
+        ) +
+        ggplot2::scale_color_manual(values = c('blue4', 'gray', 'red'))
+      
+      plotly::ggplotly(p.speed.sparkline)
+      
+    })
+    
+    output$hist.speed <- plotly::renderPlotly({
+      
+      p.hist.speed <-
+        ggplot2::ggplot() +
+        ggplot2::geom_histogram(data = speed, ggplot2::aes(x = average.speed)) +
+        ggplot2::geom_vline(ggplot2::aes(xintercept = mean(speed$average.speed, na.rm = T), color = paste('Overall\naverage\nhourly\nSpeed of\n', mean(speed$average.speed, na.rm = T) %>% round, 'km/h')), linetype = 'dashed', linewidth = .75) +
+        ggplot2::labs(title = 'Hourly Frequency Distribution', x = 'Departures', y = 'Frequency (# route.hour)', colour = '') +
+        ggplot2::theme_linedraw() +
+        ggplot2::scale_color_manual(values = 'red')
+      
+      
+      plotly::ggplotly(p.hist.speed)
+      
+    })
+    
     # frequency ----
     overall.freq <-
       get_frequency(gtfs) %>% 
       dplyr::group_by(route_id, hour) %>% 
-      dplyr::reframe(average.frequency = weighted.mean(frequency, service_frequency))
+      dplyr::reframe(average.frequency = weighted.mean(frequency, service_frequency, na.rm = T))
     
     output$freq.sparkline <- plotly::renderPlotly({
       
-      freq.hline <-
+      hline <-
         mean(overall.freq$average.frequency, na.rm = T)
       
       p.freq.sparkline <- 
         ggplot2::ggplot() +
         ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
         ggplot2::geom_boxplot(data = overall.freq, ggplot2::aes(x = hour, y = average.frequency, color = 'Hourly\nDistribution\n', group = hour), fill = NA) +
-        ggplot2::geom_hline(ggplot2::aes(yintercept = freq.hline, color = 'Overall\nAverage\nFrequency\n'), linetype = 'dashed', linewidth = .75) +
+        ggplot2::geom_hline(ggplot2::aes(yintercept = hline, color = 'Overall\nAverage\nFrequency\n'), linetype = 'dashed', linewidth = .75) +
         ggplot2::geom_line(data = dplyr::group_by(overall.freq, hour) %>% dplyr::reframe(frequency = mean(average.frequency)), ggplot2::aes(hour, frequency, color = 'Hourly\nAverage\nFrequency\n'), linewidth = 1) +
         ggplot2::labs(x = 'Hour of the day', y = 'Hourly Frequency', colour = '', title = 'System Frequency') +
         ggplot2::theme_linedraw() +
@@ -216,8 +271,8 @@ explore_gtfs <-
       
       p.hist.hw <-
         ggplot2::ggplot() +
-        ggplot2::geom_histogram(data = hw, ggplot2::aes(x = average.headway.minutes)) +
-        ggplot2::geom_vline(ggplot2::aes(xintercept = mean(hw$average.headway.minutes, na.rm = T), color = paste('Overall\nAverage\nDwell Time\n', mean(hw$average.headway.minutes, na.rm = T) %>% round, 'minutes\n')), linetype = 'dashed', linewidth = .75) +
+        ggplot2::geom_histogram(data = hw, ggplot2::aes(x = average.hw)) +
+        ggplot2::geom_vline(ggplot2::aes(xintercept = mean(hw$average.hw, na.rm = T), color = paste('Overall\nAverage\nDwell Time\n', mean(hw$average.hw, na.rm = T) %>% round, 'minutes\n')), linetype = 'dashed', linewidth = .75) +
         ggplot2::labs(title = 'Headway Distribution', x = 'Headway (min)', y = 'Frequency (# arrival)', colour = '') +
         ggplot2::theme_linedraw() +
         ggplot2::scale_color_manual(values = 'red')
@@ -233,4 +288,5 @@ explore_gtfs <-
   
 }
 
+#gtfs <- for_gtfs
 #explore_gtfs(gtfs)
