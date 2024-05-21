@@ -33,6 +33,23 @@ names(gtfs)
 
 class(gtfs)
 # [1] "wizardgtfs" "gtfs" "list"
+
+summary(gtfs)
+#A wizardgtfs object with:  
+#
+#10  GTFS tables 
+#With the following names and respective numbers of entries in each: 
+#         agency        calendar  calendar_dates fare_attributes 
+#              1               3               6               2 
+#     fare_rules          routes          shapes      stop_times 
+#            345             345          125776         2659737 
+#          stops           trips 
+#           4676           85410 
+#345  routes 
+#4676  stops 
+#85410  trips 
+#823  valid days of service 
+#271.4  meters is the average distance between sequencial stops in a given route 
 ```
 
 GTFS feeds are explored using the `explore_gtfs()` function:
