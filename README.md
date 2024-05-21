@@ -43,71 +43,71 @@ explore_gtfs(gtfs)
 Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headway()`, the `get_dwelltime()`, and the `get_speed()` functions:
 ``` r
 get_frequency(gtfs)
-## A tibble: 15,522 × 5
-#   route_id  hour service_id frequency service_frequency
-#   <chr>    <dbl> <chr>          <int>             <int>
-# 1 004          7 U                  2               586
-# 2 004          8 U                  4               586
-# 3 004          9 U                  4               586
-# 4 004         10 U                  4               586
-# 5 004         11 U                  4               586
-# 6 004         12 U                  4               586
-# 7 004         13 U                  4               586
-# 8 004         14 U                  5               586
-# 9 004         15 U                  4               586
-#10 004         16 U                  4               586
-## ℹ 15,512 more rows
+## A tibble: 122 × 5
+#   route_id  hour frequency service_id service_frequency
+#   <chr>    <dbl>     <int> <chr>                  <int>
+# 1 164          6         1 28046026               20429
+# 2 164          6         1 28046044                4085
+# 3 164          6         1 28046048                4085
+# 4 164          7         1 28046028               20429
+# 5 164          9         1 28046030               20429
+# 6 164         10         1 28046032               20429
+# 7 164         16         1 28046034               20429
+# 8 164         19         1 28046036               20429
+# 9 164         20         1 28046038               20429
+#10 164         20         1 28046040               20429
+## ℹ 112 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_headway(gtfs)
-## A tibble: 664,746 × 6
-#   route_id stop_id service_id  hour average.headway.minutes service_frequency
-#   <chr>    <fct>   <chr>      <dbl>                   <dbl>             <int>
-# 1 004      3330    U              8                    149                586
-# 2 004      3330    U              9                    148                586
-# 3 004      3330    U             10                    143                586
-# 4 004      3330    U             11                    179                586
-# 5 004      3330    U             12                    112.               586
-# 6 004      3330    U             13                    116.               586
-# 7 004      3330    U             14                    146                586
-# 8 004      3330    U             15                    144                586
-# 9 004      3330    U             16                    141                586
-#10 004      3303    U              8                    149                586
-## ℹ 664,736 more rows
+## A tibble: 5,040 × 6
+#   route_id stop_id       hour average.headway service_id service_frequency
+#   <chr>    <fct>        <dbl>           <dbl> <chr>                  <int>
+# 1 1920_700 100000110503     5            40.5 1                        139
+# 2 1920_700 100000110503     6           257   1                        139
+# 3 1920_700 100000110503    10           224.  1                        139
+# 4 1920_700 100000110503    14            91   1                        139
+# 5 1920_700 100000110503    16            85   1                        139
+# 6 1920_700 100000110602     5            40.5 1                        139
+# 7 1920_700 100000110602     6           257   1                        139
+# 8 1920_700 100000110602    10           224.  1                        139
+# 9 1920_700 100000110602    14            91   1                        139
+#10 1920_700 100000110602    16            85   1                        139
+## ℹ 5,030 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_dwelltime(gtfs, max.dwelltime = 60)
-# A tibble: 2,198,547 × 6
+## A tibble: 1,736 × 6
 #   route_id stop_id  hour dwell_time service_id service_frequency
 #   <chr>    <fct>   <dbl>      <dbl> <chr>                  <int>
-# 1 011      3500        5         10 D                        121
-# 2 011      1013        5         20 D                        121
-# 3 011      1015        5         20 D                        121
-# 4 011      4251        5         20 D                        121
-# 5 011      990         5         10 D                        121
-# 6 011      991         5         10 D                        121
-# 7 011      989         5         20 D                        121
-# 8 011      1600        5         20 D                        121
-# 9 011      1608        5         30 D                        121
-#10 011      4767        5         20 D                        121
-## ℹ 2,198,537 more rows
+# 1 164      M19         6          0 28046026               20429
+# 2 164      M10         6         28 28046026               20429
+# 3 164      M18         6         22 28046026               20429
+# 4 164      M17         6         28 28046026               20429
+# 5 164      M16         6         26 28046026               20429
+# 6 164      M15         6         27 28046026               20429
+# 7 164      M14         6         25 28046026               20429
+# 8 164      M13         6         41 28046026               20429
+# 9 164      M38         6         23 28046026               20429
+#10 164      M39         6         22 28046026               20429
+## ℹ 1,726 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_speed(gtfs)
-## A tibble: 2,114,523 × 9
-#   route_id  hour service_id from_stop_id to_stop_id duration distance speed service_frequency
-#   <fct>    <dbl> <chr>      <chr>        <chr>         <dbl>    <dbl> <dbl>             <int>
-# 1 011          5 D          3500         1013            120     376.  11.3               121
-# 2 011          5 D          1013         1015             60     240.  14.4               121
-# 3 011          5 D          1015         4251             60     265.  15.9               121
-# 4 011          5 D          4251         990              60     244.  14.7               121
-# 5 011          5 D          990          991              60     266.  16.0               121
-# 6 011          5 D          991          989              60     282.  16.9               121
-# 7 011          5 D          989          1600            120     627.  18.8               121
-# 8 011          5 D          1600         1608            120     338.  10.1               121
-# 9 011          5 D          1608         4767             60     337.  20.2               121
-#10 011          5 D          4767         6450             60     260.  15.6               121
-## ℹ 2,114,513 more rows
+## A tibble: 1,614 × 9
+#   route_id from_stop_id to_stop_id  hour duration distance speed service_id service_frequency
+#   <fct>    <chr>        <chr>      <dbl>    <dbl>    <dbl> <dbl> <chr>                  <int>
+# 1 164      M19          M10            6       68     789.  41.8 28046026               20429
+# 2 164      M10          M18            6       66     530.  28.9 28046026               20429
+# 3 164      M18          M17            6       54     532.  35.5 28046026               20429
+# 4 164      M17          M16            6       66     674.  36.8 28046026               20429
+# 5 164      M16          M15            6       69     700.  36.5 28046026               20429
+# 6 164      M15          M14            6      117    1068.  32.9 28046026               20429
+# 7 164      M14          M13            6      120     975.  29.3 28046026               20429
+# 8 164      M13          M38            6       87     836.  34.6 28046026               20429
+# 9 164      M38          M39            6       68     729.  38.6 28046026               20429
+#10 164      M39          M40            6       71     694.  35.2 28046026               20429
+## ℹ 1,604 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
