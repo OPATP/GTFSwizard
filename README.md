@@ -128,6 +128,15 @@ get_speed(gtfs)
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
+GTFSwizard also reconstructs missing shape tables using the `get_shapes()` function:
+``` r
+gtfs$shape
+
+gtfs <- get_shapes(gtfs)
+gtfs$shape
+
+```
+
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
 
