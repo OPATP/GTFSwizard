@@ -17,11 +17,13 @@ remotes::install_github('OPATP/GTFSwizard')
 
 ## Usage
 GTFS feeds are read using the `read_gtfs()` function.\
-`read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.
+`read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.\
+You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as.wizardgtfs()` function
 ``` r
 library(GTFSwizard)
 
-gtfs <- read_gtfs('path-to-gtfs.zip')
+gtfs <- read_gtfs('path-to-gtfs.zip') # or
+gtfs <- as.wizardgtfs(gtfs_obj)
 
 names(gtfs)
 # [1] "agency"          "calendar"
@@ -59,72 +61,72 @@ explore_gtfs(gtfs)
 
 Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headway()`, the `get_dwelltime()`, and the `get_speed()` functions:
 ``` r
-get_frequency(gtfs)
-## A tibble: 122 × 5
-#   route_id  hour frequency service_id service_frequency
-#   <chr>    <dbl>     <int> <chr>                  <int>
-# 1 164          6         1 28046026               20429
-# 2 164          6         1 28046044                4085
-# 3 164          6         1 28046048                4085
-# 4 164          7         1 28046028               20429
-# 5 164          9         1 28046030               20429
-# 6 164         10         1 28046032               20429
-# 7 164         16         1 28046034               20429
-# 8 164         19         1 28046036               20429
-# 9 164         20         1 28046038               20429
-#10 164         20         1 28046040               20429
-## ℹ 112 more rows
+get_frequency(gtfs, simplify = FALSE)
+## A tibble: 5,487 × 5
+#   route_id  hour frequency service_pattern  pattern_frequency
+#   <chr>    <dbl>     <int> <chr>                        <int>
+# 1 1012-10     12         1 servicepattern-1             13779
+# 2 1012-10     12         1 servicepattern-2              9951
+# 3 1012-10     12         1 servicepattern-3              5358
+# 4 1012-10     18         1 servicepattern-1             13779
+# 5 1012-10     18         1 servicepattern-2              9951
+# 6 1012-10     18         1 servicepattern-3              5358
+# 7 1015-10     17         1 servicepattern-1             13779
+# 8 1015-10     17         1 servicepattern-2              9951
+# 9 1015-10     17         1 servicepattern-3              5358
+#10 1016-10     12         1 servicepattern-1             13779
+## ℹ 5,477 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-get_headway(gtfs)
-## A tibble: 5,040 × 6
-#   route_id stop_id       hour average.headway service_id service_frequency
-#   <chr>    <fct>        <dbl>           <dbl> <chr>                  <int>
-# 1 1920_700 100000110503     5            40.5 1                        139
-# 2 1920_700 100000110503     6           257   1                        139
-# 3 1920_700 100000110503    10           224.  1                        139
-# 4 1920_700 100000110503    14            91   1                        139
-# 5 1920_700 100000110503    16            85   1                        139
-# 6 1920_700 100000110602     5            40.5 1                        139
-# 7 1920_700 100000110602     6           257   1                        139
-# 8 1920_700 100000110602    10           224.  1                        139
-# 9 1920_700 100000110602    14            91   1                        139
-#10 1920_700 100000110602    16            85   1                        139
-## ℹ 5,030 more rows
+get_headway(gtfs, simplify = TRUE)
+# A tibble: 5,635 × 5
+#   route_id  hour average.headway service_pattern  pattern_frequency
+#   <chr>    <dbl>           <dbl> <chr>                        <int>
+# 1 1012-10     12             360 servicepattern-1             13779
+# 2 1012-10     12             360 servicepattern-2              9951
+# 3 1012-10     12             360 servicepattern-3              5358
+# 4 1016-10     12             300 servicepattern-1             13779
+# 5 1016-10     17              63 servicepattern-1             13779
+# 6 1016-10     12             300 servicepattern-2              9951
+# 7 1016-10     17              63 servicepattern-2              9951
+# 8 1016-10     12             300 servicepattern-3              5358
+# 9 1016-10     17              63 servicepattern-3              5358
+#10 1017-10     17              60 servicepattern-1             13779
+## ℹ 5,625 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-get_dwelltime(gtfs, max.dwelltime = 60)
-## A tibble: 1,736 × 6
-#   route_id stop_id  hour dwell_time service_id service_frequency
-#   <chr>    <fct>   <dbl>      <dbl> <chr>                  <int>
-# 1 164      M19         6          0 28046026               20429
-# 2 164      M10         6         28 28046026               20429
-# 3 164      M18         6         22 28046026               20429
-# 4 164      M17         6         28 28046026               20429
-# 5 164      M16         6         26 28046026               20429
-# 6 164      M15         6         27 28046026               20429
-# 7 164      M14         6         25 28046026               20429
-# 8 164      M13         6         41 28046026               20429
-# 9 164      M38         6         23 28046026               20429
-#10 164      M39         6         22 28046026               20429
-## ℹ 1,726 more rows
+get_dwelltime(gtfs, max.dwelltime = 60, simplify = FALSE)
+## A tibble: 259,940 × 6
+#   route_id stop_id   hour dwell_time service_pattern  pattern_frequency
+#   <chr>    <fct>    <dbl>      <dbl> <chr>                        <int>
+# 1 1012-10  301729      18          0 servicepattern-1             13779
+# 2 1012-10  301729      18          0 servicepattern-2              9951
+# 3 1012-10  301729      18          0 servicepattern-3              5358
+# 4 1012-10  301764      18          0 servicepattern-1             13779
+# 5 1012-10  301764      18          0 servicepattern-2              9951
+# 6 1012-10  301764      18          0 servicepattern-3              5358
+# 7 1012-10  301724      18          0 servicepattern-1             13779
+# 8 1012-10  301724      18          0 servicepattern-2              9951
+# 9 1012-10  301724      18          0 servicepattern-3              5358
+#10 1012-10  30003042    18          0 servicepattern-1             13779
+## ℹ 259,930 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
 get_speed(gtfs)
-## A tibble: 1,614 × 9
-#   route_id from_stop_id to_stop_id  hour duration distance speed service_id service_frequency
-#   <fct>    <chr>        <chr>      <dbl>    <dbl>    <dbl> <dbl> <chr>                  <int>
-# 1 164      M19          M10            6       68     789.  41.8 28046026               20429
-# 2 164      M10          M18            6       66     530.  28.9 28046026               20429
-# 3 164      M18          M17            6       54     532.  35.5 28046026               20429
-# 4 164      M17          M16            6       66     674.  36.8 28046026               20429
-# 5 164      M16          M15            6       69     700.  36.5 28046026               20429
-# 6 164      M15          M14            6      117    1068.  32.9 28046026               20429
-# 7 164      M14          M13            6      120     975.  29.3 28046026               20429
-# 8 164      M13          M38            6       87     836.  34.6 28046026               20429
-# 9 164      M38          M39            6       68     729.  38.6 28046026               20429
-#10 164      M39          M40            6       71     694.  35.2 28046026               20429
-## ℹ 1,604 more rows
+## A tibble: 2,114,523 × 9
+#   route_id from_stop_id to_stop_id  hour duration distance speed service_pattern  pattern_frequency
+#   <fct>    <chr>        <chr>      <dbl>    <dbl>    <dbl> <dbl> <chr>                        <int>
+# 1 011      3500         1013           5      120     376.  11.3 servicepattern-3               121
+# 2 011      1013         1015           5       60     240.  14.4 servicepattern-3               121
+# 3 011      1015         4251           5       60     265.  15.9 servicepattern-3               121
+# 4 011      4251         990            5       60     244.  14.7 servicepattern-3               121
+# 5 011      990          991            5       60     266.  16.0 servicepattern-3               121
+# 6 011      991          989            5       60     282.  16.9 servicepattern-3               121
+# 7 011      989          1600           5      120     627.  18.8 servicepattern-3               121
+# 8 011      1600         1608           5      120     338.  10.1 servicepattern-3               121
+# 9 011      1608         4767           5       60     337.  20.2 servicepattern-3               121
+#10 011      4767         6450           5       60     260.  15.6 servicepattern-3               121
+## ℹ 2,114,513 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
