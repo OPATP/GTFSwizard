@@ -128,6 +128,31 @@ get_speed(gtfs)
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
+GTFSwizard also reconstructs missing shape tables using the `get_shapes()` function:
+``` r
+gtfs$shape
+#NULL
+
+gtfs <- get_shapes(gtfs)
+gtfs$shape
+## A tibble: 6,830 × 5
+#   shape_id shape_pt_lon shape_pt_lat shape_pt_sequence shape_dist_traveled
+#   <chr>           <dbl>        <dbl>             <int>               <dbl>
+# 1 shape-1         -38.7        -3.96                 1                  0 
+# 2 shape-1         -38.7        -3.95                 2                499.
+# 3 shape-1         -38.7        -3.96                 3               1428 
+# 4 shape-1         -38.7        -3.98                 4               3404.
+# 5 shape-1         -38.7        -3.97                 5               5490.
+# 6 shape-1         -38.7        -3.97                 6               6248.
+# 7 shape-1         -38.7        -3.98                 7               7871.
+# 8 shape-1         -38.8        -3.97                 8              11398.
+# 9 shape-1         -38.7        -3.97                 9              13093.
+#10 shape-1         -38.8        -3.97                10              13395 
+## ℹ 6,820 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+```
+
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
 
