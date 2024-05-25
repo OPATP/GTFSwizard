@@ -78,7 +78,7 @@ get_frequency(gtfs, simplify = FALSE)
 ## ℹ 5,477 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-get_headway(gtfs, simplify = TRUE)
+get_headways(gtfs, simplify = TRUE)
 # A tibble: 5,635 × 5
 #   route_id  hour average.headway service_pattern  pattern_frequency
 #   <chr>    <dbl>           <dbl> <chr>                        <int>
