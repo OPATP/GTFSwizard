@@ -2,7 +2,10 @@ get_frequency <- function(gtfs, simplify = T){
   
   get_frequency_byroute <- function(gtfs){
     
-    if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+    if(!"wizardgtfs" %in% class(gtfs)){
+      gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    }
   
     service_pattern <- 
       GTFSwizard::get_servicepattern(gtfs)
@@ -11,7 +14,9 @@ get_frequency <- function(gtfs, simplify = T){
       gtfs$dates_services$service_id %>% 
       unlist %>%
       tibble(service_id = .) %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>% 
+      dplyr::left_join(service_pattern,
+                       by = 'service_id',
+                       relationship = "many-to-many") %>% 
       dplyr::group_by(service_pattern) %>% 
       dplyr::reframe(pattern_frequency= n())
     
@@ -22,7 +27,9 @@ get_frequency <- function(gtfs, simplify = T){
       dplyr::left_join(gtfs$trips %>% 
                          dplyr::select(route_id, service_id, trip_id),
                        by = 'trip_id') %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>%
+      dplyr::left_join(service_pattern,
+                       by = 'service_id',
+                       relationship = "many-to-many") %>%
       dplyr::group_by(route_id, service_pattern) %>%
       dplyr::reframe(frequency = n()) %>% 
       dplyr::left_join(service_pattern_freq,
@@ -36,7 +43,10 @@ get_frequency <- function(gtfs, simplify = T){
 
   get_frequency_detailed <- function(gtfs){
     
-    if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+    if(!"wizardgtfs" %in% class(gtfs)){
+      gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    }
   
     service_pattern <- 
       GTFSwizard::get_servicepattern(gtfs)
@@ -45,7 +55,9 @@ get_frequency <- function(gtfs, simplify = T){
       gtfs$dates_services$service_id %>% 
       unlist %>%
       tibble(service_id = .) %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>% 
+      dplyr::left_join(service_pattern,
+                       by = 'service_id',
+                       relationship = "many-to-many") %>% 
       dplyr::group_by(service_pattern) %>% 
       dplyr::reframe(pattern_frequency= n())
     
@@ -56,7 +68,9 @@ get_frequency <- function(gtfs, simplify = T){
       dplyr::left_join(gtfs$trips %>% 
                          dplyr::select(route_id, service_id, trip_id),
                        by = 'trip_id') %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>%
+      dplyr::left_join(service_pattern,
+                       by = 'service_id',
+                       relationship = "many-to-many") %>%
       dplyr::mutate(hour = str_extract(as.character(departure), '\\d+') %>% as.numeric()) %>% 
       dplyr::group_by(route_id, hour, service_pattern) %>%
       dplyr::reframe(frequency = n()) %>% 
@@ -87,4 +101,4 @@ get_frequency <- function(gtfs, simplify = T){
   
 }
 
-#get_frequency(gtfs, simplify = 'yes')
+#get_frequency(temp, simplify = T)

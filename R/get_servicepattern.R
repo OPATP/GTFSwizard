@@ -1,6 +1,9 @@
 get_servicepattern <- function(gtfs){
   
-  if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+  if(!"wizardgtfs" %in% class(gtfs)){
+    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+  }
   
   service_pattern <- 
     gtfs$dates_services %>% 
