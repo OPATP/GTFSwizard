@@ -1,6 +1,17 @@
 get_dwelltime <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+ 
+  service_pattern <- 
+    GTFSwizard::get_servicepattern(gtfs)
+  
+  service_pattern_freq <- 
+    gtfs$dates_services$service_id %>% 
+    unlist %>%
+    tibble(service_id = .) %>% 
+    dplyr::left_join(service_pattern) %>% 
+    dplyr::group_by(service_pattern) %>% 
+    reframe(pattern_frequency= n())
   
   dwell_time <- 
     gtfs$stop_times %>% 
@@ -27,15 +38,11 @@ get_dwelltime <- function(gtfs, max.dwelltime = 90){
                   dwell_time = departure_time - arrival_time
     ) %>% 
     dplyr::filter(dwell_time <= max.dwelltime) %>%
-    dplyr::left_join(gtfs$trips) %>% 
-    dplyr::select(route_id, stop_id, hour, dwell_time, service_id) %>% 
-    dplyr::left_join(
-      gtfs$dates_services$service_id %>%
-        unlist %>%
-        table %>%
-        as_tibble %>% 
-        stats::setNames(c('service_id', 'service_frequency'))
-    )
+    dplyr::left_join(gtfs$trips, by = join_by(trip_id)) %>% 
+    dplyr::left_join(service_pattern, by = 'service_id') %>% 
+    dplyr::select(route_id, stop_id, hour, dwell_time, service_pattern) %>% 
+    dplyr::left_join(service_pattern_freq,
+                     by = 'service_pattern')
   
   return(dwell_time)
   
