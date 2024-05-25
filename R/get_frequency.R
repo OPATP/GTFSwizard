@@ -11,7 +11,7 @@ get_frequency <- function(gtfs){
     tibble(service_id = .) %>% 
     dplyr::left_join(service_pattern) %>% 
     dplyr::group_by(service_pattern) %>% 
-    reframe(pattern_frequency= n())
+    dplyr::reframe(pattern_frequency= n())
   
   freq <-
     gtfs$stop_times %>% 
@@ -20,16 +20,15 @@ get_frequency <- function(gtfs){
     dplyr::left_join(gtfs$trips %>% 
                        dplyr::select(route_id, service_id, trip_id),
                      by = 'trip_id') %>% 
-    dplyr::left_join(service_pattern, by = 'service_id') %>% 
+    dplyr::left_join(service_pattern, by = 'service_id') %>% # aqui
     dplyr::mutate(hour = str_extract(as.character(departure), '\\d+') %>% as.numeric()) %>% 
-    dplyr::group_by(route_id, hour, service_pattern) %>% 
+    dplyr::group_by(route_id, hour, service_pattern) %>% # aqui
     dplyr::reframe(frequency = n()) %>% 
-    dplyr::left_join(service_pattern_freq,
+    dplyr::left_join(service_pattern_freq, # aqui
                      by = 'service_pattern') %>%
     #filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
     dplyr::select(route_id, hour, frequency, service_pattern, pattern_frequency)
   
   return(freq)
+  
 }
-
-#get_frequency(gtfs)

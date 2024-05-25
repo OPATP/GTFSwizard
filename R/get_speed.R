@@ -1,6 +1,17 @@
-get_speed <- function(gtfs){
+get_speed <- function(gtfs, detailed.){
   
   if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+  
+  service_pattern <- 
+    GTFSwizard::get_servicepattern(gtfs)
+  
+  service_pattern_freq <- 
+    gtfs$dates_services$service_id %>% 
+    unlist %>%
+    tibble(service_id = .) %>% 
+    dplyr::left_join(service_pattern) %>% 
+    dplyr::group_by(service_pattern) %>% 
+    dplyr::reframe(pattern_frequency= n())
   
   distance.matrix <- 
     tidytransit::stop_distances(gtfs_stops = gtfs$stops) %>% 
@@ -33,22 +44,17 @@ get_speed <- function(gtfs){
                   duration = lead(arrival_time)  - departure_time) %>% 
     ungroup() %>% 
     na.omit() %>% 
-    dplyr::left_join(distance.matrix) %>% 
+    dplyr::left_join(distance.matrix, by = join_by(from_stop_id, to_stop_id)) %>% 
     dplyr::mutate(speed = (distance/1000) / (duration/3600)) %>% 
     filter(speed > 0) %>% 
-    dplyr::left_join(gtfs$trips) %>% 
-    dplyr::select(route_id, hour, service_id, from_stop_id, to_stop_id, duration, distance, speed) %>% 
+    dplyr::left_join(gtfs$trips, by = join_by(trip_id)) %>% 
+    dplyr::left_join(service_pattern, by = 'service_id') %>%
+    dplyr::select(route_id, hour, service_pattern, from_stop_id, to_stop_id, duration, distance, speed) %>% 
     dplyr::mutate(route_id = forcats::as_factor(route_id),
                   hour = as.numeric(hour)) %>% 
-    dplyr::left_join(
-      gtfs$dates_services$service_id %>%
-        unlist %>%
-        table %>%
-        as_tibble %>% 
-        stats::setNames(c('service_id', 'service_frequency'))
-    )
+    dplyr::left_join(service_pattern_freq,
+                     by = 'service_pattern') %>%
+    select(route_id, from_stop_id, to_stop_id, hour, duration, distance, speed, service_pattern, pattern_frequency)
   
   return(speed)
 }
-
-#get_speed(gtfs)
