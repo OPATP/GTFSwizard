@@ -59,7 +59,7 @@ GTFS feeds are explored using the `explore_gtfs()` function:
 explore_gtfs(gtfs)
 ```
 
-Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headway()`, the `get_dwelltime()`, and the `get_speed()` functions:
+Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, and the `get_speed()` functions:
 ``` r
 get_frequency(gtfs, simplify = FALSE)
 ## A tibble: 5,487 × 5
@@ -95,7 +95,7 @@ get_headways(gtfs, simplify = TRUE)
 ## ℹ 5,625 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-get_dwelltime(gtfs, max.dwelltime = 60, simplify = FALSE)
+get_dwelltimes(gtfs, max.dwelltime = 60, simplify = FALSE)
 ## A tibble: 259,940 × 6
 #   route_id stop_id   hour dwell_time service_pattern  pattern_frequency
 #   <chr>    <fct>    <dbl>      <dbl> <chr>                        <int>
