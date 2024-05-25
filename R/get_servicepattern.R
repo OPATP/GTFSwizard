@@ -5,7 +5,8 @@ get_servicepattern <- function(gtfs){
   service_pattern <- 
     gtfs$dates_services %>% 
     group_by(service_id) %>% 
-    reframe(dates = list(as.character(date))) %>% 
+    reframe(dates = list(as.character(date)),
+            n = n()) %>% 
     mutate(service_pattern = paste0('servicepattern-', 1:n())) %>% 
     select(-dates)
     
