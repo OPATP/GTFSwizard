@@ -2,7 +2,10 @@ get_shapes <- function(gtfs){
   
   warning('This algorithm reconstructs the shape files using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
   
-  if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+  if(!"wizardgtfs" %in% class(gtfs)){
+    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+  }
   
   shapes.dic <- 
     gtfs$stop_times %>%

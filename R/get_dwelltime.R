@@ -2,7 +2,10 @@ get_dwelltime <- function(gtfs, max.dwelltime = 90, simplify = T){
   
   get_dwelltime_byhour <- function(gtfs){
   
-  if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+    if(!"wizardgtfs" %in% class(gtfs)){
+      gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    }
   
   service_pattern <- 
     GTFSwizard::get_servicepattern(gtfs)
@@ -54,7 +57,10 @@ get_dwelltime <- function(gtfs, max.dwelltime = 90, simplify = T){
 
   get_dwelltime_detailed <- function(gtfs){
   
-  if(!"wizardgtfs" %in% class(gtfs))(gtfs <- GTFSwizard::gtfs_to_wizard(gtfs))
+    if(!"wizardgtfs" %in% class(gtfs)){
+      gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    }
  
   service_pattern <- 
     GTFSwizard::get_servicepattern(gtfs)
