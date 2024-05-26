@@ -132,11 +132,11 @@ get_speed(gtfs)
 
 GTFSwizard also reconstructs missing shape tables using the `get_shapes()` function:
 ``` r
-gtfs$shape
+gtfs$shapes
 #NULL
 
 gtfs <- get_shapes(gtfs)
-gtfs$shape
+gtfs$shapes
 ## A tibble: 6,830 × 5
 #   shape_id shape_pt_lon shape_pt_lat shape_pt_sequence shape_dist_traveled
 #   <chr>           <dbl>        <dbl>             <int>               <dbl>
