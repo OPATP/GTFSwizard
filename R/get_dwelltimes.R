@@ -1,4 +1,4 @@
-get_dwelltime <- function(gtfs, max.dwelltime = 90, simplify = T){
+get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   
   get_dwelltime_byhour <- function(gtfs){
   
