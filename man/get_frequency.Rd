@@ -1,5 +1,5 @@
 \name{get_frequency}
-\alias{get_frequency{GTFSwizard}}
+\alias{get_frequency}
 \title{
 Computes route frequency
 }
@@ -25,7 +25,7 @@ get_frequency(
 %%  ~~ If necessary, more details than the description above ~~
 }
 \value{
-  A \code{tibble} with the hourly frequency for each route and service. If \code{simplify} is \code{TRUE}, results are shown for the whole day.
+  A \code{tibble} with the hourly frequency (# trips) for each route and service. If \code{simplify} is \code{TRUE}, results are shown for the whole day.
 }
 \references{
 %% ~put references to the literature/web site here ~
