@@ -1,6 +1,6 @@
 get_shapes <- function(gtfs){
   
-  warning('This algorithm reconstructs the shape files using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
+  warning('This algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -16,10 +16,10 @@ get_shapes <- function(gtfs){
                        dplyr::select(stop_id),
                      by = join_by(stop_id)
                      ) %>% 
-    dplyr::group_by(trip_id) %>% 
-    dplyr::reframe(geometry = st_union(geometry)) %>% 
     sf::st_as_sf(crs = 4326) %>% 
-    sf::st_cast('LINESTRING') %>% 
+    dplyr::group_by(trip_id) %>% 
+    dplyr::arrange(stop_sequence) %>% 
+    dplyr::summarise(geometry = st_combine(geometry) %>% sf::st_cast('LINESTRING')) %>% #plot 
     dplyr::left_join(gtfs$trips %>%
                        dplyr::select(trip_id, route_id)) %>% 
     dplyr::group_by(geometry) %>% 
