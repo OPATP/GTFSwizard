@@ -4,7 +4,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   
     if(!"wizardgtfs" %in% class(gtfs)){
       gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+      warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
     }
   
   service_pattern <- 
@@ -16,7 +16,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
     tibble(service_id = .) %>% 
     dplyr::left_join(service_pattern, by = 'service_id') %>% 
     dplyr::group_by(service_pattern) %>% 
-    reframe(pattern_frequency= n())
+    dplyr::reframe(pattern_frequency= n())
   
   dwell_time <- 
     gtfs$stop_times %>% 
@@ -59,7 +59,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   
     if(!"wizardgtfs" %in% class(gtfs)){
       gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+      warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
     }
  
   service_pattern <- 
