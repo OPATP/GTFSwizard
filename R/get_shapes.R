@@ -1,10 +1,14 @@
 get_shapes <- function(gtfs){
   
-  warning('This algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
+  warning('\nThis algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
+  
+  if(!is_null(gtfs$shapes)){
+    warning('\nThis gtfs object already contains a shapes table.\nIt will be overwritten')
+  }
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-    warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
   shapes.dic <- 

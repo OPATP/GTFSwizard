@@ -4,7 +4,7 @@ get_frequency <- function(gtfs, simplify = T){
     
     if(!"wizardgtfs" %in% class(gtfs)){
       gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+      warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
     }
   
     service_pattern <- 
@@ -45,7 +45,7 @@ get_frequency <- function(gtfs, simplify = T){
     
     if(!"wizardgtfs" %in% class(gtfs)){
       gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-      warning('\nGTFS is not a wizardgtfs object.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+      warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
     }
   
     service_pattern <- 
