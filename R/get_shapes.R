@@ -1,9 +1,9 @@
 get_shapes <- function(gtfs){
   
-  warning('\nThis algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip.')
+  warning('\nThis algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip, and may not me accurate.')
   
   if(!is_null(gtfs$shapes)){
-    warning('\nThis gtfs object already contains a shapes table.\nIt will be overwritten.')
+    warning('\nThis gtfs object already contains a shapes table.\nget_shapes() will overwrite it.')
   }
   
   if(!"wizardgtfs" %in% class(gtfs)){
