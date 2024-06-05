@@ -14,7 +14,7 @@ get_headways <- function(gtfs, simplify = T){
       gtfs$dates_services$service_id %>% 
       unlist %>%
       tibble(service_id = .) %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>% 
+      dplyr::left_join(service_pattern, by = 'service_id', relationship = "many-to-many") %>% 
       dplyr::group_by(service_pattern) %>% 
       reframe(pattern_frequency= n())
     
@@ -66,7 +66,7 @@ get_headways <- function(gtfs, simplify = T){
       gtfs$dates_services$service_id %>% 
       unlist %>%
       tibble(service_id = .) %>% 
-      dplyr::left_join(service_pattern, by = 'service_id') %>% 
+      dplyr::left_join(service_pattern, by = 'service_id', relationship = "many-to-many") %>% 
       dplyr::group_by(service_pattern) %>% 
       reframe(pattern_frequency= n())
     
