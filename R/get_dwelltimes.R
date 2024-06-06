@@ -10,20 +10,10 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   service_pattern <- 
     GTFSwizard::get_servicepattern(gtfs)
   
-  service_pattern_freq <- 
-    gtfs$dates_services$service_id %>% 
-    unlist %>%
-    tibble(service_id = .) %>% 
-    dplyr::left_join(service_pattern, by = 'service_id') %>% 
-    dplyr::group_by(service_pattern) %>% 
-    dplyr::reframe(pattern_frequency= n())
-  
   dwell_time <- 
     gtfs$stop_times %>% 
-    dplyr::select(arrival_time, departure_time, stop_id, trip_id)  %>% 
     dplyr::left_join(gtfs$trips, by = join_by(trip_id)) %>% 
-    dplyr::left_join(service_pattern, by = 'service_id') %>% 
-    dplyr::mutate(stop_id = as_factor(stop_id)) %>% 
+    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>% 
     dplyr::filter(!arrival_time == '' & !departure_time == "") %>% 
     dplyr::group_by(arrival_time, departure_time, service_pattern) %>% 
     dplyr::reframe(n = n()) %>% 
@@ -47,9 +37,11 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
                   dwell_time = departure_time - arrival_time
     ) %>% 
     dplyr::filter(dwell_time <= max.dwelltime) %>%
-    dplyr::select(hour, dwell_time, service_pattern) %>% 
-    dplyr::left_join(service_pattern_freq,
-                     by = 'service_pattern')
+    dplyr::select(hour, dwell_time, service_pattern, n) %>% 
+    dplyr::left_join(service_pattern %>% dplyr::select(-service_id) %>% unique(),
+                     by = 'service_pattern') %>% 
+      dplyr::group_by(hour, dwell_time, service_pattern) %>% 
+      dplyr::reframe(frequency = sum(n * pattern_frequency))
   
   return(dwell_time)
   
@@ -65,18 +57,8 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   service_pattern <- 
     GTFSwizard::get_servicepattern(gtfs)
   
-  service_pattern_freq <- 
-    gtfs$dates_services$service_id %>% 
-    unlist %>%
-    tibble(service_id = .) %>% 
-    dplyr::left_join(service_pattern, by = 'service_id') %>% 
-    dplyr::group_by(service_pattern) %>% 
-    reframe(pattern_frequency= n())
-  
   dwell_time <- 
     gtfs$stop_times %>% 
-    dplyr::select(arrival_time, departure_time, stop_id, trip_id)  %>% 
-    dplyr::mutate(stop_id = as_factor(stop_id)) %>% 
     dplyr::filter(!arrival_time == '' & !departure_time == "") %>% 
     dplyr::mutate(hour = str_extract(arrival_time, "\\d+") %>% as.numeric(),
                   arrival_time = arrival_time %>% 
@@ -99,10 +81,8 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
     ) %>% 
     dplyr::filter(dwell_time <= max.dwelltime) %>%
     dplyr::left_join(gtfs$trips, by = join_by(trip_id)) %>% 
-    dplyr::left_join(service_pattern, by = 'service_id') %>% 
-    dplyr::select(route_id, stop_id, hour, dwell_time, service_pattern) %>% 
-    dplyr::left_join(service_pattern_freq,
-                     by = 'service_pattern')
+    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>% 
+    dplyr::select(route_id, stop_id, hour, dwell_time, service_pattern, pattern_frequency)
   
   return(dwell_time)
   
@@ -118,10 +98,9 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, simplify = T){
   
   if (!simplify %in% c(T, F)) {
     dwell_time <- get_dwelltime_byhour(gtfs)
-    warn <- warning('\n"simplify" should be one of TRUE or FALSE\nReturning "simplify = TRUE"')
+    warning('\n"simplify" should be one of TRUE or FALSE\nReturning "simplify = TRUE"')
   }
   
   return(dwell_time)
-  return(warn)
   
 }
