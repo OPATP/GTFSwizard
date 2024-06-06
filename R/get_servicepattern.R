@@ -12,10 +12,10 @@ get_servicepattern <- function(gtfs){
             pattern_frequency = n()) %>% 
     mutate(service_pattern = paste0('servicepattern-', 1:n())) %>% 
     select(-dates)
-    
+  
   
   while(is_list(service_pattern$service_id)) {
-    service_pattern <- service_pattern %>% unnest(service_id)
+    service_pattern <- service_pattern %>% unnest(., cols = service_id)
   }
   
   return(service_pattern)
