@@ -1,4 +1,4 @@
-get_frequency <- function(gtfs, simplify = T){
+get_frequency <- function(gtfs, method = 'by.route'){
   
   get_frequency_byroute <- function(gtfs){
     
@@ -12,6 +12,7 @@ get_frequency <- function(gtfs, simplify = T){
     
     freq <-
       gtfs$stop_times %>% 
+      dplyr::filter(!arrival_time == '') %>% 
       dplyr::group_by(trip_id) %>% 
       dplyr::reframe(departure = arrival_time[1]) %>% 
       dplyr::left_join(gtfs$trips,
@@ -19,12 +20,10 @@ get_frequency <- function(gtfs, simplify = T){
       dplyr::left_join(service_pattern,
                        by = 'service_id',
                        relationship = "many-to-many") %>%
-      dplyr::group_by(route_id, service_pattern) %>%
-      dplyr::reframe(frequency = n()) %>% 
-      dplyr::left_join(service_pattern %>% dplyr::select(-service_id) %>% unique,
-                       by = 'service_pattern') %>%
+      dplyr::group_by(route_id, service_pattern, pattern_frequency) %>%
+      dplyr::reframe(daily.frequency = n()) %>% 
       #filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
-      dplyr::select(route_id, frequency, service_pattern, pattern_frequency)
+      dplyr::select(route_id, daily.frequency, service_pattern, pattern_frequency)
     
     return(freq)
   
@@ -42,6 +41,7 @@ get_frequency <- function(gtfs, simplify = T){
     
     freq <-
       gtfs$stop_times %>% 
+      dplyr::filter(!arrival_time == '') %>% 
       dplyr::group_by(trip_id) %>% 
       dplyr::reframe(departure = arrival_time[1]) %>% 
       dplyr::left_join(gtfs$trips,
@@ -50,10 +50,8 @@ get_frequency <- function(gtfs, simplify = T){
                        by = 'service_id',
                        relationship = "many-to-many") %>%
       dplyr::mutate(hour = str_extract(as.character(departure), '\\d+')) %>% 
-      dplyr::group_by(route_id, hour, service_pattern) %>%
+      dplyr::group_by(route_id, hour, service_pattern, pattern_frequency) %>%
       dplyr::reframe(frequency = n()) %>% 
-      dplyr::left_join(service_pattern %>% dplyr::select(-service_id) %>% unique,
-                       by = 'service_pattern') %>%
       #filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
       dplyr::select(route_id, hour, frequency, service_pattern, pattern_frequency)
     
@@ -61,17 +59,17 @@ get_frequency <- function(gtfs, simplify = T){
   
   }
   
-  if (simplify == T) {
+  if (method == "by.route") {
     freq <- get_frequency_byroute(gtfs)
   }
   
-  if (simplify == F) {
+  if (method == "detailed") {
     freq <- get_frequency_detailed(gtfs)
   }
   
-  if (!simplify %in% c(T, F)) {
+  if (!method %in% c("by.route", "detailed")) {
     freq <- get_frequency_byroute(gtfs)
-    warning('\n"simplify" should be one of TRUE or FALSE\nReturning "simplify = TRUE"')
+    warning('\n"method" should be one of "by.route" or "detailed".\nReturning "method = "by.route"".')
   }
   
   return(freq)
