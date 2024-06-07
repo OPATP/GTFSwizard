@@ -190,7 +190,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
     dwell_time <- get_dwelltime_detailed(gtfs)
   }
   
-  if (!simplify %in% c('by.hour', 'by.route', 'detailed', 'by.trip')) {
+  if (!method %in% c('by.hour', 'by.route', 'detailed', 'by.trip')) {
     dwell_time <- get_dwelltime_byroute(gtfs)
     warning('\n"method" should be one of "by.hour", "by.route", "by.trip" or "detailed".\nReturning "method = "by.route"".')
   }

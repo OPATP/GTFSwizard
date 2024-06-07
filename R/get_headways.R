@@ -131,7 +131,7 @@ get_headways <- function(gtfs, method = 'by.route'){
   
   if (!method %in% c("by.route", 'detailed', 'by.trip')) {
     hw <- get_headway_byroute(gtfs)
-    warning('\n"method" should be one of "by.route or "detailed".\nReturning "method = "by.route"".')
+    warning('\n"method" should be one of "by.route", "by.trip" or "detailed".\nReturning "method = "by.route"".')
   }
   
   return(hw)
