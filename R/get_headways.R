@@ -116,12 +116,12 @@ get_headways <- function(gtfs, method = 'by.route'){
   }
   
   if (method == 'by.route') {
-    warning('\nThis method assumes constant headways along stops.')
+    message('\nThis method assumes constant headways along stops.')
     hw <- get_headway_byroute(gtfs)
   }
   
   if (method == 'by.trip') {
-    warning('\nThis method assumes constant headways along stops.')
+    message('\nThis method assumes constant headways along stops.')
     hw <- get_headway_bytrip(gtfs)
   }
   
