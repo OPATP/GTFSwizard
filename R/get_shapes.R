@@ -4,7 +4,7 @@ get_shapes <- function(gtfs){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
-    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    message('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
   if(!is_null(gtfs$shapes)){
