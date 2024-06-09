@@ -384,7 +384,7 @@ get_fleet <- function(gtfs, method = 'by.route'){
   
   if (!method %in% c('by.route', 'detailed', 'peak', 'by.hour')) {
     durations <- get_durations_byroute(gtfs)
-    warning('\n"method" should be one of "by.route","by.hour", "peak" or "detailed".\nReturning "method = by.route"".')
+    warning('\n"method" should be one of "by.route", "by.hour", "peak" or "detailed".\nReturning "method = by.route"".')
   }
   
   return(durations)
