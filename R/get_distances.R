@@ -213,7 +213,7 @@ get_distances <- function(gtfs, method = 'by.route'){
     dist_matrix <-
       dist_matrix %>%
       tidyr::unnest(cols = origins) %>% 
-      stats::setNames(c('shape', 'from_stop_id', 'to_stop_id', 'distance'))
+      stats::setNames(c('shape_id', 'from_stop_id', 'to_stop_id', 'distance'))
     
     return(dist_matrix)
     
