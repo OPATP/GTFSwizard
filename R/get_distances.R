@@ -27,6 +27,29 @@ get_distances <- function(gtfs, method = 'by.route'){
     
   }
   
+  get_distances_bytrip <- function(gtfs){
+    
+    if(!"wizardgtfs" %in% class(gtfs)){
+      gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+      warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    }
+    
+    service_pattern <-
+      GTFSwizard::get_servicepattern(gtfs)
+    
+    distances <- 
+      tidytransit::shapes_as_sf(gtfs$shapes) %>% 
+      dplyr::mutate(distance = st_length(geometry))
+    
+    distances <-
+      gtfs$trips %>% 
+      dplyr::left_join(distances, by = 'shape_id') %>% 
+      dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>%
+      select(route_id, trip_id, distance, service_pattern, pattern_frequency)
+    
+    return(distances)
+    
+  }
   
   # get_distances_byhour <- function(gtfs){
   
@@ -223,9 +246,9 @@ get_distances <- function(gtfs, method = 'by.route'){
     distances <- get_distances_byroute(gtfs)
   }
   
-  # if (method == 'by.hour') {
-  #   distances <- get_distances_byhour(gtfs)
-  # }
+  if (method == 'by.trip') {
+    distances <- get_distances_bytrip(gtfs)
+  }
   
   if (method == 'detailed') {
     message('This operation may take several minutes to complete.')
@@ -233,10 +256,10 @@ get_distances <- function(gtfs, method = 'by.route'){
   }
   
   if (!method %in% c('by.route',
-                     # 'by.hour',
+                     'by.trip',
                      'detailed')) {
     distances <- get_distances_byroute(gtfs)
-    warning('\n"method" should be one of "by.route" or "detailed".\nReturning "method = by.route"".')
+    warning('\n"method" should be one of "by.route", "by.trip" or "detailed".\nReturning "method = by.route"".')
   }
   
   return(distances)
