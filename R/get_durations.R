@@ -146,7 +146,7 @@ get_durations <- function(gtfs, method = 'by.route'){
   
   if (!method %in% c('by.route', 'detailed', 'by.trip')) {
     durations <- get_durations_byroute(gtfs)
-    warning('\n"method" should be one of "by.route","by.trip" or "detailed".\nReturning "method = by.route"".')
+    warning('\n"method" should be one of "by.route", "by.trip" or "detailed".\nReturning "method = by.route"".')
   }
   
   return(durations)
