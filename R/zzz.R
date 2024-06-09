@@ -6,7 +6,7 @@
       suppressWarnings(
         
         lapply(
-          c('sf', 'data.table', 'shiny', 'plotly', 'leaflet', 'leaflet.extras','tidyverse', 'hrbrthemes', 'hms'),
+          c('sf', 'data.table', 'shiny', 'plotly', 'leaflet', 'leaflet.extras','tidyverse', 'hrbrthemes', 'stplanr'),
           function(x){
             invisible(
               suppressPackageStartupMessages(
