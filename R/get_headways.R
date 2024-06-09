@@ -30,9 +30,10 @@ get_headways <- function(gtfs, method = 'by.route'){
       dplyr::mutate(headway.minutes = (lead(arrival_time) - arrival_time)) %>%
       dplyr::filter(headway.minutes >= 0) %>% 
       dplyr::group_by(route_id, service_pattern, pattern_frequency) %>% 
-      dplyr::reframe(average.headway = mean(headway.minutes, na.rm = T)) %>%
+      dplyr::reframe(average.headway = mean(headway.minutes, na.rm = T),
+                     trips = n()) %>%
       # filter(route_id %in% c() & service_id %in% c()) # filtrar por dia e por rota
-      dplyr::select(route_id, average.headway, service_pattern, pattern_frequency) %>% 
+      dplyr::select(route_id, trips, average.headway, service_pattern, pattern_frequency) %>% 
       na.omit()
     
     return(hw)

@@ -37,8 +37,9 @@ get_durations <- function(gtfs, method = 'by.route'){
                        by = 'service_id',
                        relationship = 'many-to-many') %>% 
       dplyr::group_by(route_id, service_pattern, pattern_frequency) %>% 
-      dplyr::reframe(average.duration = mean(duration)) %>% 
-      dplyr::select(route_id, average.duration, service_pattern, pattern_frequency)
+      dplyr::reframe(average.duration = mean(duration),
+                     trips = n()) %>% 
+      dplyr::select(route_id, trips, average.duration, service_pattern, pattern_frequency)
     
     return(durations)
     

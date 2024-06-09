@@ -38,8 +38,9 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
       ) %>% 
       dplyr::filter(dwell_time <= max.dwelltime) %>%
       dplyr::group_by(hour, service_pattern, pattern_frequency) %>% 
-      dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n)) %>% 
-      dplyr::select(hour, average.dwelltime, service_pattern, pattern_frequency)
+      dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n),
+                     trips = n()) %>% 
+      dplyr::select(hour, trips, average.dwelltime, service_pattern, pattern_frequency)
     
     return(dwell_time)
     
@@ -82,8 +83,9 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
       ) %>%
       dplyr::filter(dwell_time <= max.dwelltime) %>%
       dplyr::group_by(route_id, service_pattern, pattern_frequency) %>% 
-      dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n)) %>% 
-      dplyr::select(route_id, average.dwelltime, service_pattern, pattern_frequency)
+      dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n),
+                     trips = n()) %>% 
+      dplyr::select(route_id, trips, average.dwelltime, service_pattern, pattern_frequency)
     
     return(dwell_time)
     
