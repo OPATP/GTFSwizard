@@ -1,6 +1,6 @@
 Package: GTFSwizard
 Type: Package
-Title: GTFSwizard
+Title: A set of tools for exploring and manipulating GTFS files.
 Version: 0.1.0
 Authors@R: c(
     person(given="Nelson de O.", family="Quesado Filho", email="nquesado@gmail.com",role=c("aut")),
