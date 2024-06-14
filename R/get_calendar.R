@@ -1,4 +1,4 @@
-get_calendar <- function(gtfs){
+get_calendar <- function(gtfs, ncol = 6){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -41,7 +41,7 @@ get_calendar <- function(gtfs){
                    axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
     ggplot2::labs(x = NULL, y = NULL, fill = "# trips") +
     ggplot2::coord_fixed() +
-    ggplot2::facet_wrap(year ~ month, ncol = 6)
+    ggplot2::facet_wrap(year ~ month, ncol = ncol)
   
   return(plot)
   
