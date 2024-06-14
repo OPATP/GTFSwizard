@@ -59,7 +59,8 @@ explore_gtfs <-
                           width = 4,
                           plotly::plotlyOutput('hist.dt', height = '300px')
                         )
-                      )
+                      ),
+                      shiny::column(shiny::plotOutput('p.calendar'), width = 12)
       ),
       # BY ROUTE ----
       shiny::tabPanel('By Route',
@@ -215,7 +216,7 @@ explore_gtfs <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = speed, ggplot2::aes(x = average.speed, weight = trips * pattern_frequency)) +
           ggplot2::geom_vline(ggplot2::aes(xintercept = mean(speed$average.speed, na.rm = T), color = paste('Overall\naverage\nhourly\nSpeed of\n', mean(speed$average.speed, na.rm = T) %>% round, 'km/h')), linetype = 'dashed', linewidth = .75) +
-          ggplot2::labs(title = 'Speed Distribution (for all dates)', x = 'Speed (km/h)', y = 'Frequency (# route)', colour = '') +
+          ggplot2::labs(title = 'Speeds Distribution (for all dates)', x = 'Speed (km/h)', y = 'Frequency (# route)', colour = '') +
           ggplot2::theme_linedraw() +
           ggplot2::theme(
             panel.grid.major.x = element_blank(),
@@ -254,8 +255,13 @@ explore_gtfs <-
         
       })
       
+      # caldenar ----
+      output$p.calendar <- shiny::renderPlot(GTFSwizard::get_calendar(gtfs, ncol = 12))
+      
     }
     
     return(shiny::shinyApp(ui, server))
     
   }
+
+explore_gtfs(gtfs)
