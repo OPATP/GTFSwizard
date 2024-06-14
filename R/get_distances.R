@@ -107,6 +107,13 @@ get_distances <- function(gtfs, method = 'by.route'){
       warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
     }
     
+    if(is_null(gtfs$shapes)){
+      
+      gtfs <- GTFSwizard::get_shapes(gtfs)
+      
+      warning('\nThis gtfs object does not contain a shapes table.\nUsing get_shapes().')
+    }
+    
     service_pattern <-
       GTFSwizard::get_servicepattern(gtfs)
     
