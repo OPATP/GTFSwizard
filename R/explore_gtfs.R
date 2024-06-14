@@ -215,7 +215,7 @@ explore_gtfs <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = speed, ggplot2::aes(x = average.speed, weight = trips * pattern_frequency)) +
           ggplot2::geom_vline(ggplot2::aes(xintercept = mean(speed$average.speed, na.rm = T), color = paste('Overall\naverage\nhourly\nSpeed of\n', mean(speed$average.speed, na.rm = T) %>% round, 'km/h')), linetype = 'dashed', linewidth = .75) +
-          ggplot2::labs(title = 'Speeds Distribution (for all dates)', x = 'Speed (km/h)', y = 'Frequency (# route)', colour = '') +
+          ggplot2::labs(title = 'Speed Distribution (for all dates)', x = 'Speed (km/h)', y = 'Frequency (# route)', colour = '') +
           ggplot2::theme_linedraw() +
           ggplot2::theme(
             panel.grid.major.x = element_blank(),
