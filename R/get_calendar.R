@@ -1,0 +1,48 @@
+get_calendar <- function(gtfs){
+  
+  if(!"wizardgtfs" %in% class(gtfs)){
+    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as_gtfswizard() is advised.')
+  }
+  
+  services <- 
+    gtfs$trips$service_id %>% 
+    table %>% 
+    data.frame %>% 
+    tibble %>% 
+    stats::setNames(c('service_id', 'trips'))
+  
+  trip_dates_count <- 
+    gtfs$dates_services %>% 
+    tidyr::unnest(cols = service_id) %>% 
+    dplyr::left_join(services,
+                     by = 'service_id') %>% 
+    dplyr::group_by(date) %>% 
+    dplyr::reframe(count = sum(trips)) %>% 
+    dplyr::mutate(
+      date = lubridate::ymd(date),
+      day_of_month = lubridate::day(date),
+      month = lubridate::month(date, label = T, abbr = F),
+      year = lubridate::year(date),
+      weekday = lubridate::wday(date, label = T, abbr = T, week_start = 7),
+      first_day_of_month = lubridate::wday(date - day_of_month,  week_start = 7),
+      week_of_month = ceiling((day_of_month - as.numeric(weekday) - first_day_of_month) / 7)
+    )
+  
+  plot <- 
+    ggplot2::ggplot(trip_dates_count, aes(x = weekday, y = -week_of_month)) +
+    ggplot2::theme_bw() +
+    ggplot2::geom_tile(aes(fill = count), color = 'gray50') +
+    ggplot2::geom_text(aes(label = day_of_month), size = 2.25, colour = "grey20") +
+    ggplot2::scale_fill_gradient(low = "pink", high = "red", na.value = "black")+
+    ggplot2::theme(axis.text.y = element_blank(),
+                   axis.ticks.y = element_blank(),
+                   panel.grid = element_blank(),
+                   axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
+    ggplot2::labs(x = NULL, y = NULL, fill = "# trips") +
+    ggplot2::coord_fixed() +
+    ggplot2::facet_wrap(year ~ month, ncol = 6)
+  
+  return(plot)
+  
+}
