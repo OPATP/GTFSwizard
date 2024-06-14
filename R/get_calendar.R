@@ -33,7 +33,7 @@ get_calendar <- function(gtfs, ncol = 6){
     ggplot2::ggplot(trip_dates_count, aes(x = weekday, y = -week_of_month)) +
     ggplot2::theme_bw() +
     ggplot2::geom_tile(aes(fill = count), color = 'gray50') +
-    ggplot2::geom_text(aes(label = day_of_month), size = 2.25, colour = "grey20") +
+    ggplot2::geom_text(aes(label = day_of_month), size = 3, colour = "grey20") +
     ggplot2::scale_fill_gradient(low = "pink", high = "red", na.value = "black")+
     ggplot2::theme(axis.text.y = element_blank(),
                    axis.ticks.y = element_blank(),
