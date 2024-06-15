@@ -12,6 +12,10 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
     tibble %>% 
     stats::setNames(c('service_id', 'trips'))
   
+  while(rlang::is_list(gtfs$dates_services$service_id)) {
+    gtfs$dates_services <- gtfs$dates_services %>% unnest(., cols = c(service_id))
+  }
+  
   trip_dates_count <- 
     gtfs$dates_services %>% 
     tidyr::unnest(cols = service_id) %>% 
@@ -43,12 +47,14 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
     ggplot2::coord_fixed()
   
   if(facet_by_year == FALSE){
-    plot <- plot +
+    plot <-
+      plot +
       ggplot2::facet_wrap(year ~ month, ncol = ncol)
   }
    
   if(facet_by_year == TRUE){
-    plot <- plot +
+    plot <-
+      plot +
       ggplot2::facet_grid(year ~ month)
   } 
   
