@@ -51,8 +51,9 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
       plot +
       ggplot2::facet_wrap(year ~ month, ncol = ncol)
   }
-   
+  
   if(facet_by_year == TRUE){
+    message("face_by_year = TRUE forces ncol = 0")
     plot <-
       plot +
       ggplot2::facet_grid(year ~ month)
