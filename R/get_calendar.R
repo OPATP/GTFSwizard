@@ -22,7 +22,7 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
     dplyr::left_join(services,
                      by = 'service_id') %>% 
     dplyr::group_by(date) %>% 
-    dplyr::reframe(count = sum(trips)) %>% 
+    dplyr::reframe(count = sum(trips, na.rm = T)) %>% 
     dplyr::mutate(
       date = lubridate::ymd(date),
       day_of_month = lubridate::day(date),
