@@ -38,14 +38,15 @@ explore_gtfs <-
                           width = 6,
                           shiny::tableOutput('agency_table'),
                         ),
-                        shiny::hr()
-                      ),
+                        ),
+                      shiny::hr(),
                       shiny::fluidRow(
                         shiny::column(
                           width = 12,
                           plotly::plotlyOutput('freq.sparkline', height = '300px')
                         )
                       ),
+                      shiny::hr(),
                       shiny::fluidRow(
                         shiny::column(
                           width = 4,
@@ -60,12 +61,14 @@ explore_gtfs <-
                           plotly::plotlyOutput('hist.dt', height = '300px')
                         )
                       ),
+                      shiny::hr(),
                       shiny::fluidRow(
                       shiny::column(shiny::plotOutput('p.calendar',
                                                       height = paste0(as.numeric(max(lubridate::year(gtfs$dates_services$date)) - as.numeric(min(lubridate::year(gtfs$dates_services$date)))  + 5) * 75, "px")
                                                       ),
                                     width = 12)
-                      )
+                      ),
+                      shiny::hr()
       ),
       # BY ROUTE ----
       shiny::tabPanel('By Route',
@@ -275,4 +278,4 @@ explore_gtfs <-
     
   }
 
-#explore_gtfs(gtfs)
+explore_gtfs(gtfs)
