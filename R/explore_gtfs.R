@@ -264,4 +264,4 @@ explore_gtfs <-
     
   }
 
-explore_gtfs(gtfs)
+#explore_gtfs(gtfs)
