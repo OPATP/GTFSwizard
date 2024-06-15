@@ -1,4 +1,4 @@
-get_calendar <- function(gtfs, ncol = 6){
+get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -40,8 +40,17 @@ get_calendar <- function(gtfs, ncol = 6){
                    panel.grid = element_blank(),
                    axis.text.x = element_text(angle = 90, hjust = 1, vjust = .5)) +
     ggplot2::labs(x = NULL, y = NULL, fill = "# trips") +
-    ggplot2::coord_fixed() +
-    ggplot2::facet_wrap(year ~ month, ncol = ncol)
+    ggplot2::coord_fixed()
+  
+  if(facet_by_year == FALSE){
+    plot <- plot +
+      ggplot2::facet_wrap(year ~ month, ncol = ncol)
+  }
+   
+  if(facet_by_year == TRUE){
+    plot <- plot +
+      ggplot2::facet_grid(year ~ month)
+  } 
   
   return(plot)
   

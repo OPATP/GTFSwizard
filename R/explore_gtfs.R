@@ -256,7 +256,7 @@ explore_gtfs <-
       })
       
       # caldenar ----
-      output$p.calendar <- shiny::renderPlot(GTFSwizard::get_calendar(gtfs, ncol = 12))
+      output$p.calendar <- shiny::renderPlot(get_calendar(gtfs, facet_by_year = T))
       
     }
     
