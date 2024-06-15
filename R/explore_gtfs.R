@@ -264,8 +264,7 @@ explore_gtfs <-
       output$p.calendar <- shiny::renderPlot({
         
         suppressMessages({
-          #GTFSwizard::get_calendar(gtfs, facet_by_year = T)
-          get_calendar(gtfs, facet_by_year = T)
+          GTFSwizard::get_calendar(gtfs, facet_by_year = T)
         })
         
       })
@@ -276,4 +275,4 @@ explore_gtfs <-
     
   }
 
-explore_gtfs(gtfs)
+#explore_gtfs(gtfs)
