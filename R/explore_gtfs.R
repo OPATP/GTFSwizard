@@ -60,7 +60,12 @@ explore_gtfs <-
                           plotly::plotlyOutput('hist.dt', height = '300px')
                         )
                       ),
-                      shiny::column(shiny::plotOutput('p.calendar'), width = 12)
+                      shiny::fluidRow(
+                      shiny::column(shiny::plotOutput('p.calendar',
+                                                      height = paste0(as.numeric(max(lubridate::year(gtfs$dates_services$date)) - as.numeric(min(lubridate::year(gtfs$dates_services$date)))  + 5) * 75, "px")
+                                                      ),
+                                    width = 12)
+                      )
       ),
       # BY ROUTE ----
       shiny::tabPanel('By Route',
@@ -256,7 +261,14 @@ explore_gtfs <-
       })
       
       # caldenar ----
-      output$p.calendar <- shiny::renderPlot(GTFSwizard::get_calendar(gtfs, facet_by_year = T))
+      output$p.calendar <- shiny::renderPlot({
+        
+        suppressMessages({
+          #GTFSwizard::get_calendar(gtfs, facet_by_year = T)
+          get_calendar(gtfs, facet_by_year = T)
+        })
+        
+      })
       
     }
     
@@ -264,4 +276,4 @@ explore_gtfs <-
     
   }
 
-#explore_gtfs(gtfs)
+explore_gtfs(gtfs)
