@@ -1,14 +1,19 @@
-filter_servicepattern <- function(gtfs, servicepattern = 'servicepattern-1'){
+filter_servicepattern <- function(gtfs, servicepattern = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
+  if(is.null(servicepattern)){
+    warning('\nNo service pattern(s) provided.\nReturning most frequent pattern.')
+    servicepattern <- 'servicepattern-1'
+  }
+  
   service_pattern <- 
     GTFSwizard::get_servicepattern(gtfs)
   
-  if(!servicepattern %in% unique(service_pattern$service_pattern)){
+  if(all(!servicepattern %in% unique(service_pattern$service_pattern))){
     message(paste0('\nService pattern should be one of ', 
                    paste(unique(service_pattern$service_pattern), collapse = ', '),
                    '.',
@@ -112,7 +117,7 @@ filter_date <- function(gtfs, date = NULL){
     date <-  gtfs$dates_services$date[length(gtfs$dates_services$date)] %>% lubridate::date()
   }
   
-  if(!date %in% lubridate::date(gtfs$dates_services$date)){
+  if(all(!date %in% lubridate::date(gtfs$dates_services$date))){
     message('\nDate(s) do not belongs to calendar.\nPlease use get_calendar() to check available dates.')
     stop()
   }
@@ -213,7 +218,7 @@ filter_service <- function(gtfs, service = NULL){
     stop()
   }
   
-  if(!service %in% gtfs$trips$service_id){
+  if(all(!service %in% gtfs$trips$service_id)){
     message(paste0('\nService(s) should be one of ', 
                    paste(unique(gtfs$trips$service_id), collapse = ', '),
                    '.'))
@@ -314,7 +319,7 @@ filter_route <- function(gtfs, route = NULL){
     stop()
   }
   
-  if(!route %in% gtfs$routes$route_id){
+  if(all(!route %in% gtfs$routes$route_id)){
     message('\nThere is no such route(s).\nRun gtfs$routes to check available routes.')
     stop()
     
@@ -413,7 +418,7 @@ filter_trip <- function(gtfs, trip = NULL){
     stop()
   }
   
-  if(!trip %in% gtfs$trips$trip_id){
+  if(all(!trip %in% gtfs$trips$trip_id)){
     message('\nThere is no such trip(s).\nRun gtfs$trips to check available trips.')
     stop()
     
@@ -512,7 +517,7 @@ filter_stop <- function(gtfs, stop = NULL){
     stop()
   }
   
-  if(!stop %in% gtfs$stops$stop_id){
+  if(all(!stop %in% gtfs$stops$stop_id)){
     message('\nThere is no such stop(s).\nRun gtfs$stops to check available stops.')
     stop()
     
