@@ -369,7 +369,7 @@ explore_gtfs <-
       # BY ROOOOOOUTE -------
       # map by route ----
       gtfs.filtered <- reactive({
-        GTFSwizard::filter_route(gtfs, route = c(input$selected.routes))
+        GTFSwizard::filter_route(gtfs, route = input$selected.routes)
       })
       
       gtfs.filtered.trips.shp <- reactive({
@@ -480,4 +480,4 @@ explore_gtfs <-
   }
 
 
-explore_gtfs(gtfs)
+#explore_gtfs(gtfs)
