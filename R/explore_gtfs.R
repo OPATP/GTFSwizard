@@ -170,41 +170,12 @@ explore_gtfs <-
       })
       
       # frequency ----
-      overall.freq <-
-        GTFSwizard::get_frequency(gtfs, method = 'detailed') %>% 
-        mutate(hour = as.numeric(hour))
-      
-      output$freq.sparkline <- plotly::renderPlotly({
-        
-        hline <-
-          weighted.mean(overall.freq$frequency, overall.freq$pattern_frequency, na.rm = T)
-        
-        p.freq.sparkline <- 
-          ggplot2::ggplot() +
-          ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
-          ggplot2::geom_violin(data = overall.freq, ggplot2::aes(x = hour, y = frequency, color = 'Hourly\nDistribution\n', group = hour, weight = pattern_frequency), fill = 'grey', alpha = .65, scale = 'width') +
-          ggplot2::geom_hline(ggplot2::aes(yintercept = hline, color = 'Overall\nAverage\nFrequency\n'), linetype = 'dashed', linewidth = .75) +
-          ggplot2::geom_line(data = dplyr::group_by(overall.freq, hour) %>% dplyr::reframe(frequency = weighted.mean(frequency, pattern_frequency)), ggplot2::aes(hour, frequency, color = 'Hourly\nAverage\nFrequency\n', group = NA), linewidth = 1) +
-          ggplot2::labs(x = 'Hour of the day', y = 'Hourly Frequency', colour = '', title = 'System Frequency') +
-          hrbrthemes::theme_ipsum() +
-          ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24)) +
-          ggplot2::theme(
-            panel.grid.major.x = element_blank(),
-            panel.grid.major.y = element_blank(),
-            axis.ticks.x = element_blank()
-          ) +
-          ggplot2::scale_color_manual(values = c('blue4', 'white', 'red'))
-        
-        suppressWarnings({
-          plotly::ggplotly(p.freq.sparkline)
-        })
-        
-      })
+      output$freq.sparkline <- plotly::renderPlotly({plot_frequency(gtfs)})
       
       # fleet ----
       fleet <-
         GTFSwizard::get_fleet(gtfs, method = 'by.hour') %>% 
-        mutate(hour = as.numeric(hour))
+        dplyr::mutate(hour = as.numeric(hour))
       
       output$fleet.sparkline <- plotly::renderPlotly({
         
@@ -406,38 +377,9 @@ explore_gtfs <-
       })
       
       # frequency by route ----
-      overall.freq.byroute <- reactive({
-        GTFSwizard::get_frequency(gtfs.filtered(), method = 'detailed') %>% 
-          mutate(hour = as.numeric(hour))
-      })
+      route <- reactive({input$selected.routes})
       
-      output$freq.sparkline.byroute <- plotly::renderPlotly({
-        overall.freq <- overall.freq.byroute()
-        
-        hline <-
-          weighted.mean(overall.freq$frequency, overall.freq$pattern_frequency, na.rm = T)
-        
-        p.freq.sparkline <- 
-          ggplot2::ggplot() +
-          ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
-          ggplot2::geom_violin(data = overall.freq, ggplot2::aes(x = hour, y = frequency, color = 'Hourly\nDistribution\n', group = hour, weight = pattern_frequency), fill = 'grey', alpha = .65, scale = 'width') +
-          ggplot2::geom_hline(ggplot2::aes(yintercept = hline, color = 'Overall\nAverage\nFrequency\n'), linetype = 'dashed', linewidth = .75) +
-          ggplot2::geom_line(data = dplyr::group_by(overall.freq, hour) %>% dplyr::reframe(frequency = weighted.mean(frequency, pattern_frequency)), ggplot2::aes(hour, frequency, color = 'Hourly\nAverage\nFrequency\n', group = NA), linewidth = 1) +
-          ggplot2::labs(x = 'Hour of the day', y = 'Hourly Frequency', colour = '', title = 'Route(s) Frequency') +
-          hrbrthemes::theme_ipsum() +
-          ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24)) +
-          ggplot2::theme(
-            panel.grid.major.x = element_blank(),
-            panel.grid.major.y = element_blank(),
-            axis.ticks.x = element_blank()
-          ) +
-          ggplot2::scale_color_manual(values = c('blue4', 'white', 'red'))
-        
-        suppressWarnings({
-          plotly::ggplotly(p.freq.sparkline)
-        })
-        
-      })
+      output$freq.sparkline.byroute <- plotly::renderPlotly({plot_routefrequency(gtfs, route())})
       
       # headway by route ----    
       headway.byroute <- reactive({
