@@ -101,6 +101,13 @@ filter_servicepattern <- function(gtfs, servicepattern = NULL){
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
   }
   
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+    gtfs$dates_services %>% 
+    dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+    .[.$keep == T, 1:2]
+  }
+  
   return(gtfs)
   
 }
@@ -200,6 +207,13 @@ filter_date <- function(gtfs, date = NULL){
   if(!is_null(gtfs$transfers)){
     gtfs$transfers <- 
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
+  }
+  
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
   }
   
   return(gtfs)
@@ -303,6 +317,13 @@ filter_service <- function(gtfs, service = NULL){
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
   }
   
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
+  }
+  
   return(gtfs)
   
 }
@@ -400,6 +421,13 @@ filter_route <- function(gtfs, route = NULL){
   if(!is_null(gtfs$transfers)){
     gtfs$transfers <- 
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
+  }
+  
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
   }
   
   return(gtfs)
@@ -501,6 +529,13 @@ filter_trip <- function(gtfs, trip = NULL){
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
   }
   
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
+  }
+  
   return(gtfs)
   
 }
@@ -598,6 +633,13 @@ filter_stop <- function(gtfs, stop = NULL){
   if(!is_null(gtfs$transfers)){
     gtfs$transfers <- 
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
+  }
+  
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
   }
   
   return(gtfs)
@@ -739,6 +781,13 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   if(!is_null(gtfs$transfers)){
     gtfs$transfers <- 
       gtfs$transfers[gtfs$transfers$stop_id %in% stops, ]
+  }
+  
+  if(!is_null(gtfs$dates_services)){
+    gtfs$dates_services <- 
+      gtfs$dates_services %>% 
+      dplyr::mutate(keep = sapply(service_id, function(x){all(services %in% unlist(x))})) %>% 
+      .[.$keep == T, 1:2]
   }
   
   return(gtfs)
