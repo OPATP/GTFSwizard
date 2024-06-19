@@ -81,10 +81,10 @@ filter_servicepattern <- function(gtfs, servicepattern = NULL){
   }
   
   if(!is_null(gtfs$calendar)){
-    gtfs$calendar <- 
+    gtfs$calendar <-
       gtfs$calendar[gtfs$calendar$service_id %in% services, ]
   }
-  
+
   # if(!is_null(gtfs$calendar_dates)){ 
   #   gtfs$calendar_dates <- 
   #   gtfs$calendar_dates %>% 
