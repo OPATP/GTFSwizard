@@ -1,4 +1,4 @@
-get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
+plot_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -28,7 +28,7 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
       by = 'date'
     ) %>% 
     dplyr::mutate(
-      count = if_else(is.na(count), 0, count), 
+      #count = if_else(is.na(count), 0, count), 
       date = lubridate::ymd(date),
       day_of_month = lubridate::day(date),
       month = lubridate::month(date, label = T, abbr = F),
