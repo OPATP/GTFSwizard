@@ -1,4 +1,4 @@
-get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
+plot_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -23,7 +23,12 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
                      by = 'service_id') %>% 
     dplyr::group_by(date) %>% 
     dplyr::reframe(count = sum(trips, na.rm = T)) %>% 
+    dplyr::right_join(
+      tibble(date = seq(min(gtfs$dates_services$date), max(gtfs$dates_services$date), 86400)),
+      by = 'date'
+    ) %>% 
     dplyr::mutate(
+      #count = if_else(is.na(count), 0, count), 
       date = lubridate::ymd(date),
       day_of_month = lubridate::day(date),
       month = lubridate::month(date, label = T, abbr = F),
@@ -32,6 +37,7 @@ get_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
       first_day_of_month = lubridate::wday(date - day_of_month,  week_start = 7),
       week_of_month = ceiling((day_of_month - as.numeric(weekday) - first_day_of_month) / 7)
     )
+  
   
   plot <- 
     ggplot2::ggplot(trip_dates_count, aes(x = weekday, y = -week_of_month)) +
