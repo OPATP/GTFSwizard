@@ -1,5 +1,4 @@
 # corrigir os by dos left_join
-
 explore_gtfs <- 
   function(gtfs){
     
@@ -170,7 +169,7 @@ explore_gtfs <-
       })
       
       # frequency ----
-      output$freq.sparkline <- plotly::renderPlotly({plot_frequency(gtfs)})
+      output$freq.sparkline <- plotly::renderPlotly({GTFSwizard::plot_frequency(gtfs)})
       
       # fleet ----
       fleet <-
@@ -332,7 +331,7 @@ explore_gtfs <-
       output$p.calendar <- shiny::renderPlot({
         
         suppressMessages({
-          GTFSwizard::get_calendar(gtfs, facet_by_year = T)
+          GTFSwizard::plot_calendar(gtfs, facet_by_year = T)
         })
         
       })
@@ -379,7 +378,7 @@ explore_gtfs <-
       # frequency by route ----
       route <- reactive({input$selected.routes})
       
-      output$freq.sparkline.byroute <- plotly::renderPlotly({plot_routefrequency(gtfs, route())})
+      output$freq.sparkline.byroute <- plotly::renderPlotly({GTFSwizard::plot_routefrequency(gtfs, route())})
       
       # headway by route ----    
       headway.byroute <- reactive({
