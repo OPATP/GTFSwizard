@@ -206,27 +206,7 @@ explore_gtfs <-
       })
       
       # headway ----    
-      hw <- 
-        GTFSwizard::get_headways(gtfs, method = 'by.route')
-      
-      output$hist.hw <- plotly::renderPlotly({
-        
-        p.hist.hw <-
-          ggplot2::ggplot() +
-          ggplot2::geom_histogram(data = hw, ggplot2::aes(x = average.headway, weight = trips * pattern_frequency)) +
-          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(hw$average.headway, hw$pattern_frequency, na.rm = T), color = paste('Overall\nAverage\nHeadway\n', weighted.mean(hw$average.headway, hw$pattern_frequency, na.rm = T) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
-          ggplot2::labs(title = 'Headway Distribution (for all dates)', x = 'Headway (s)', y = 'Frequency (# arrival)', colour = '') +
-          hrbrthemes::scale_x_comma(big.mark = " ") +
-          hrbrthemes::scale_y_comma(big.mark = " ") +
-          hrbrthemes::theme_ipsum() +
-          ggplot2::scale_color_manual(values = 'red') +
-          ggplot2::theme(
-            axis.ticks.x = element_blank()
-          )
-        
-        plotly::ggplotly(p.hist.hw)
-        
-      })
+      output$hist.hw <- plotly::renderPlotly({GTFSwizard::plot_headways(gtfs)})
       
       # speed ----
       speed <-
