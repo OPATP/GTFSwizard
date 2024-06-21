@@ -1,5 +1,12 @@
 get_speeds <- function(gtfs, method = 'by.route'){
   
+  if(is_null(gtfs$shapes)){
+    
+    gtfs <- GTFSwizard::get_shapes(gtfs)
+    
+    warning('\nThis gtfs object does not contain a shapes table.\nUsing get_shapes().')
+  }
+  
   get_speeds_byroute <- function(gtfs){
     
     if(!"wizardgtfs" %in% class(gtfs)){
@@ -90,7 +97,7 @@ get_speeds <- function(gtfs, method = 'by.route'){
     speeds <- 
       durations %>% 
       dplyr::left_join(distances, 
-                       by = c('trip_id', 'from_stop_id', 'to_stop_id')) %>% 
+                       by = c('trip_id', 'from_stop_id', 'to_stop_id')) #%>% 
       dplyr::group_by(route_id, trip_id, hour, from_stop_id, to_stop_id) %>% 
       dplyr::reframe(speed = (distance/1000) / (duration/3600),
                      service_pattern,
