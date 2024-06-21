@@ -1,30 +1,131 @@
+as_wizardgtfs <- function(gtfs_list,build_shapes = T){
+  UseMethod('as_wizardgtfs')
+}
 
+as_wizardgtfs.tidygtfs <- function(gtfs_list,build_shapes = T){
+  
+  checkmate::assert_logical(build_shapes, len = 1, any.missing = F)
+  
+  gtfs_list[['dates_services']] <- gtfs_list$.$dates_services %>% 
+    dplyr::group_by(date) %>% 
+    reframe(service_id = list(service_id))
+  gtfs_list<-gtfs_list[names(gtfs_list)!='.']
+  class(gtfs_list) <- c('wizardgtfs','gtfs','list')
+  if(build_shapes){
+    if('shapes' %in% names(gtfs_obj) == FALSE){
+      gtfs_obj <- get_shapes(gtfs_obj)
+    }
+  }
+  return(gtfs_list)
+}
 
-seqs_table <- function(intervals){
-  tibble(
-    period=unique(intervals)
-  ) %>% 
-    dplyr::mutate(date = purrr::map(period,function(x) seq(int_start(x),int_end(x),'1 day')))
+as_wizardgtfs.default <- function(gtfs_list,build_shapes = T){
+  duplicate_ids <- has_duplicate_primary(gtfs_list)
+  
+  checkmate::assert_logical(build_shapes, len = 1, any.missing = F)
+  
+  if(('calendar'%in%names(gtfs_list)==FALSE)&('calendar_dates'%in%names(gtfs_list)==FALSE)){
+    ## Tentar formatar com cor e itálico
+    
+    
+    warning(crayon::italic(crayon::red(paste0("Can't find calendar nor calendar_dates tables in GTFS files.\nReturning a gtfs object."))))
+    return(gtfs_list)
+    
+    
+  }
+  if(any(unlist(duplicate_ids))){
+    warning("Duplicated ids found in: ", paste0(names(duplicate_ids[duplicate_ids]), 
+                                                collapse = ", "), "\n", crayon::red("The returned object is not a wizardgtfs object."))
+    return(gtfs_list)
+  }else{
+    gtfs_obj <- convert_to_tibble(gtfs_list) %>% 
+      convert_times_and_dates() %>% 
+      create_dates_services_table()
+    #gtfs_obj <- gtfsio::new_gtfs(gtfs_obj)
+    class(gtfs_obj) <- c('wizardgtfs','gtfs','list')
+    if(build_shapes){
+      if('shapes' %in% names(gtfs_obj) == FALSE){
+        gtfs_obj <- get_shapes(gtfs_obj)
+      }
+    }
+    return(gtfs_obj)
+  }
 }
 
 
-label_wday <- function(x=1:7){
-  c('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday')[x]
+
+
+has_duplicate_primary <- function(gtfs_list){
+  duplicated_ids <- as.list(rep(FALSE,length(gtfs_list)))
+  names(duplicated_ids) <- names(gtfs_list)
+  for (table_name in names(primary_ids())) {
+    if(table_name %in% names(duplicated_ids)){
+      primary_vec <- gtfs_list[[table_name]] %>% dplyr::select(primary_ids()[table_name])
+      if(anyDuplicated(primary_vec)>0){
+        duplicated_ids[[table_name]] <- TRUE
+      }
+    }
+    
+  }
+  return(unlist(duplicated_ids))
 }
 
-without <- function(x,y){
-  x[! x %in% y]
+primary_ids <- function(){
+  c(trips='trip_id',calendar='service_id',routes='route_id',stops='stop_id')
 }
 
-get_wday_services <- function(x){
-  resp <- tibble(
-    wday = label_wday()
-  )
-  resp$service_id <- purrr::map(label_wday(), function(y){
-    list(x$service_id[x[,y]==1])
-  })
-  resp
+convert_to_tibble <- function(x){
+  purrr::map(x, as_tibble)
 }
+
+convert_times_and_dates <- function(gtfs_list){
+  
+  if('calendar'%in%names(gtfs_list)){
+    gtfs_list$calendar$start_date <- 
+      date_to_posixct(gtfs_list$calendar$start_date)
+    gtfs_list$calendar$end_date <- 
+      date_to_posixct(gtfs_list$calendar$end_date)
+  }
+  if('calendar_dates'%in%names(gtfs_list)){
+    gtfs_list$calendar_dates$date <- 
+      date_to_posixct(gtfs_list$calendar_dates$date)
+  }
+  if('stop_times'%in%names(gtfs_list)){
+    # gtfs_list$stop_times$arrival_time <- 
+    #   chr_to_hms(gtfs_list$stop_times$arrival_time)
+    # gtfs_list$stop_times$departure_time <- 
+    #   chr_to_hms(gtfs_list$stop_times$departure_time)
+  }
+  return(gtfs_list)
+}
+
+date_to_posixct <- function(x) {
+  as.character(x) %>% 
+    as.POSIXct(tryFormats = c(
+      "%Y%m%d",
+      "%Y-%m-%d",
+      "%Y/%m/%d"
+    ))
+}
+
+chr_to_segs <- function(x){
+  x <- as.numeric(x)
+  return(x[1]*60*60+x[2]*60+x[3])
+}
+
+chr_to_hms <- function(x){
+  x[nchar(x)==0] <- NA
+  x <- purrr::map_vec(str_split(x,':'),function(y){
+    ifelse(
+      sum(is.na(y))==0,
+      NA,
+      chr_to_segs(y) 
+    )
+  }) 
+  hms::hms(x)
+}
+
+
 
 create_dates_services_table <- function(gtfs_list){
   
@@ -146,51 +247,3 @@ create_dates_services_table <- function(gtfs_list){
   
   
 }
-
-verify_tables <- function(x,tables){
-  ls <- rep(FALSE,length(tables))
-  ls <- tables%in%names(x)==FALSE
-  names(ls) <- tables
-  return(ls)
-}
-
-verify_field <- function(tbl,x){
-  x %in% names(tbl)
-}
-
-field_if_exist <- function(tbl,x){
-  if(x %in% names(tbl)){
-    return(x)
-  }else{
-    return(NULL)
-  }
-}
-
-
-
-
-
-get_stop_dists <- function(gtfs){
-  gtfs$stop_times %>%
-    dplyr::left_join(gtfs$trips %>% select('route_id','trip_id', 'direction_id'[verify_field(gtfs$trips,'direction_id')]),by = 'trip_id') %>% 
-    dplyr::arrange('trip_id','stop_sequence',field_if_exist(.,'direction_id')) %>% 
-    dplyr::select(route_id,stop_id) %>% 
-    unique() %>% 
-    dplyr::left_join(gtfs$stops %>% select(stop_id,stop_lon,stop_lat), by = 'stop_id') %>% 
-    dplyr::group_by(route_id) %>% 
-    dplyr::reframe(dists = list(get_trip_stops_dist(stop_lon,stop_lat))) %>% 
-    .$dists %>% unlist() %>% median(na.rm = T) %>% 
-    round(1)
-}
-
-
-get_trip_stops_dist <- function(lon,lat){
-  coords<-matrix(c(lon,lat),ncol = 2)
-  coord_pairs <- cbind(coords[-nrow(coords), ], coords[-1, ])
-  # Aplicar distGeo a cada par de coordenadas consecutivas
-  distancias <- apply(coord_pairs, 1, function(row) geosphere::distHaversine(row[1:2], row[3:4]))
-  return(distancias)
-}
-
-
-
