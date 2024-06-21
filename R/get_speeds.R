@@ -97,7 +97,7 @@ get_speeds <- function(gtfs, method = 'by.route'){
     speeds <- 
       durations %>% 
       dplyr::left_join(distances, 
-                       by = c('trip_id', 'from_stop_id', 'to_stop_id')) #%>% 
+                       by = c('trip_id', 'from_stop_id', 'to_stop_id')) %>% 
       dplyr::group_by(route_id, trip_id, hour, from_stop_id, to_stop_id) %>% 
       dplyr::reframe(speed = (distance/1000) / (duration/3600),
                      service_pattern,
