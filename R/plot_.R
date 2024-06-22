@@ -41,12 +41,12 @@ plot_routefrequency <- function(gtfs, route = NULL, servicepattern = NULL){
     tibble(route_id = rep(route, times = rep(24, times = length(route))),
            hour = rep(1:24, times = length(route))) %>% 
     dplyr::left_join(
-      filter_route(gtfs, route) %>% 
-        filter_servicepattern(., servicepattern) %>% 
+      GTFSwizard::filter_route(gtfs, route) %>% 
+        #GTFSwizard::filter_servicepattern(., servicepattern) %>% 
         GTFSwizard::get_frequency(method = 'detailed') %>% 
         dplyr::mutate(hour = as.numeric(hour)) 
     ) %>% 
-      dplyr::mutate(frequency = dplyr::if_else(is.na(frequency), 0, frequency))
+    dplyr::mutate(frequency = dplyr::if_else(is.na(frequency), 0, frequency))
   
   plot <- 
     ggplot2::ggplot() +
@@ -54,8 +54,7 @@ plot_routefrequency <- function(gtfs, route = NULL, servicepattern = NULL){
     ggplot2::geom_point(data = data, ggplot2::aes(x = hour, y = frequency, color = route_id), alpha = .5) +
     ggplot2::labs(x = 'Hour of the day', y = 'Hourly Frequency', colour = 'Route(s)', linewidth = "", title = 'Route(s) Frequency') +
     hrbrthemes::theme_ipsum() +
-    ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24), limits = c(0, 24)) #+
-    #ggplot2::scale_y_continuous(limits = c(0, max(data$frequency)))
+    ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24), limits = c(0, 24))
   
   plotly <-
     suppressWarnings(
@@ -70,8 +69,8 @@ plot_routefrequency <- function(gtfs, route = NULL, servicepattern = NULL){
 # plot_headways 
 plot_headways <- function(gtfs){
   
-  data <-
-    get_headways(gtfs, method = 'by.hour') %>% 
+  #data <-
+  GTFSwizard::get_headways(gtfs, method = 'by.hour') %>% 
     dplyr::mutate(average.headway = round(average.headway / 60, 0),
                   weight = pattern_frequency * trips,
                   hour = as.numeric(hour)) 
@@ -101,3 +100,4 @@ plot_headways <- function(gtfs){
   
   return(plotly)
 }
+

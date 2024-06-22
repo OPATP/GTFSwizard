@@ -446,12 +446,12 @@ filter_route <- function(gtfs, route = NULL){
   if(!is_null(gtfs$dates_services)){
     suppressWarnings(
       gtfs$dates_services <-
-    gtfs$dates_services %>%
-      tidyr::unnest(cols = 'service_id') %>% 
-      dplyr::filter(service_id %in% services) %>% 
-      dplyr::group_by(date) %>% 
-      dplyr::reframe(service_id = list(service_id))
-    
+        gtfs$dates_services %>%
+        tidyr::unnest(cols = 'service_id') %>% 
+        dplyr::filter(service_id %in% services) %>% 
+        dplyr::group_by(date) %>% 
+        dplyr::reframe(service_id = list(service_id))
+      
     )
   }
   
