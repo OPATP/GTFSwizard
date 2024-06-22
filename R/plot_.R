@@ -37,24 +37,28 @@ plot_routefrequency <- function(gtfs, route = NULL, servicepattern = NULL){
     stop()
   }
   
-  data <-
+  freq <- 
+    GTFSwizard::filter_route(gtfs, route) %>% 
+    GTFSwizard::get_frequency(method = 'detailed') %>% 
+    dplyr::mutate(hour = as.numeric(hour))
+  
+  data <- 
     tibble(route_id = rep(route, times = rep(24, times = length(route))),
-           hour = rep(1:24, times = length(route))) %>% 
-    dplyr::left_join(
-      GTFSwizard::filter_route(gtfs, route) %>% 
-        #GTFSwizard::filter_servicepattern(., servicepattern) %>% 
-        GTFSwizard::get_frequency(method = 'detailed') %>% 
-        dplyr::mutate(hour = as.numeric(hour)) 
-    ) %>% 
+           hour = rep(1:24, times = length(route)),
+           service_pattern = list(unique(freq$service_pattern))) %>% 
+    tidyr::unnest(cols = 'service_pattern') %>% 
+    dplyr::full_join(freq, .) %>% 
     dplyr::mutate(frequency = dplyr::if_else(is.na(frequency), 0, frequency))
   
   plot <- 
     ggplot2::ggplot() +
-    ggplot2::geom_line(data = data, ggplot2::aes(x = hour, y = frequency, color = route_id), alpha = .5, linewidth = 1.25) +
-    ggplot2::geom_point(data = data, ggplot2::aes(x = hour, y = frequency, color = route_id), alpha = .5) +
+    ggplot2::geom_line(data = data, ggplot2::aes(x = hour, y = frequency, color = route_id, alpha = service_pattern), linewidth = 1) +
+    ggplot2::geom_point(data = data, ggplot2::aes(x = hour, y = frequency, color = route_id, alpha = service_pattern), alpha = .5) +
     ggplot2::labs(x = 'Hour of the day', y = 'Hourly Frequency', colour = 'Route(s)', linewidth = "", title = 'Route(s) Frequency') +
-    hrbrthemes::theme_ipsum() +
-    ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24), limits = c(0, 24))
+      ggplot2::scale_alpha_manual(values = c(.85, rep(.2, length(unique(data$service_pattern)) - 1)), labels = unique(data$service_pattern)) +
+      hrbrthemes::theme_ipsum() +
+      ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24), limits = c(0, 24)) +
+      ggplot2::theme(legend.position = 'none')
   
   plotly <-
     suppressWarnings(
@@ -86,7 +90,7 @@ plot_headways <- function(gtfs){
     ggplot2::geom_hline(ggplot2::aes(yintercept = overal.average, linetype = paste0('Overall\nAverage\nHeadway of\n', round(overal.average, 1), ' minutes')), linewidth = 1, color = '#113322') +
     ggplot2::labs(x = 'Hour of the Day ', title = 'System Average Headway', linetype = '', y = 'Average Headway (min)') +
     ggplot2::scale_linetype_manual(values = 'dashed') +
-    ggplot2::scale_alpha_manual(values = c(.9, rep(.15, length(unique(data$service_pattern)) - 1))) +
+    ggplot2::scale_alpha_manual(values = c(.85, rep(.2, length(unique(data$service_pattern)) - 1))) +
     hrbrthemes::theme_ipsum() +
     ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24), limits = c(0, 24)) +
     ggplot2::theme(legend.position = 'none')
