@@ -233,7 +233,8 @@ explore_gtfs <-
       
       # dwell time ----
       dwell_time <- 
-        GTFSwizard::get_dwelltimes(gtfs, method = 'by.hour')
+        get_dwelltimes(gtfs, method = 'by.hour')
+        #GTFSwizard::get_dwelltimes(gtfs, method = 'by.hour')
       
       output$hist.dt <- plotly::renderPlotly({
         
@@ -358,14 +359,14 @@ explore_gtfs <-
       # frequency by route ----
       route <- reactive({input$selected.routes})
       
-      output$freq.sparkline.byroute <- plotly::renderPlotly({GTFSwizard::plot_routefrequency(gtfs, route())})
+      output$freq.sparkline.byroute <- plotly::renderPlotly({plot_routefrequency(gtfs, route())})
       
       # headway by route ----    
       headway.byroute <- reactive({
         GTFSwizard::get_headways(gtfs.filtered(), method = 'detailed')
       })
       
-      output$headway.byroute.sparkline <- plotly::renderPlotly({GTFSwizard::plot_routeheadways(gtfs, route())})
+      output$headway.byroute.sparkline <- plotly::renderPlotly({plot_routeheadways(gtfs, route())})
       
       
     }
