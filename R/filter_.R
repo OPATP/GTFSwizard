@@ -832,3 +832,7 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   return(gtfs)
   
 }
+
+# inserir filter_polygon ou filter_space
+# stops <- st_filter(as_stops_sf(gtfs$stops) %>% st_make_valid(), shp.de.interesse) %>% .$stop_id
+# gtfs <- filter_stop(gtfs, stops)

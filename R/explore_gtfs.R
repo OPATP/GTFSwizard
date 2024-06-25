@@ -25,18 +25,18 @@ explore_gtfs <-
       shiny::tabPanel('Overview',
                       shiny::fluidRow(
                         shiny::column(
-                          width = 7,
-                          leaflet::leafletOutput('overview_map1', height = '50vh'),
+                          width = 5,
+                          leaflet::leafletOutput('overview_map1', height = '45vh'),
                           shiny::tags$style(
                             'div#overview_map1{
           width:100%;
-          heigth:50vh;
+          heigth:45vh;
           border:solid green;
           border-radius:10px;
           }')
                         ),
                         shiny::column(
-                          width = 5,
+                          width = 7,
                           shiny::tableOutput('agency_table'),
                         ),
                       ),
@@ -233,7 +233,8 @@ explore_gtfs <-
       
       # dwell time ----
       dwell_time <- 
-        GTFSwizard::get_dwelltimes(gtfs, method = 'by.hour')
+        get_dwelltimes(gtfs, method = 'by.hour')
+        #GTFSwizard::get_dwelltimes(gtfs, method = 'by.hour')
       
       output$hist.dt <- plotly::renderPlotly({
         
@@ -358,40 +359,14 @@ explore_gtfs <-
       # frequency by route ----
       route <- reactive({input$selected.routes})
       
-      output$freq.sparkline.byroute <- plotly::renderPlotly({GTFSwizard::plot_routefrequency(gtfs, route())})
+      output$freq.sparkline.byroute <- plotly::renderPlotly({plot_routefrequency(gtfs, route())})
       
       # headway by route ----    
       headway.byroute <- reactive({
         GTFSwizard::get_headways(gtfs.filtered(), method = 'detailed')
       })
       
-      output$headway.byroute.sparkline <- plotly::renderPlotly({
-        headway.byroute <- headway.byroute()
-        
-        hline <-
-          weighted.mean(headway.byroute$headway, headway.byroute$pattern_frequency, na.rm = T)
-        
-        p.headway.byroute.sparkline <- 
-          ggplot2::ggplot() +
-          ggplot2::geom_vline(xintercept = c(0, 6, 12, 18, 24), color = 'gray', alpha = .25, linetype = 'dashed') +
-          ggplot2::geom_violin(data = headway.byroute, ggplot2::aes(x = hour, y = headway, color = 'Hourly\nDistribution\n', group = hour, weight = pattern_frequency), fill = 'grey', alpha = .65, scale = 'width') +
-          ggplot2::geom_hline(ggplot2::aes(yintercept = hline, color = 'Overall\nAverage\nHeadway\n'), linetype = 'dashed', linewidth = .75) +
-          ggplot2::geom_line(data = dplyr::group_by(headway.byroute, hour) %>% dplyr::reframe(headway = weighted.mean(headway, pattern_frequency)), ggplot2::aes(hour, headway, color = 'Hourly\nAverage\nHeadway\n', group = NA), linewidth = 1) +
-          ggplot2::labs(x = 'Hour of the day', y = 'Headway', colour = '', title = 'Route(s) Headway') +
-          hrbrthemes::theme_ipsum() +
-          ggplot2::scale_x_continuous(breaks = c(0, 6, 12, 18, 24)) +
-          ggplot2::theme(
-            panel.grid.major.x = element_blank(),
-            panel.grid.major.y = element_blank(),
-            axis.ticks.x = element_blank()
-          ) +
-          ggplot2::scale_color_manual(values = c('blue4', 'white', 'red'))
-        
-        suppressWarnings({
-          plotly::ggplotly(p.headway.byroute.sparkline)
-        })
-        
-      })
+      output$headway.byroute.sparkline <- plotly::renderPlotly({plot_routeheadways(gtfs, route())})
       
       
     }

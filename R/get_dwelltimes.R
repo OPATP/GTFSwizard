@@ -1,19 +1,19 @@
 get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
   
   if (method == 'by.hour') {
-    dwell_time <- get_dwelltime_byhour(gtfs)
+    dwell_time <- get_dwelltime_byhour(gtfs, max.dwelltime = max.dwelltime)
   }
   
   if (method == 'by.route') {
-    dwell_time <- get_dwelltime_byroute(gtfs)
+    dwell_time <- get_dwelltime_byroute(gtfs, max.dwelltime = max.dwelltime)
   }
   
   if (method == 'by.trip') {
-    dwell_time <- get_dwelltime_bytrip(gtfs)
+    dwell_time <- get_dwelltime_bytrip(gtfs, max.dwelltime = max.dwelltime)
   }
   
   if (method == 'detailed') {
-    dwell_time <- get_dwelltime_detailed(gtfs)
+    dwell_time <- get_dwelltime_detailed(gtfs, max.dwelltime = max.dwelltime)
   }
   
   if (!method %in% c('by.hour', 'by.route', 'detailed', 'by.trip')) {
@@ -25,7 +25,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
   
 }
 
-get_dwelltime_byhour <- function(gtfs, max.dwelltime){
+get_dwelltime_byhour <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -71,7 +71,7 @@ get_dwelltime_byhour <- function(gtfs, max.dwelltime){
   
 }
 
-get_dwelltime_byroute <- function(gtfs, max.dwelltime){
+get_dwelltime_byroute <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -116,7 +116,7 @@ get_dwelltime_byroute <- function(gtfs, max.dwelltime){
   
 }
 
-get_dwelltime_bytrip <- function(gtfs, max.dwelltime){
+get_dwelltime_bytrip <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
@@ -160,7 +160,7 @@ get_dwelltime_bytrip <- function(gtfs, max.dwelltime){
   
 }
 
-get_dwelltime_detailed <- function(gtfs, max.dwelltime){
+get_dwelltime_detailed <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
