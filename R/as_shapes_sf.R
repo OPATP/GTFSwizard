@@ -37,6 +37,7 @@ as_shapes_sf.data.frame <- function(obj){
     
     if('shape_pt_sequence' %in% names(obj)){
       obj <- obj %>% 
+        dplyr::mutate(shape_pt_sequence = as.numeric(shape_pt_sequence)) %>% 
         dplyr::arrange(shape_id,shape_pt_sequence)
     }else{
       warning("When the ",crayon::blue('"shape_pt_sequence"')," column is not defined, the line will be built considering the points in order.")
@@ -46,16 +47,18 @@ as_shapes_sf.data.frame <- function(obj){
       obj <- obj %>% 
         dplyr::group_by(shape_id) %>% 
         dplyr::mutate(geometry = paste0(shape_pt_lon,' ',shape_pt_lat)) %>% 
+        dplyr::group_by(shape_id) %>% 
         dplyr::reframe(
           shape_dist_traveled = sum(as.numeric(shape_dist_traveled),na.rm = T),
           geometry = paste0('LINESTRING(',paste0(geometry,collapse = ', '), ')')
-        ) %>% 
+        ) %>%
         sf::st_as_sf(wkt = 'geometry',crs=4326)
         
     }else{
       obj <- obj %>% 
         dplyr::group_by(shape_id) %>% 
         dplyr::mutate(geometry = paste0(shape_pt_lon,' ',shape_pt_lat)) %>% 
+        dplyr::group_by(shape_id)
         dplyr::reframe(
           geometry = paste0('LINESTRING(',paste0(geometry,collapse = ', '), ')')
         ) %>% 
