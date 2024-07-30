@@ -682,8 +682,6 @@ filter_stop <- function(gtfs, stop = NULL){
 
 filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   
-  message('filter_time() removes invalid stop times.')
-  
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
@@ -830,6 +828,8 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   }
   
   return(gtfs)
+  
+  message('filter_time() removes invalid stop times.')
   
 }
 
