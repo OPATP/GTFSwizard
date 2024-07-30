@@ -1,7 +1,7 @@
 plot_calendar <- function(gtfs, ncol = 6, facet_by_year = FALSE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as_gtfswizard() is advised.')
   }
   

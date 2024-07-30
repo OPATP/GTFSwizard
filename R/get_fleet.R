@@ -30,7 +30,7 @@ get_fleet_byroute <- function(gtfs){
   message('\nThis method returns the maximum number of simultaneous trips for a given route.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -122,7 +122,7 @@ get_fleet_byhour <- function(gtfs){
   message('\nThis method returns the maximum number of simultaneous trips for a given hour.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -214,7 +214,7 @@ get_fleet_peak <- function(gtfs){
   message('\nThis method returns the number of simultaneous trips for the three busiest hours.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -307,7 +307,7 @@ get_fleet_peak <- function(gtfs){
 get_fleet_detailed <- function(gtfs){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -391,3 +391,4 @@ get_fleet_detailed <- function(gtfs){
   
 }
 
+ 

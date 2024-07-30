@@ -3,7 +3,7 @@ get_shapes <- function(gtfs){
   message('\nThis algorithm reconstructs the shapes table using an Euclidean approximation, based on the coordinates and sequence of stops for each trip, and may not me accurate.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     message('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   

@@ -1,7 +1,7 @@
 filter_servicepattern <- function(gtfs, servicepattern = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -123,7 +123,7 @@ filter_servicepattern <- function(gtfs, servicepattern = NULL){
 filter_date <- function(gtfs, date = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -238,7 +238,7 @@ filter_date <- function(gtfs, date = NULL){
 filter_service <- function(gtfs, service = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -351,7 +351,7 @@ filter_service <- function(gtfs, service = NULL){
 filter_route <- function(gtfs, route = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -462,7 +462,7 @@ filter_route <- function(gtfs, route = NULL){
 filter_trip <- function(gtfs, trip = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -572,7 +572,7 @@ filter_trip <- function(gtfs, trip = NULL){
 filter_stop <- function(gtfs, stop = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -685,7 +685,7 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   message('filter_time() removes invalid stop times.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   

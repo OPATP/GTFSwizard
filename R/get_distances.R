@@ -27,7 +27,7 @@ get_distances <- function(gtfs, method = 'by.route'){
 get_distances_byroute <- function(gtfs){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -61,7 +61,7 @@ get_distances_byroute <- function(gtfs){
 get_distances_bytrip <- function(gtfs){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -92,7 +92,7 @@ get_distances_bytrip <- function(gtfs){
 get_distances_detailed <- function(gtfs){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -242,7 +242,7 @@ get_distances_detailed <- function(gtfs){
 # get_distances_byhour <- function(gtfs){
 
 #   if(!"wizardgtfs" %in% class(gtfs)){
-#     gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+#     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
 #     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
 #   }
 #   
