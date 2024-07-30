@@ -28,7 +28,7 @@ get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
 get_dwelltime_byhour <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -74,7 +74,7 @@ get_dwelltime_byhour <- function(gtfs, max.dwelltime = 90){
 get_dwelltime_byroute <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -119,7 +119,7 @@ get_dwelltime_byroute <- function(gtfs, max.dwelltime = 90){
 get_dwelltime_bytrip <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
@@ -163,7 +163,7 @@ get_dwelltime_bytrip <- function(gtfs, max.dwelltime = 90){
 get_dwelltime_detailed <- function(gtfs, max.dwelltime = 90){
   
   if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::gtfs_to_wizard(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
