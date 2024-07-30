@@ -33,7 +33,7 @@ sf_to_df <- function(gtfs){
     if('sf'%in%class(gtfs$shapes)){
       new_shapes <- gtfs$shapes %>% 
         group_by(shape_id) %>% 
-        mutate(coords = coords_shapes(geometry)) %>% 
+        dplyr::mutate(coords = coords_shapes(geometry)) %>% 
         st_drop_geometry() %>% 
         unnest('coords') %>% 
         ungroup()
@@ -41,7 +41,7 @@ sf_to_df <- function(gtfs){
       if('shape_dist_traveled' %in% names(new_shapes)){
         new_shapes <- new_shapes %>%  
           group_by('shape_id') %>% 
-          mutate(shape_dist_traveled = shape_dist_traveled/n()) %>% 
+          dplyr::mutate(shape_dist_traveled = shape_dist_traveled/n()) %>% 
           ungroup()
       }
       
@@ -54,7 +54,7 @@ sf_to_df <- function(gtfs){
     try({gtfs$stops <- st_as_sf(gtfs$stops)},silent = T)
     if('sf' %in% class('stops')){
       gtfs$stops <- gtfs$stops %>% 
-        mutate(coords_stops(geometry)) %>% 
+        dplyr::mutate(coords_stops(geometry)) %>% 
         st_drop_geometry() %>% 
         as.data.frame()
     }
@@ -68,7 +68,7 @@ coords_shapes <- function(geom){
   st_coordinates(geom)[,1:2] %>% 
     as.data.frame() %>% 
     setnames(new  = c('shape_pt_lon','shape_pt_lat')) %>% 
-    mutate(shape_pt_sequence = 1:n()) %>% 
+    dplyr::mutate(shape_pt_sequence = 1:n()) %>% 
     list()
 }
 coords_stops <- function(geom){
@@ -78,26 +78,20 @@ coords_stops <- function(geom){
 }
 
 
-
+date_to_int <- function(x){
+  as.numeric(strftime(x,format = '%Y%m%d'))
+}
 
 as_df_ordinary <- function(df){
   
-  df <- as.data.frame(df)
-  
-  df2 <- lapply(df, function(col){
-    if(hms::is_hms(col)){
-      col = as.character(col)
-    }
-    if(is.POSIXct(col)|is.POSIXlt(col)|is.Date(col)){
-      col = as.character(col)
-    }
-    if(is.character(.col)){
-      col[is.na(col)] <- ""
-    }
-    return(col)
-  })
- 
-  attributes(df2) <- attributes(df)
+  df <- df %>% 
+    dplyr::mutate_if(is.POSIXct,date_to_int) %>% 
+    dplyr::mutate_if(is.POSIXlt,date_to_int) %>% 
+    dplyr::mutate_if(is.Date,date_to_int) %>% 
+    dplyr::mutate_if(is.character, function(x) {
+      x[is.null(x)|is.na(x)] <- ''
+      return(x)
+    })
   
   return(df)
   
