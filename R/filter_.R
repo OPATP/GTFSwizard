@@ -124,21 +124,23 @@ filter_date <- function(gtfs, date = NULL){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as_gtfswizard() is advised.')
   }
   
-  if(is.null(date)){
+  if(is.null(date)) {
     warning('\nNo date(s) provided.\nReturning furtherst date.')
-    date <-  gtfs$dates_services$date[length(gtfs$dates_services$date)] %>% lubridate::date()
-  }
+    date <- gtfs$dates_services$date[length(gtfs$dates_services$date)] %>% as.Date()
+  } else {
+    date <- as.Date(date)
+    }
   
-  if(any(!date %in% lubridate::date(gtfs$dates_services$date))){
-    message('\nDate(s) do not belongs to calendar.\nPlease use get_calendar() to check available dates.')
+  if(any(!date %in% as.Date(gtfs$dates_services$date))){
+    message('\nDate(s) do not belongs to calendar.\nMust be either a "YYYY-MM-DD" character vector or a POSIXct object.\nPlease use get_calendar() to check available dates.')
     stop()
   }
   
   services <-
-    gtfs$dates_services[lubridate::date(gtfs$dates_services$date) %in% date, ] %>% 
+    gtfs$dates_services[as.Date(gtfs$dates_services$date) %in% date, ] %>% 
     tidyr::unnest(cols = 'service_id') %>% 
     .$service_id
   
@@ -199,14 +201,14 @@ filter_date <- function(gtfs, date = NULL){
   if(!is_null(gtfs$calendar)){
     new.calendar.dates <- 
       tibble(service_id = services,
-             start_date = list(as.POSIXct(date)),
-             end_date = list(as.POSIXct(date))) %>% 
+             start_date = list(date),
+             end_date = list(date)) %>% 
       tidyr::unnest(cols = c('start_date', 'end_date'))
     
     gtfs$calendar <- 
       gtfs$calendar[gtfs$calendar$service_id %in% services, ] %>% 
       .[, 1:8] %>% 
-      dplyr::left_join(new.calendar.dates)
+      dplyr::left_join(new.calendar.dates, by = join_by(service_id))
   }
   
   if(!is_null(gtfs$calendar_dates)){
@@ -227,7 +229,7 @@ filter_date <- function(gtfs, date = NULL){
   if(!is_null(gtfs$dates_services)){
     suppressWarnings(
       gtfs$dates_services <- 
-        gtfs$dates_services[lubridate::date(gtfs$dates_services$date) %in% date, ]
+        gtfs$dates_services[as.Date(gtfs$dates_services$date) %in% date, ]
     )
   }
   
@@ -336,11 +338,11 @@ filter_service <- function(gtfs, service = NULL){
     suppressWarnings(
       gtfs$dates_services <-
         gtfs$dates_services %>% 
-      tidyr::unnest(cols = 'service_id') %>% 
-      dplyr::filter(service_id %in% services) %>% 
-      dplyr::group_by(date) %>% 
-      dplyr::reframe(service_id = list(service_id))
-        
+        tidyr::unnest(cols = 'service_id') %>% 
+        dplyr::filter(service_id %in% services) %>% 
+        dplyr::group_by(date) %>% 
+        dplyr::reframe(service_id = list(service_id))
+      
     )
   }
   
@@ -429,8 +431,8 @@ filter_route <- function(gtfs, route = NULL){
   
   if(!is_null(gtfs$calendar_dates)){
     gtfs$calendar_dates <-
-    gtfs$calendar_dates %>%
-    dplyr::filter(service_id %in% services)
+      gtfs$calendar_dates %>%
+      dplyr::filter(service_id %in% services)
   }
   
   if(!is_null(gtfs$frequencies)){
@@ -540,8 +542,8 @@ filter_trip <- function(gtfs, trip = NULL){
   
   if(!is_null(gtfs$calendar_dates)){
     gtfs$calendar_dates <-
-    gtfs$calendar_dates %>%
-    dplyr::filter(service_id %in% services)
+      gtfs$calendar_dates %>%
+      dplyr::filter(service_id %in% services)
   }
   
   if(!is_null(gtfs$frequencies)){
@@ -629,7 +631,7 @@ filter_stop <- function(gtfs, stop = NULL){
     gtfs$fare_rules <- 
       gtfs$fare_rules[gtfs$fare_rules$route_id %in% routes, ]
     
-    }
+  }
   
   if(!is_null(gtfs$fare_attributes)){
     fares <- 
@@ -651,10 +653,10 @@ filter_stop <- function(gtfs, stop = NULL){
   
   if(!is_null(gtfs$calendar_dates)){
     gtfs$calendar_dates <-
-    gtfs$calendar_dates %>%
-    dplyr::filter(service_id %in% services)
+      gtfs$calendar_dates %>%
+      dplyr::filter(service_id %in% services)
   }
-
+  
   if(!is_null(gtfs$frequencies)){
     gtfs$frequencies <- 
       gtfs$frequencies[gtfs$frequencies$trip_id %in% trips, ]
@@ -784,7 +786,7 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
     gtfs$fare_rules <- 
       gtfs$fare_rules[gtfs$fare_rules$route_id %in% routes, ]
     
-    }
+  }
   
   if(!is_null(gtfs$fare_attributes)){
     fares <- 
@@ -802,8 +804,8 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
   
   if(!is_null(gtfs$calendar_dates)){
     gtfs$calendar_dates <-
-    gtfs$calendar_dates %>%
-    dplyr::filter(service_id %in% services)
+      gtfs$calendar_dates %>%
+      dplyr::filter(service_id %in% services)
   }
   
   if(!is_null(gtfs$frequencies)){
