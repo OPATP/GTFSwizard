@@ -461,7 +461,7 @@ filter_route <- function(gtfs, route = NULL){
   
 }
 
-filter_trip <- function(gtfs, trip = NULL){
+filter_trip <- function(gtfs, trip = NULL, keep = TRUE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
@@ -479,7 +479,18 @@ filter_trip <- function(gtfs, trip = NULL){
     
   }
   
-  trips <- trip
+  if(!is.logical(keep)) {
+    message('\nThe argument "keep" must be one of TRUE or FALSE.')
+    stop()
+  }
+  
+  if(isTRUE(keep)) {
+    trips <- trip  
+  }
+  
+  if(!isTRUE(keep)) {
+    trips <- gtfs$trips$trip_id[!gtfs$trips$trip_id == trip]
+  }
   
   gtfs$trips <- 
     gtfs$trips[gtfs$trips$trip_id %in% trips, ]
