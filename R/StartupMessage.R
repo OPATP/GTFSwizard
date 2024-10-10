@@ -19,6 +19,7 @@ GTFSwizard.StartupMessage <- function(){
 "))
 
 }
+cat('V1\n')
 GTFSwizard.StartupMessage()
 
 
@@ -41,6 +42,7 @@ GTFSwizard.StartupMessage <- function(){
 "))
   
 }
+cat('V2\n')
 GTFSwizard.StartupMessage()
 
 
@@ -49,4 +51,5 @@ cat("|==================================\n")
 cat("|  ",red$bold("GTFS WIZARD"),"",cyan$italic("version"),cyan$italic(packageVersion("GTFSwizard")),"\n")
 cat("|==================================")
 }
+cat('V3\n')
 GTFSwizard.StartupMessage()
