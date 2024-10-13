@@ -2,12 +2,12 @@ merge_gtfs <- function(gtfs.x, gtfs.y){
   
   # checa a classe ----
   if(!"wizardgtfs" %in% class(gtfs.x)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs.x)
     warning('\nThe first gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
   if(!"wizardgtfs" %in% class(gtfs.y)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
+    gtfs <- GTFSwizard::as_wizardgtfs(gtfs.y)
     warning('\nThe first gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
