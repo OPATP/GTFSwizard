@@ -1,30 +1,8 @@
 
-library('crayon')
-
-GTFSwizard.StartupMessage <- function(){
-  cat(red("
-  #####   #####  #####   #####  
-  #         #    #       #      
-  #  ##     #    ####    #####  
-  #   #     #    #           #  
-  #####     #    #       #####  
-"))
-  
-  cat(red("
-#       #  # #####     #     #####  ####
-#       #  #  #       # #    #    # #   #
-#       #  #   #     #   #   ###### #    #
-#  #  # #  #    #   #  #  #  #    # #   #
- #  #  #   # ##### #       # #    # ####
-"))
-
-}
-cat('V1\n')
-GTFSwizard.StartupMessage()
 
 
 GTFSwizard.StartupMessage <- function(){
-  cat(green$bold("
+  cat(crayon::green$bold("
    _____ _______ ______ _____   
   / ____|__   __|  ____/ ____|  
  | |  __   | |  | |__ | (___    
@@ -38,18 +16,7 @@ GTFSwizard.StartupMessage <- function(){
    \\_/\\_/ |_/___\\__,_|_|  \\__,_|
                                 
 "))
-cat(cyan$italic("         version"),cyan$italic(packageVersion("GTFSwizard")),"\n\n")
-cat(cyan('Type \'citation("GTFSwizard”)\' for citing this R package in publications.'))
+cat(crayon::cyan$italic("         version"),crayon::cyan$italic(utils::packageVersion("GTFSwizard")),"\n\n")
+cat(crayon::cyan('Type \'citation("GTFSwizard”)\' for citing this R package in publications.'))
   
 }
-cat('V2\n')
-GTFSwizard.StartupMessage()
-
-
-GTFSwizard.StartupMessage <- function(){
-cat("|==================================\n")
-cat("|  ",red$bold("GTFS WIZARD"),"",cyan$italic("version"),cyan$italic(packageVersion("GTFSwizard")),"\n")
-cat("|==================================")
-}
-cat('V3\n')
-GTFSwizard.StartupMessage()
