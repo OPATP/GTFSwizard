@@ -19,5 +19,10 @@
     )
   )
   
+  invisible(suppressMessages(suppressWarnings(
+    try(detach("package:tidylog", unload = TRUE),silent = T)
+  )))
+  
+  packageStartupMessage(GTFSwizard.StartupMessage())
   
 }
