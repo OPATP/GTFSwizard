@@ -19,7 +19,7 @@ as_wizardgtfs.tidygtfs <- function(gtfs_list,build_shapes = T){
   return(gtfs_list)
 }
 
-as_wizardgtfs.default <- function(gtfs_list,build_shapes = T){
+as_wizardgtfs.list <- function(gtfs_list,build_shapes = T){
   duplicate_ids <- has_duplicate_primary(gtfs_list)
   
   checkmate::assert_logical(build_shapes, len = 1, any.missing = F)
@@ -82,13 +82,13 @@ convert_times_and_dates <- function(gtfs_list){
   
   if('calendar'%in%names(gtfs_list)){
     gtfs_list$calendar$start_date <- 
-      date_to_Date(gtfs_list$calendar$start_date)
+      date_to_posixct(gtfs_list$calendar$start_date)
     gtfs_list$calendar$end_date <- 
-      date_to_Date(gtfs_list$calendar$end_date)
+      date_to_posixct(gtfs_list$calendar$end_date)
   }
   if('calendar_dates'%in%names(gtfs_list)){
     gtfs_list$calendar_dates$date <- 
-      date_to_Date(gtfs_list$calendar_dates$date)
+      date_to_posixct(gtfs_list$calendar_dates$date)
   }
   if('stop_times'%in%names(gtfs_list)){
     # gtfs_list$stop_times$arrival_time <- 
@@ -99,9 +99,9 @@ convert_times_and_dates <- function(gtfs_list){
   return(gtfs_list)
 }
 
-date_to_Date <- function(x) {
+date_to_posixct <- function(x) {
   as.character(x) %>% 
-    as.Date(tryFormats = c(
+    as.POSIXct(tryFormats = c(
       "%Y%m%d",
       "%Y-%m-%d",
       "%Y/%m/%d"
