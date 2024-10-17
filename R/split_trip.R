@@ -1,4 +1,4 @@
-split_trip <- function(gtfs, trip, method = 'equal.size', split = 2){
+split_trip <- function(gtfs, trip, method = 'equal.size', split = 1){
 
   # checa os argumentos -------------------------------------------------------------------------
   if(!"wizardgtfs" %in% class(gtfs)){
@@ -53,19 +53,21 @@ split_trip <- function(gtfs, trip, method = 'equal.size', split = 2){
 
   # trips --------------------------------------------------------------------------------------
   gtfs$trips <- 
-    left_join(gtfs$trips, trip.dic) %>% 
+    left_join(gtfs$trips, trip.dic, by = 'trip_id') %>% 
     mutate(trip_id = if_else(is.na(new.trip_id), trip_id, new.trip_id)) 
   
-  routes_dic <- 
+  routes_dic <-  # verificar se precisa disso tudo
     gtfs$trips %>% 
     select(trip_id, new.trip_id, route_id) %>% 
     na.omit()
+  
+  routes <- unique(routes_dic$route_id)
   
   gtfs$trips <- 
     gtfs$trips %>% 
     select(-new.trip_id)
 
-  # frequencies --------------------------------------------------------------------------------------
+  # frequencies ---------------------------------------------------------------------------------
   if (!is_null(gtfs$frequencies)) {
     
     gtfs$frequencies <- 
@@ -85,6 +87,16 @@ split_trip <- function(gtfs, trip, method = 'equal.size', split = 2){
     
   }  
   
+  # corrigindo shapes ---------------------------------------------------------------------------
+  gtfs.x <- 
+    filter_trip(gtfs, trip.dic$new.trip_id, keep = FALSE)
+  
+  gtfs.y <- 
+    filter_trip(gtfs, trip.dic$new.trip_id, keep = TRUE) %>% 
+    get_shapes()
+  
+  gtfs <- merge(gtfs.x, gtfs.y, suffix = FALSE)
+
   # retornando gtfs -----------------------------------------------------------------------------
   return(gtfs)
   
