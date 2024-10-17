@@ -350,7 +350,7 @@ filter_service <- function(gtfs, service = NULL){
   
 }
 
-filter_route <- function(gtfs, route = NULL){
+filter_route <- function(gtfs, route = NULL, keep = TRUE){
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
@@ -368,7 +368,15 @@ filter_route <- function(gtfs, route = NULL){
     
   }
   
-  routes <- route
+  checkmate::assert_logical(keep)
+  
+  if(isTRUE(keep)) {
+    routes <- route
+  }
+  
+  if(!isTRUE(keep)) {
+    routes <- gtfs$routes$route_id[!gtfs$routes$route_id %in% route]
+  }
   
   gtfs$routes <- 
     gtfs$routes[gtfs$routes$route_id %in% routes, ]
@@ -468,6 +476,7 @@ filter_trip <- function(gtfs, trip = NULL, keep = TRUE){
     warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
   }
   
+  
   if(is.null(trip)){
     message('\nNo trip(s) provided.\nRun gtfs$trips to check available trips.')
     stop()
@@ -479,17 +488,14 @@ filter_trip <- function(gtfs, trip = NULL, keep = TRUE){
     
   }
   
-  if(!is.logical(keep)) {
-    message('\nThe argument "keep" must be one of TRUE or FALSE.')
-    stop()
-  }
+  checkmate::assert_logical(keep)
   
   if(isTRUE(keep)) {
     trips <- trip  
   }
   
   if(!isTRUE(keep)) {
-    trips <- gtfs$trips$trip_id[!gtfs$trips$trip_id == trip]
+    trips <- gtfs$trips$trip_id[!gtfs$trips$trip_id %in% trip]
   }
   
   gtfs$trips <- 
