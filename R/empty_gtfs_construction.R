@@ -9,7 +9,7 @@ for (i in 1:length(gtfs_meta)) {
 
   colnames <- gtfs_meta[[i]]$field
   coltypes <- paste0(gtfs_meta[[i]]$coltype, "()")
-  table <- map2_dfc(colnames, coltypes, ~ setNames(list(eval(parse(text = .y))), .x))
+  table <- purrr::map2_dfc(colnames, coltypes, ~ setNames(list(eval(parse(text = .y))), .x))
   empty_gtfs_full[[i]] <- table
   names(empty_gtfs_full)[i] <- names(gtfs_meta)[i]
     
@@ -36,7 +36,7 @@ for (i in 1:length(gtfs_meta_minimum)) {
   field_spec <- gtfs_meta[[i]]$field_spec == 'req'
   colnames <- gtfs_meta[[i]]$field[field_spec]
   coltypes <- paste0(gtfs_meta[[i]]$coltype[field_spec], "()")
-  table <- map2_dfc(colnames, coltypes, ~ setNames(list(eval(parse(text = .y))), .x))
+  table <- purrr::map2_dfc(colnames, coltypes, ~ setNames(list(eval(parse(text = .y))), .x))
   empty_gtfs_minimum[[i]] <- table
   names(empty_gtfs_minimum)[i] <- names(gtfs_meta_minimum)[i]
   
