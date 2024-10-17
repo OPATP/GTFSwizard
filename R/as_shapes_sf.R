@@ -52,7 +52,9 @@ as_shapes_sf.data.frame <- function(obj){
           shape_dist_traveled = sum(as.numeric(shape_dist_traveled),na.rm = T),
           geometry = paste0('LINESTRING(',paste0(geometry,collapse = ', '), ')')
         ) %>%
-        sf::st_as_sf(wkt = 'geometry',crs=4326)
+        sf::st_as_sf(wkt = 'geometry',crs=4326) %>% 
+        tibble::as_tibble() %>% 
+        sf::st_as_sf()
         
     }else{
       obj <- obj %>% 
@@ -62,7 +64,9 @@ as_shapes_sf.data.frame <- function(obj){
         dplyr::reframe(
           geometry = paste0('LINESTRING(',paste0(geometry,collapse = ', '), ')')
         ) %>% 
-        st_as_sf(wkt = 'geometry',crs=4326)
+        sf::st_as_sf(wkt = 'geometry',crs=4326) %>% 
+          tibble::as_tibble() %>% 
+          sf::st_as_sf()
     }
     
     return(obj)
