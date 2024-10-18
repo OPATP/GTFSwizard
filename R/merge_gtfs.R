@@ -111,31 +111,31 @@ merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
   # bind rows ----
   gtfs <- list()
   
-  gtfs$agency <- bind_rows(gtfs.x$agency, gtfs.y$agency)
+  gtfs$agency <- bind_rows(gtfs.x$agency, gtfs.y$agency) %>% dplyr::distinct()
   
-  gtfs$routes <- bind_rows(gtfs.x$routes, gtfs.y$routes)
+  gtfs$routes <- bind_rows(gtfs.x$routes, gtfs.y$routes) %>% dplyr::distinct()
   
-  gtfs$trips <- bind_rows(gtfs.x$trips, gtfs.y$trips)
+  gtfs$trips <- bind_rows(gtfs.x$trips, gtfs.y$trips) %>% dplyr::distinct()
   
-  gtfs$stop_times <- bind_rows(gtfs.x$stop_times, gtfs.y$stop_times)
+  gtfs$stop_times <- bind_rows(gtfs.x$stop_times, gtfs.y$stop_times) %>% dplyr::distinct()
   
-  gtfs$stops <- bind_rows(gtfs.x$stops, gtfs.y$stops)
+  gtfs$stops <- bind_rows(gtfs.x$stops, gtfs.y$stops) %>% dplyr::distinct()
   
-  gtfs$fare_attributes <- bind_rows(gtfs.x$fare_attributes, gtfs.y$fare_attributes)
+  gtfs$fare_attributes <- bind_rows(gtfs.x$fare_attributes, gtfs.y$fare_attributes) %>% dplyr::distinct()
   
-  gtfs$fare_rules <- bind_rows(gtfs.x$fare_rules, gtfs.y$fare_rules)
+  gtfs$fare_rules <- bind_rows(gtfs.x$fare_rules, gtfs.y$fare_rules) %>% dplyr::distinct()
   
-  gtfs$shapes <- bind_rows(gtfs.x$shapes, gtfs.y$shapes)
+  gtfs$shapes <- bind_rows(gtfs.x$shapes, gtfs.y$shapes) %>% dplyr::distinct()
   
-  gtfs$calendar <- bind_rows(gtfs.x$calendar, gtfs.y$calendar)
+  gtfs$calendar <- bind_rows(gtfs.x$calendar, gtfs.y$calendar) %>% dplyr::distinct()
   
-  gtfs$calendar_dates <- bind_rows(gtfs.x$calendar_dates, gtfs.y$calendar_dates)
+  gtfs$calendar_dates <- bind_rows(gtfs.x$calendar_dates, gtfs.y$calendar_dates) %>% dplyr::distinct()
   
-  gtfs$frequencies <- bind_rows(gtfs.x$frequencies, gtfs.y$frequencies)
+  gtfs$frequencies <- bind_rows(gtfs.x$frequencies, gtfs.y$frequencies) %>% dplyr::distinct()
   
-  gtfs$transfers <- bind_rows(gtfs.x$transfers, gtfs.y$transfers)
+  gtfs$transfers <- bind_rows(gtfs.x$transfers, gtfs.y$transfers) %>% dplyr::distinct()
   
-  gtfs$feed_info <- bind_rows(gtfs.x$feed_info, gtfs.y$feed_info)
+  gtfs$feed_info <- bind_rows(gtfs.x$feed_info, gtfs.y$feed_info) %>% dplyr::distinct()
   
   # convertendo para 'wizardgts' ----
   gtfs <- as_wizardgtfs(gtfs)
