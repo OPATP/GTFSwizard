@@ -131,6 +131,8 @@ merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
   
   gtfs$calendar_dates <- bind_rows(gtfs.x$calendar_dates, gtfs.y$calendar_dates) %>% dplyr::distinct()
   
+  gtfs$dates_services <- bind_rows(gtfs.x$dates_services, gtfs.y$dates_services) %>% dplyr::distinct()
+  
   gtfs$frequencies <- bind_rows(gtfs.x$frequencies, gtfs.y$frequencies) %>% dplyr::distinct()
   
   gtfs$transfers <- bind_rows(gtfs.x$transfers, gtfs.y$transfers) %>% dplyr::distinct()
@@ -138,7 +140,7 @@ merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
   gtfs$feed_info <- bind_rows(gtfs.x$feed_info, gtfs.y$feed_info) %>% dplyr::distinct()
   
   # convertendo para 'wizardgts' ----
-  gtfs <- as_wizardgtfs(gtfs)
+  gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
   
   # retornando gtfs ----
   return(gtfs)
