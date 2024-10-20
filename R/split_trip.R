@@ -1,16 +1,17 @@
-split_trip <- function(gtfs, trip, method = 'equal.size', split = 1){
+#split_trip <- function(gtfs, trip, method = 'equal.size', split = 1){
+split_trip <- function(gtfs, trip, split = 1){
 
   # checa os argumentos --------------------------------------------  -----------------------------
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    warning('The first gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    warning('The gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
   
   checkmate::assert_int(split)
   
   checkmate::assert_subset(trip, choices = gtfs$trips$trip_id)
   
-  checkmate::assert_choice(method, choices = c('equal.size'))
+  #checkmate::assert_choice(method, choices = c('equal.size'))
   
   # identifica trips -------------------------------------------------------------------------
   groups <- split + 1
