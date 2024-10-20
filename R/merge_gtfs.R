@@ -48,61 +48,73 @@ merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
     
     if(!is_null(gtfs.x$fare_rules$route_id)){
       gtfs.x$fare_rules$route_id <- paste0(gtfs.x$fare_rules$route_id, '.x')
+    }
+    
+    if(!is_null(gtfs.x$fare_rules$fare_id)){
       gtfs.x$fare_rules$fare_id <- paste0(gtfs.x$fare_rules$fare_id, '.x')
     }
     
     if(!is_null(gtfs.y$fare_rules$route_id)){
       gtfs.y$fare_rules$route_id <- paste0(gtfs.y$fare_rules$route_id, '.y')
+    }
+    
+    if(!is_null(gtfs.y$fare_rules$fare_id)){
       gtfs.y$fare_rules$fare_id <- paste0(gtfs.y$fare_rules$fare_id, '.y')
     }
     
-    if(!is_null(gtfs.x$fare_attributes)){
+    if(!is_null(gtfs.x$fare_attributes$fare_id)){
       gtfs.x$fare_attributes$fare_id <- paste0(gtfs.x$fare_attributes$fare_id, '.x')
     }
     
-    if(!is_null(gtfs.y$fare_attributes)){
+    if(!is_null(gtfs.y$fare_attributes$fare_id)){
       gtfs.y$fare_attributes$fare_id <- paste0(gtfs.y$fare_attributes$fare_id, '.y')
     }
     
-    if(!is_null(gtfs.x$shapes)){
+    if(!is_null(gtfs.x$shapes$shape_id)){
       gtfs.x$shapes$shape_id <- paste0(gtfs.x$shapes$shape_id, '.x')
     }  
     
-    if(!is_null(gtfs.y$shapes)){
+    if(!is_null(gtfs.y$shapes$shape_id)){
       gtfs.y$shapes$shape_id <- paste0(gtfs.y$shapes$shape_id, '.y')
     }
     
-    if(!is_null(gtfs.x$calendar)){
+    if(!is_null(gtfs.x$calendar$service_id)){
       gtfs.x$calendar$service_id <- paste0(gtfs.x$calendar$service_id, '.x')
     }
     
-    if(!is_null(gtfs.y$calendar)){
+    if(!is_null(gtfs.y$calendar$service_id)){
       gtfs.y$calendar$service_id <- paste0(gtfs.y$calendar$service_id, '.y')
     }
     
-    if(!is_null(gtfs.x$calendar_dates)){
+    if(!is_null(gtfs.x$calendar_dates$service_id)){
       gtfs.x$calendar_dates$service_id <- paste0(gtfs.x$calendar_dates$service_id, '.x')
     }
     
-    if(!is_null(gtfs.y$calendar_dates)){
+    if(!is_null(gtfs.y$calendar_dates$service_id)){
       gtfs.y$calendar_dates$service_id <- paste0(gtfs.y$calendar_dates$service_id, '.y')
     }  
     
-    if(!is_null(gtfs.x$frequencies)){
+    if(!is_null(gtfs.x$frequencies$trip_id)){
       gtfs.x$frequencies$trip_id <- paste0(gtfs.x$frequencies$trip_id, '.x')
     }
     
-    if(!is_null(gtfs.y$frequencies)){
+    if(!is_null(gtfs.y$frequencies$trip_id)){
       gtfs.y$frequencies$trip_id <- paste0(gtfs.y$frequencies$trip_id, '.y')
     }
     
-    if(!is_null(gtfs.x$transfers)){
+    if(!is_null(gtfs.x$transfers$trip_id)){
       gtfs.x$transfers$trip_id <- paste0(gtfs.x$transfers$trip_id, '.x')
+    }
+    
+    if(!is_null(gtfs.x$transfers$stop_id)){
       gtfs.x$transfers$stop_id <- paste0(gtfs.x$transfers$stop_id, '.x')
     }
     
-    if(!is_null(gtfs.y$transfers)){
+    if(!is_null(gtfs.y$transfers$trip_id)){
       gtfs.y$transfers$trip_id <- paste0(gtfs.y$transfers$trip_id, '.y')
+    }
+    
+    if(!is_null(gtfs.y$transfers$stop_id)){
       gtfs.y$transfers$stop_id <- paste0(gtfs.y$transfers$stop_id, '.y')
     }
     
@@ -111,33 +123,33 @@ merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
   # bind rows ----
   gtfs <- list()
   
-  gtfs$agency <- bind_rows(gtfs.x$agency, gtfs.y$agency) %>% dplyr::distinct()
+  gtfs$agency <- dplyr::bind_rows(gtfs.x$agency, gtfs.y$agency) %>% dplyr::distinct()
   
-  gtfs$routes <- bind_rows(gtfs.x$routes, gtfs.y$routes) %>% dplyr::distinct()
+  gtfs$routes <- dplyr::bind_rows(gtfs.x$routes, gtfs.y$routes) %>% dplyr::distinct()
   
-  gtfs$trips <- bind_rows(gtfs.x$trips, gtfs.y$trips) %>% dplyr::distinct()
+  gtfs$trips <- dplyr::bind_rows(gtfs.x$trips, gtfs.y$trips) %>% dplyr::distinct()
   
-  gtfs$stop_times <- bind_rows(gtfs.x$stop_times, gtfs.y$stop_times) %>% dplyr::distinct()
+  gtfs$stop_times <- dplyr::bind_rows(gtfs.x$stop_times, gtfs.y$stop_times) %>% dplyr::distinct()
   
-  gtfs$stops <- bind_rows(gtfs.x$stops, gtfs.y$stops) %>% dplyr::distinct()
+  gtfs$stops <- dplyr::bind_rows(gtfs.x$stops, gtfs.y$stops) %>% dplyr::distinct()
   
-  gtfs$fare_attributes <- bind_rows(gtfs.x$fare_attributes, gtfs.y$fare_attributes) %>% dplyr::distinct()
+  gtfs$fare_attributes <- dplyr::bind_rows(gtfs.x$fare_attributes, gtfs.y$fare_attributes) %>% dplyr::distinct()
   
-  gtfs$fare_rules <- bind_rows(gtfs.x$fare_rules, gtfs.y$fare_rules) %>% dplyr::distinct()
+  gtfs$fare_rules <- dplyr::bind_rows(gtfs.x$fare_rules, gtfs.y$fare_rules) %>% dplyr::distinct()
   
-  gtfs$shapes <- bind_rows(gtfs.x$shapes, gtfs.y$shapes) %>% dplyr::distinct()
+  gtfs$shapes <- dplyr::bind_rows(gtfs.x$shapes, gtfs.y$shapes) %>% dplyr::distinct()
   
-  gtfs$calendar <- bind_rows(gtfs.x$calendar, gtfs.y$calendar) %>% dplyr::distinct()
+  gtfs$calendar <- dplyr::bind_rows(gtfs.x$calendar, gtfs.y$calendar) %>% dplyr::distinct()
   
-  gtfs$calendar_dates <- bind_rows(gtfs.x$calendar_dates, gtfs.y$calendar_dates) %>% dplyr::distinct()
+  gtfs$calendar_dates <- dplyr::bind_rows(gtfs.x$calendar_dates, gtfs.y$calendar_dates) %>% dplyr::distinct()
   
-  gtfs$dates_services <- bind_rows(gtfs.x$dates_services, gtfs.y$dates_services) %>% dplyr::distinct()
+  gtfs$dates_services <- dplyr::bind_rows(gtfs.x$dates_services, gtfs.y$dates_services) %>% dplyr::distinct()
   
-  gtfs$frequencies <- bind_rows(gtfs.x$frequencies, gtfs.y$frequencies) %>% dplyr::distinct()
+  gtfs$frequencies <- dplyr::bind_rows(gtfs.x$frequencies, gtfs.y$frequencies) %>% dplyr::distinct()
   
-  gtfs$transfers <- bind_rows(gtfs.x$transfers, gtfs.y$transfers) %>% dplyr::distinct()
+  gtfs$transfers <- dplyr::bind_rows(gtfs.x$transfers, gtfs.y$transfers) %>% dplyr::distinct()
   
-  gtfs$feed_info <- bind_rows(gtfs.x$feed_info, gtfs.y$feed_info) %>% dplyr::distinct()
+  gtfs$feed_info <- dplyr::bind_rows(gtfs.x$feed_info, gtfs.y$feed_info) %>% dplyr::distinct()
   
   # convertendo para 'wizardgts' ----
   gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
