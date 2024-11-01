@@ -1,4 +1,4 @@
-
+`%>%` <- dplyr::`%>%`
 
 seqs_table <- function(intervals){
   tibble(
