@@ -238,13 +238,3 @@ edit_trip_dwelltime.trips_mult <- function(trip,value,stops){
 
 
 
-
-
-
-
-
-
-a <- gtfs %>% 
-  selection(geometry %intersects% shp | route_id == '038') %>% 
-  edit_dwelltime(value = c(set = 15),keep_headway = TRUE,keep_duration = TRUE)
-
