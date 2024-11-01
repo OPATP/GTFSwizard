@@ -239,30 +239,7 @@ edit_trip_dwelltime.trips_mult <- function(trip,value,stops){
 
 
 
-# teste -------------------------------------------------------------------
 
-library(GTFSwizard)
-gtfs <- for_gtfs
-
-
-keep_duration = TRUE
-
-
-#edit_dwelltime(gtfs,value = value)
-
-a <- gtfs %>% 
-  selection(trip_id %in% gtfs$trips$trip_id[1:2]) %>% 
-  edit_dwelltime(value = c(set  = 15),keep_headway = TRUE,keep_duration = TRUE)
-
-filtro <- filter_route(gtfs, route = '075')
-
-shp <- filtro$shapes %>% 
-  get_shapes_sf()
-
-pts <- filtro$stops %>% 
-  get_stops_sf()
-
-pts <- pts[1:5,]
 
 
 
