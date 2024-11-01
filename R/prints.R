@@ -66,10 +66,10 @@ plot.wizardgtfs <- function(gtfs){
       if('sf' %in% class(gtfs$shapes) == FALSE){
         
         tryCatch(
-          gtfs$shapes <- as_shapes_sf(gtfs$shapes),
+          gtfs$shapes <- get_shapes_sf(gtfs$shapes),
           error = function(e){
             if('sf' %in% class(gtfs$stops) == FALSE){
-              gtfs$stops <- as_stops_sf(gtfs$stops)
+              gtfs$stops <- get_stops_sf(gtfs$stops)
             }
             return(plot_stops(gtfs))
           }
@@ -79,7 +79,7 @@ plot.wizardgtfs <- function(gtfs){
       
       if('sf' %in% class(gtfs$stops) == FALSE){
         
-        gtfs$stops <- as_stops_sf(gtfs$stops)
+        gtfs$stops <- get_stops_sf(gtfs$stops)
         
       }
       
@@ -92,7 +92,7 @@ plot.wizardgtfs <- function(gtfs){
         
         if('sf' %in% class(gtfs$stops) == FALSE){
           
-          gtfs$stops <- as_stops_sf(gtfs$stops)
+          gtfs$stops <- get_stops_sf(gtfs$stops)
           
         }
         
@@ -103,7 +103,7 @@ plot.wizardgtfs <- function(gtfs){
         
         if('sf' %in% class(gtfs$shapes) == FALSE){
           
-          gtfs$shapes <- as_stops_sf(gtfs$shapes)
+          gtfs$shapes <- get_stops_sf(gtfs$shapes)
           
         }
         
