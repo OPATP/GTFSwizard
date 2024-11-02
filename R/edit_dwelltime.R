@@ -1,15 +1,7 @@
 
-# Lógica ------------------------------------------------------------------
-# 
-# If the duration doesn't change the headway doesn't change either, then you only need to change the trip.
-# 
-# If the duration changes and the headway can change, you only need to change the trip as well.
-# 
-# If the duration changes, but the headway can't change, you need to change it along the route by accumulating the differences in the trips in the same direction.
-# 
-# If the change is in specific stops keep_duration necessarily needs to be FALSE.
-# 
-# If the change is to specific trips keep_headway necessarily needs to be FALSE
+
+# Roxygen help ------------------------------------------------------------
+
 
 
 
@@ -25,13 +17,6 @@ do_keep_duration <- function(x){
   }
 }
 
-do_keep_headway <- function(x){
-  if('set'%in%names(x)){
-    return(TRUE)
-  }else{
-    return(FALSE)
-  }
-}
 
 as.character.Period <- function(x){
   x <- lubridate::hms(x,roll = T)
@@ -54,25 +39,10 @@ verify_keepduration <- function(x){
 }
 
 
-verify_keepheadway <- function(x){
-  if('wizardgtfs_selected' %in% class(x)){
-    trips <- x$trips$trip_id[x$trips$route_id %in% attr(x,'selection')$routes]
-    
-    if(any(trips %nin% attr(x,'selection')$trips)){
-      return(FALSE)
-    }else{
-      return(TRUE)
-    }
-    
-  }else{
-    return(TRUE)
-  }
-}
-
 # Main functions ----------------------------------------------------------
 
 
-edit_dwelltime <- function(obj,value){
+edit_dwelltime <- function(gtfs,value){
   if(missing(value)){
     stop('Missing “value” argument with no pattern')
   }
@@ -90,77 +60,235 @@ edit_dwelltime <- function(obj,value){
 }
 
 
-edit_dwelltime.list<- function(obj,...){
-  obj <- as_wizardgtfs(obj)
-  edit_dwelltime.wizardgtfs(obj,...)
+edit_dwelltime.list<- function(gtfs,...){
+  gtfs <- as_wizardgtfs(gtfs)
+  edit_dwelltime.wizardgtfs(gtfs,...)
 }
 
-edit_dwelltime.wizardgtfs_selected <- function(obj,value){
+edit_dwelltime.wizardgtfs_selected <- function(gtfs,value){
   
   
   if(!checkmate::test_named(value)){
     names(value) <- 'set'
   }
   
+  if(lubridate::is.duration(value)){
+    value = as.numeric(dseconds(value))
+  }
   
   keep_duration <- do_keep_duration(value)
   
   if('set'%in%names(value)){
-    if(!verify_keepduration(obj)){
+    if(!verify_keepduration(gtfs)){
       warning(crayon::red("When 'value' is designated as 'set,' the change applies to the entire trip, regardless of specific stop selections. Use 'to,' 'add,' or 'mult' to adjust dwell time at specific stops.\nTo don't see this, select an entire trip or route.\nSee details using help('edit_dwelltime')\n"))
     }
   }
   
-  trips <- obj$stop_times %>% 
+  trips <- gtfs$stop_times %>% 
     group_by(trip_id) %>% 
     arrange(stop_sequence) %>% 
     ungroup() %>%
     dplyr::left_join(
-      obj$trips %>% select(trip_id,direction_id),
+      gtfs$trips %>% select(trip_id,direction_id),
       by  = 'trip_id'
     )
   
-  selection_trips <- attr(obj,'selection')$trips
+  selection_trips <- attr(gtfs,'selection')$trips
   
-  class(trips) <- c(paste0('trips_',names(value)),class(trips))
+  trips <- trips %>% 
+    group_by(trip_id) %>% 
+    group_split()
   
-  trips <- split(trips,trips$trip_id)
+  selection_trips <- sapply(trips, function(x){
+    ind <- parent.frame()$i
+    if(x$trip_id[1]%in%selection_trips){
+      return(ind)
+    }else{return(NULL)}
+  }) %>% unlist()
   
   if(names(value) == 'set'){
     
     trips[selection_trips] <- lapply(
       trips[selection_trips],
-      edit_trips_dwelltime,
+      edit_trips_dwelltime.trips_set,
       value = value
     )
     
   }else{
     
-    selection_stops <- attr(obj,'selection')$stops
+    selection_stops <- attr(gtfs,'selection')$stops
     
-    trips[selection_trips] <- lapply(
-      trips[selection_trips],
-      edit_trips_dwelltime,
-      value = value,
-      stops = selection_stops
-    )
+    if(names(value) == 'to'){
+      trips[selection_trips] <- lapply(
+        trips[selection_trips],
+        edit_trips_dwelltime.trips_to,
+        value = value,
+        stops = selection_stops
+      )
+    }
+    
+    if(names(value) == 'add'){
+      trips[selection_trips] <- lapply(
+        trips[selection_trips],
+        edit_trips_dwelltime.trips_add,
+        value = value,
+        stops = selection_stops
+      )
+    }
+    
+    if(names(value) == 'mult'){
+      trips[selection_trips] <- lapply(
+        trips[selection_trips],
+        edit_trips_dwelltime.trips_mult,
+        value = value,
+        stops = selection_stops
+      )
+    }
     
   }
   
-  obj$stop_times <- data.table::rbindlist(trips) 
+  gtfs$stop_times <- data.table::rbindlist(trips) 
+  
+  if(is.null(attr(gtfs,'editions'))){
+    editions <- list(
+      `1` = list(
+        `function` = 'edit_dwellime',
+        params = list(value=value),
+        selection = attr(gtfs,'selection')
+      )
+    )
+  }else{
+    editions <- append(
+      attr(gtfs,'editions'),
+      list(value = list(
+        `function` = 'edit_dwellime',
+        params = list(value=value),
+        selection = attr(gtfs,'selection')
+      ))
+    )
+    
+    names(editions) <- as.character(1:length(editions))
+    
+  }
+  
+  attr(gtfs,'editions') <- editions
   
   
-  return(obj)
+  return(gtfs)
+  
+}
+
+edit_dwelltime.wizardgtfs <- function(gtfs,value){
+  
+  cat('This operation will change all GTFS trips. Consider using a "selection" before the operation. See help("selection")')
+  
+  if(!checkmate::test_named(value)){
+    names(value) <- 'set'
+  }
+  
+  if(lubridate::is.duration(value)){
+    value = as.numeric(dseconds(value))
+  }
+  
+  keep_duration <- do_keep_duration(value)
+  
+  if('set'%in%names(value)){
+    if(!verify_keepduration(gtfs)){
+      warning(crayon::red("When 'value' is designated as 'set,' the change applies to the entire trip, regardless of specific stop selections. Use 'to,' 'add,' or 'mult' to adjust dwell time at specific stops.\nTo don't see this, select an entire trip or route.\nSee details using help('edit_dwelltime')\n"))
+    }
+  }
+  
+  trips <- gtfs$stop_times %>% 
+    group_by(trip_id) %>% 
+    arrange(stop_sequence) %>% 
+    ungroup() %>%
+    dplyr::left_join(
+      gtfs$trips %>% select(trip_id,direction_id),
+      by  = 'trip_id'
+    )
+  
+  trips <- trips %>% 
+    group_by(trip_id) %>% 
+    group_split()
+  
+  
+  if(names(value) == 'set'){
+    
+    trips <- lapply(
+      trips,
+      edit_trips_dwelltime.trips_set,
+      value = value
+    )
+    
+  }else{
+    
+    if(names(value) == 'to'){
+      trips <- lapply(
+        trips,
+        edit_trips_dwelltime.trips_to,
+        value = value,
+        stops = selection_stops
+      )
+    }
+    
+    if(names(value) == 'add'){
+      trips <- lapply(
+        trips,
+        edit_trips_dwelltime.trips_add,
+        value = value,
+        stops = selection_stops
+      )
+    }
+    
+    if(names(value) == 'mult'){
+      trips <- lapply(
+        trips,
+        edit_trips_dwelltime.trips_mult,
+        value = value,
+        stops = selection_stops
+      )
+    }
+    
+  }
+  
+  gtfs$stop_times <- data.table::rbindlist(trips) 
+  
+  if(is.null(attr(gtfs,'editions'))){
+    editions <- list(
+      `1` = list(
+        `function` = 'edit_dwellime',
+        params = list(value=value),
+        selection = 'all'
+      )
+    )
+  }else{
+    editions <- append(
+      attr(gtfs,'editions'),
+      list(value = list(
+        `function` = 'edit_dwellime',
+        params = list(value=value),
+        selection = 'all'
+      ))
+    )
+    
+    names(editions) <- as.character(1:length(editions))
+    
+  }
+  
+  attr(gtfs,'editions') <- editions
+  
+  
+  return(gtfs)
   
 }
 
 
+# edit_trips_dwelltime <- function(trip,value,stops){
+#   UseMethod('edit_trips_dwelltime')
+# }
 
-edit_trip_dwelltime <- function(trip,value,stops){
-  UseMethod('edit_trip_dwelltime')
-}
 
-edit_trip_dwelltime.trips_set <- function(trip,value,stops){
+edit_trips_dwelltime.trips_set <- function(trip,value){
   
   trip_na_dwell <- trip %>% 
     filter(arrival_time==""|departure_time=="")
@@ -194,10 +322,12 @@ edit_trip_dwelltime.trips_set <- function(trip,value,stops){
     mutate(arrival_time = as.character.Period(arrival_time)) %>% 
     mutate(departure_time = as.character.Period(departure_time)) %>% 
     dplyr::select(-direction_id) %>% 
+    bind_rows(trip_na_dwell) %>% 
+    arrange(stop_sequence) %>%
     return()
 }
 
-edit_trip_dwelltime.trips_to <- function(trip,value,stops){
+edit_trips_dwelltime.trips_to <- function(trip,value,stops){
   
   trip_na_dwell <- trip %>% 
     filter(arrival_time==""|departure_time=="")
@@ -210,29 +340,88 @@ edit_trip_dwelltime.trips_to <- function(trip,value,stops){
     mutate(departure_time = lubridate::hms(departure_time) %>%
              suppressWarnings()) %>% 
     mutate(actual_dweeltime = as.numeric(departure_time-arrival_time)) %>% 
-    mutate(change_dweeltime = value-actual_dweeltime)
-  
-  index <- 2:(nrow(trip)-1)
-  trip$arrival_time[index] <- trip$arrival_time[index]-trip$change_dweeltime[2:(nrow(trip)-1)]/2
-  trip$departure_time[index] <- trip$departure_time[index]+trip$change_dweeltime[2:(nrow(trip)-1)]/2
-  trip$departure_time[1] <- trip$departure_time[1]+trip$change_dweeltime[1]
-  trip$arrival_time[nrow(trip)] <- trip$arrival_time[nrow(trip)]-trip$change_dweeltime[nrow(trip)]
+    mutate(change_dweeltime = value-actual_dweeltime) %>% 
+    mutate(index = 1:n()) %>% 
+    mutate(arrival_time = (index-1)*change_dweeltime+arrival_time) %>% 
+    mutate(departure_time = index*change_dweeltime+departure_time)
   
   trip %>% 
-    select(-max_dweeltime,-actual_dweeltime,-change_dweeltime) %>% 
+    select(-actual_dweeltime,-change_dweeltime,-index) %>% 
     mutate(arrival_time = as.character.Period(arrival_time)) %>% 
     mutate(departure_time = as.character.Period(departure_time)) %>% 
     dplyr::select(-direction_id) %>% 
+    bind_rows(trip_na_dwell) %>% 
+    arrange(stop_sequence) %>% 
     return()
   
 }
 
-edit_trip_dwelltime.trips_add <- function(trip,value,stops){
+edit_trips_dwelltime.trips_add <- function(trip,value,stops){
+  trip_na_dwell <- trip %>% 
+    filter(arrival_time==""|departure_time=="")
+  trip <- trip %>% 
+    filter(arrival_time!=""&departure_time!="")
   
+  if(value<0){
+    trip <- trip %>% 
+      mutate(arrival_time = lubridate::hms(arrival_time) %>%
+               suppressWarnings()) %>% 
+      mutate(departure_time = lubridate::hms(departure_time) %>%
+               suppressWarnings()) %>% 
+      mutate(actual_dweeltime = as.numeric(departure_time-arrival_time)) %>% 
+      mutate(non_negative = actual_dweeltime+value >= 0) %>% 
+      mutate(index = 1:n()) %>% 
+      mutate(change_value = ifelse(non_negative, value, actual_dweeltime )) %>% 
+      mutate(arrival_time = (index-1)*change_value + arrival_time) %>% 
+      mutate(departure_time = index*change_value + departure_time)
+  }else{
+    trip <- trip %>% 
+      mutate(arrival_time = lubridate::hms(arrival_time) %>%
+               suppressWarnings()) %>% 
+      mutate(departure_time = lubridate::hms(departure_time) %>%
+               suppressWarnings()) %>% 
+      mutate(actual_dweeltime = as.numeric(departure_time-arrival_time)) %>% 
+      mutate(index = 1:n()) %>%
+      mutate(arrival_time = (index-1)*value + arrival_time) %>% 
+      mutate(departure_time = index*value + departure_time)
+  }
+  
+  
+  
+  trip %>% 
+    select(-actual_dweeltime,-change_dweeltime,-index) %>% 
+    mutate(arrival_time = as.character.Period(arrival_time)) %>% 
+    mutate(departure_time = as.character.Period(departure_time)) %>% 
+    dplyr::select(-direction_id) %>% 
+    bind_rows(trip_na_dwell) %>% 
+    arrange(stop_sequence) %>% 
+    return()
 }
 
-edit_trip_dwelltime.trips_mult <- function(trip,value,stops){
+edit_trips_dwelltime.trips_mult <- function(trip,value,stops){
+  trip_na_dwell <- trip %>% 
+    filter(arrival_time==""|departure_time=="")
+  trip <- trip %>% 
+    filter(arrival_time!=""&departure_time!="")
   
+  trip <- trip %>% 
+    mutate(arrival_time = lubridate::hms(arrival_time) %>%
+             suppressWarnings()) %>% 
+    mutate(departure_time = lubridate::hms(departure_time) %>%
+             suppressWarnings()) %>% 
+    mutate(actual_dweeltime = as.numeric(departure_time-arrival_time)) %>% 
+    mutate(change_dweeltime = (value*actual_dweeltime)-actual_dweeltime) %>% 
+    mutate(arrival_time = (1:n()-1)*change_dweeltime+arrival_time) %>% 
+    mutate(departure_time = (1:n())*change_dweeltime+departure_time)
+  
+  trip %>% 
+    select(-actual_dweeltime,-change_dweeltime) %>% 
+    mutate(arrival_time = as.character.Period(arrival_time)) %>% 
+    mutate(departure_time = as.character.Period(departure_time)) %>% 
+    dplyr::select(-direction_id) %>% 
+    bind_rows(trip_na_dwell) %>% 
+    arrange(stop_sequence) %>% 
+    return()
 }
 
 
