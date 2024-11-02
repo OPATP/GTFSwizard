@@ -1,14 +1,14 @@
 get_shapes <- function(gtfs){
   
-  message('\nThis algorithm reconstructs the shapes table using euclidean approximation, based on the coordinates and sequence of stops for each trip, and may not me accurate.')
+  message('\nThis algorithm reconstructs the shapes table using euclidean approximation, based on the coordinates and sequence of stops for each trip, and', crayon::cyan(' may not be accurate'), '.')
   
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    message('\nThis gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class.\nComputation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
   
   if(!is_null(gtfs$shapes)){
-    warning('\nThis gtfs object already contains a shapes table.\nget_shapes() will overwrite it.')
+    warning('This gtfs object already contains a shapes table.\n', crayon::cyan('get_shapes()'), ' will', crayon::red(" overwrite"), ' it.')
   }
   
   shapes.dic <- 
@@ -41,8 +41,9 @@ get_shapes <- function(gtfs){
                        dplyr::select(-geometry) %>% 
                        tidyr::unnest(cols = 'trip_id'))
   
-  gtfs <-
-    tidytransit::sf_as_tbl(gtfs)
+  gtfs$shapes <-
+    GTFSwizard::get_shapes_df(gtfs$shapes)
+
   
   return(gtfs)
   
