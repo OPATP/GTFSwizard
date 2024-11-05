@@ -155,13 +155,13 @@ gtfs$shapes
 
 ```
 ## Objects
-GTFS features the `for_data` object, a sample of the real Regular Bus System in the city of Fortaleza, Brazil.
+GTFS features the `for_data` object, a sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
 ``` r
 gtfs <- GTFSwizard::for_data
 
 plot(gtfs)
 ```
-
+<img align="center" src="figs/plot.for_gtfs.png" alt="OPA-TP"/></a>
 
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
