@@ -1,10 +1,10 @@
-# GTFSwizard <img align="right" src="GTFSwizard_logo.png?raw=true" alt="logo" width="180">
+# GTFSwizard <img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" width="180">
 [![Lifecycle:
 experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
 GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
 
-Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes in  frequency, headway, dwell time, speed, and routes within a GTFS file.
+Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, and route frequencies.
 
 ## Installation
 ``` r
@@ -18,12 +18,12 @@ remotes::install_github('OPATP/GTFSwizard')
 ## Usage
 GTFS feeds are read using the `read_gtfs()` function.\
 `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.\
-You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as.wizardgtfs()` function
+You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as_wizardgtfs()` function
 ``` r
 library(GTFSwizard)
 
 gtfs <- read_gtfs('path-to-gtfs.zip') # or
-gtfs <- as.wizardgtfs(gtfs_obj)
+gtfs <- as_wizardgtfs(gtfs_obj)
 
 names(gtfs)
 # [1] "agency"          "calendar"
@@ -154,9 +154,17 @@ gtfs$shapes
 ## ℹ Use `print(n = ...)` to see more rows
 
 ```
+## Objects
+GTFS features the `for_data` object, a sample of the real Regular Bus System in the city of Fortaleza, Brazil.
+``` r
+gtfs <- GTFSwizard::for_data
+
+plot(gtfs)
+```
+
 
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
 
-## Acknowledgement <a href="https://www.det.ufc.br/petran"><img align="right" src="opatp.png" alt="OPA-TP" width="150" /></a>
+## Acknowledgement <a href="https://www.det.ufc.br/petran"><img align="right" src="figs/opatp.png" alt="OPA-TP" width="150" /></a>
 **GTFSwizard** is developed by Nelson Quesado and Caio Guimarães at OPA-TP research group, Universidade Federal do Ceará.
