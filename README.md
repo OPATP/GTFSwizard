@@ -13,9 +13,6 @@ Its main purpose is to provide researchers and practitioners with a seamless and
 
 > remotes::install_github('OPATP/GTFSwizard')
 ```
-## Cheat Sheet
-_under development..._
-
 ## Basics
 GTFS feeds are read using the `read_gtfs()` function. `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object. You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as_wizardgtfs()` function. You can take a glance at the feed using the `summary()` function.
 ``` r
@@ -69,6 +66,8 @@ In `wizardgtfs` objects, the `dates_services` table is an extended feature that 
 
 - Defining Service Patterns: A unique `service_pattern` is identified by a unique combination of `service_id`s operating on a given date. For instance, if two dates share the exact same `service_id`s, they are considered part of the same `service_pattern`.
 
+You can check `service_pattern` using the `get_servicepattern()` function.
+
 ``` r
 > GTFSwizard::get_servicepattern(for_gtfs)
 ## A tibble: 3 × 3
@@ -100,9 +99,10 @@ Most of the functions will consider service_patterns, _e.g._ `get_frequency()` a
 ## ℹ Use `print(n = ...)` to see more rows
 ```
 
-<img align="center" src="figs/get_routefrequency.png" alt="exploregtfs" width="250"/></a>
+<img align="center" src="figs/get_routefrequency.png" alt="exploregtfs" width="600"/></a>
 
-You can use `plot_calendar()` to check the numer of trips along the calendar and get a better sense of the `service_pattern` logic.
+
+You can use `plot_calendar()` to check the numer of trips along the calendar and get a better sense of the `service_pattern` rationale.
 
 ``` r
 > GTFSwizard::plot_calendar(for_gtfs)
@@ -110,13 +110,13 @@ You can use `plot_calendar()` to check the numer of trips along the calendar and
 
 <img align="center" src="figs/plot_calendar.png" alt="exploregtfs" width="600"/></a>
 
-# Exploring
+## Exploring
 Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, and the `get_speed()` functions:
 ``` r
 > get_headways(gtfs, simplify = TRUE)
-
 ```
 
+## Handling Geografic Data
 GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame from `simple feature` shapes object, using `get_shapes_df()` function.
 
 ``` r
@@ -194,7 +194,10 @@ GTFS features the `for_data` object, a sample of the real urban regular bus syst
 
 > plot(gtfs)
 ```
-<img align="center" src="figs/plot.for_gtfs.png" alt="plot.for_gtfs" width="250"/></a>
+<img align="center" src="figs/plot.for_gtfs.png" alt="plot.for_gtfs" width="350"/></a>
+
+## Cheat Sheet
+_Under development..._
 
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
