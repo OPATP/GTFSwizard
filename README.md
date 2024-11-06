@@ -298,12 +298,16 @@ GTFSwizard::write_gtfs(for_gtfs, 'path-to-file.zip')
 GTFSwizard autodetects and reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes objects, using `get_shapes_df()` function.
 
 ``` r
-Gtfs$shapes
+gtfs <- for_gtfs
+
+gtfs$shapes <- NULL
+
+gtfs$shapes
 #NULL
 
-Gtfs <- GTFSwizard::get_shapes(gtfs)
+gtfs <- GTFSwizard::get_shapes(gtfs)
 
-Gtfs$shapes
+gtfs$shapes
 ## A tibble: 6,830 × 5
 #   shape_id shape_pt_lon shape_pt_lat shape_pt_sequence shape_dist_traveled
 #   <chr>           <dbl>        <dbl>             <int>               <dbl>
@@ -366,7 +370,7 @@ GTFSwizard::get_stops_sf(for_gtfs$stops)
 ```
 
 ## Objects
-GTFS features the `for_data` object, a GTFS sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
+GTFSwizard features the `for_data` object, a GTFS sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
 ``` r
 gtfs <- GTFSwizard::for_data
 
