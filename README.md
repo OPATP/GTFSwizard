@@ -4,7 +4,7 @@ experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimenta
 
 GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
 
-Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, and route frequencies.
+Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, and route frequencies. Editing functions to delay and split trips, and to merge distictins GTFS, are available. This is an ongoing work and new features are planned to be featured soon.
 
 ## Installation
 ``` r
@@ -18,8 +18,8 @@ GTFS feeds are read using the `read_gtfs()` function. `read_gtfs()` returns a `w
 ``` r
 > library(GTFSwizard)
 
-> gtfs <- read_gtfs('path-to-gtfs.zip') # or
-> gtfs <- as_wizardgtfs(gtfs_obj)
+gtfs <- GTFSwizard::read_gtfs('path-to-gtfs.zip') # or
+gtfs <- GTFSwizard::as_wizardgtfs(gtfs_obj)
 
 > names(gtfs)
 # [1] "agency"          "calendar"
@@ -50,12 +50,12 @@ GTFS feeds are read using the `read_gtfs()` function. `read_gtfs()` returns a `w
 #271.4  meters is the average distance between sequencial stops in a given route 
 ```
 
-GTFS feeds are mainly explored using the `explore_gtfs()` function:
+GTFS feeds are mainly browsed using the `explore_gtfs()` function. It pops-up an informative and interactive dashboard.
 ``` r
-> explore_gtfs(for_gtfs)
+GTFSwizard::explore_gtfs(for_gtfs)
 ```
 
-<img align="center" src="figs/exploregtfs.png" alt="exploregtfs" width="550"/></a>
+<img align="center" src="figs/exploregtfs.png" width="550"/></a>
 
 ## Service Patterns
 The concept of a `service_pattern` in **GTFSwizard** helps to address a common limitation of GTFS: its lack of a standardized way to distinguish distinct service patterns within the same route. GTFS files can have multiple `service_ids` for trips within the same route on the same day, such as regular and extra services. However, GTFS does not inherently identify unique service patterns, _i.e._ unique set of `service_id`s.
@@ -63,13 +63,12 @@ The concept of a `service_pattern` in **GTFSwizard** helps to address a common l
 In `wizardgtfs` objects, the `dates_services` table is an extended feature that consolidates dates and associated `service_id`s into a single, organized table. This table is not standard in typical GTFS files but is added specifically in `wizardgtfs` objects. The `dates_services` table is structured so that each date is associated with a `list` of `service_id`s representing the transit services operating on that specific day. Essentially, every unique `list` of `service_id`s observed across dates defines a distinct `service pattern`.
 
 - Structure of `dates_services`: Each date in the `dates_service`s table has an associated `list` of `service_id`s, capturing the set of services active on that particular day.
-
 - Defining Service Patterns: A unique `service_pattern` is identified by a unique combination of `service_id`s operating on a given date. For instance, if two dates share the exact same `service_id`s, they are considered part of the same `service_pattern`.
 
 You can check `service_pattern` using the `get_servicepattern()` function.
 
 ``` r
-> GTFSwizard::get_servicepattern(for_gtfs)
+GTFSwizard::get_servicepattern(for_gtfs)
 ## A tibble: 3 × 3
 #  service_id service_pattern  pattern_frequency
 #  <chr>      <fct>                        <int>
@@ -80,7 +79,7 @@ You can check `service_pattern` using the `get_servicepattern()` function.
 
 Most of the functions will account for service_patterns, _e.g._ `get_frequency()` and `plot_routefrequency()`. The latter highligths the most frequency service pattern, _i.e._ the typical day.
 ```r
-> GTFSwizard::get_frequency(for_gtfs)
+GTFSwizard::get_frequency(for_gtfs)
 ## A tibble: 667 × 4
 #   route_id daily.frequency service_pattern  pattern_frequency
 #   <chr>              <int> <fct>                        <int>
@@ -96,23 +95,25 @@ Most of the functions will account for service_patterns, _e.g._ `get_frequency()
 #10 014                   19 servicepattern-3                13
 ## ℹ 657 more rows
 ## ℹ Use `print(n = ...)` to see more rows
+
+GTFSwizard::plot_routefrequency(for_gtfs, route = for_gtfs$routes$route_id[3])
 ```
 
-<img align="center" src="figs/get_routefrequency.png" alt="exploregtfs" width="600"/></a>
-
+<img align="center" src="figs/get_routefrequency.png" width="600"/></a>
 
 You can use `plot_calendar()` to check the numer of trips along the calendar and get a better sense of the `service_pattern` rationale.
-
 ``` r
-> GTFSwizard::plot_calendar(for_gtfs)
+GTFSwizard::plot_calendar(for_gtfs)
 ```
 
-<img align="center" src="figs/plot_calendar.png" alt="exploregtfs" width="600"/></a>
+<img align="center" src="figs/plot_calendar.png" width="600"/></a>
 
 ## Exploring
+
 Routes, frequency, headways, dell times, speeds, shapes, stops, durations, distances, and fleet are retrieved using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration`, the `get_distances`, the `get_speed()`, and the `get_fleet()` functions. These functions support several `methods`, such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
+
 ``` r
-> GTFSwizard::get_headways(for_gtfs, method = 'by.hour')
+GTFSwizard::get_headways(for_gtfs, method = 'by.hour')
 #This method assumes constant headways along stops.
 ## A tibble: 75 × 5
 #   hour  trips average.headway service_pattern  pattern_frequency
@@ -130,7 +131,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 65 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_dwelltimes(for_gtfs, max.dwelltime = 60, method = 'by.trip')
+GTFSwizard::get_dwelltimes(for_gtfs, max.dwelltime = 60, method = 'by.trip')
 ## A tibble: 52,304 × 5
 #   route_id trip_id          average.dwelltime service_pattern  pattern_frequency
 #   <chr>    <chr>                        <dbl> <fct>                        <int>
@@ -147,7 +148,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 52,294 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_durations(for_gtfs, method = 'detailed')
+GTFSwizard::get_durations(for_gtfs, method = 'detailed')
 ## A tibble: 1,398,251 × 8
 #   route_id trip_id          hour  from_stop_id to_stop_id duration service_pattern 
 #   <chr>    <chr>            <chr> <chr>        <chr>         <dbl> <fct>           
@@ -165,7 +166,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 1 more variable: pattern_frequency <int>
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_distances(for_gtfs, method = 'by.trip')
+GTFSwizard::get_distances(for_gtfs, method = 'by.trip')
 ## A tibble: 52,304 × 5
 #   route_id trip_id          distance service_pattern  pattern_frequency
 #   <chr>    <chr>                 [m] <fct>                        <int>
@@ -182,7 +183,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 52,294 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_distances(for_gtfs, method = 'by.route')
+GTFSwizard::get_distances(for_gtfs, method = 'by.route')
 ## A tibble: 667 × 5
 #   route_id trips average.distance service_pattern  pattern_frequency
 #   <chr>    <int>              [m] <fct>                        <int>
@@ -199,7 +200,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 657 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_speeds(for_gtfs, method = 'by.route')
+GTFSwizard::get_speeds(for_gtfs, method = 'by.route')
 ## A tibble: 667 × 5
 #   route_id trips average.speed service_pattern  pattern_frequency
 #   <chr>    <int>         <dbl> <fct>                        <int>
@@ -216,7 +217,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## ℹ 657 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_fleet(for_gtfs, method = 'peak')
+GTFSwizard::get_fleet(for_gtfs, method = 'peak')
 #This method returns the number of simultaneous trips for the three busiest hours.
 ## A tibble: 9 × 4
 ## Groups:   service_pattern [3]
@@ -233,21 +234,76 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 #9     4   374 servicepattern-3                13
 ```
 ## Filtering
+Filtering tools allows customized GTFS data by service patterns, specific dates, service IDs, route IDs, trip IDs, stop IDs, and time ranges. These filter_ functions help retain only the relevant data, making analysis easier and more focused.
+
+- filter_servicepattern: Filter by specified service patterns. Defaults to the most frequent pattern (typical day) if none is provided.
+- filter_date: Filter data by specific dates, returning only services active on those dates.
+- filter_service: Filter by specific service IDs to retain.
+- filter_route: Filter by route ID. Set `keep = TRUE` to retain specified routes or `keep = FALSE` to exclude them.
+- filter_trip: Filter by trip ID. Set `keep = TRUE` to retain specified trips or `keep = FALSE` to exclude them.
+- filter_stop: Filter by stop ID, keeping only associated stops and related data. It is very usefull when used together with `GTFSwizard::get_stops_sf` and `sf::st_filter()`, as can geographically filter GTFS data.
+- filter_time: Filter by a specified time range (`from` and `to`) for stop times.
+
+``` r
+# Filter by service pattern
+filtered_gtfs <- filter_servicepattern(for_gtfs, "servicepattern-2")
+
+# Filter by specific date
+filtered_gtfs <- filter_date(for_gtfs, "2023-01-01")
+
+# Filter by route ID, retaining only specified routes
+filtered_gtfs <- filter_route(for_gtfs, for_gtfs$routes$route_id[1:2])
+
+# Filter by trip ID, excluding specified trips
+filtered_gtfs <- filter_trip(for_gtfs, for_gtfs$trips$trip_id[1:2], FALSE)
+
+# Filter by time range
+filtered_gtfs <- filter_time(gtfs = for_gtfs, "06:30:00", "10:00:00")
+```
 
 ## Visualizing
+GTFSwizard offers interactive plotting tools to analyze trip frequencies and headways, providing insight into peak hours, route-specific patterns, and system-wide trends.
+
+- System Frequency by Hour: plot_frequency shows the distribution of trip frequencies by hour, with hourly and overall averages to highlight peak service times.
+``` r
+GTFSwizard::plot_frequency(for_gtfs)
+```
+<img align="center" src="figs/plot_frequency.png" width="600"/></a>
+
+- Route Frequency by Hour: plot_routefrequency displays frequency by hour for selected routes, illustrating different service patterns.
+``` r
+GTFSwizard::plot_routefrequency(for_gtfs, route = for_gtfs$routes$route_id[4:5])
+```
+<img align="center" src="figs/plot_routefrequency.png" width="600"/></a>
+
+- System Average Headway by Hour: plot_headways shows average time between trips, highlighting hourly and overall headways to visualize service intervals.
+``` r
+GTFSwizard::plot_headways(for_gtfs)
+```
+<img align="center" src="figs/plot_headway.png" width="600"/></a>
+
 
 ## Editing
+
+``` r
+
+```
+
+Feeds are exported using the `write_gtfs()` function. It saves a standard GTFS `.zip` file, located as declared.
+``` r
+GTFSwizard::write_gtfs(for_gtfs, 'path-to-file.zip')
+```
 
 ## Handling Geografic Data
 GTFSwizard autodetects and reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes objects, using `get_shapes_df()` function.
 
 ``` r
-> gtfs$shapes
+Gtfs$shapes
 #NULL
 
-> gtfs <- GTFSwizard::get_shapes(gtfs)
+Gtfs <- GTFSwizard::get_shapes(gtfs)
 
-> gtfs$shapes
+Gtfs$shapes
 ## A tibble: 6,830 × 5
 #   shape_id shape_pt_lon shape_pt_lat shape_pt_sequence shape_dist_traveled
 #   <chr>           <dbl>        <dbl>             <int>               <dbl>
@@ -264,7 +320,7 @@ GTFSwizard autodetects and reconstructs missing shape tables using the `get_shap
 ## ℹ 6,820 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_shapes_sf(for_gtfs$shapes)
+GTFSwizard::get_shapes_sf(for_gtfs$shapes)
 #Simple feature collection with 509 features and 2 fields
 #Geometry type: LINESTRING
 #Dimension:     XY
@@ -286,7 +342,7 @@ GTFSwizard autodetects and reconstructs missing shape tables using the `get_shap
 ## ℹ 499 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-> GTFSwizard::get_stops_sf(for_gtfs$stops)
+GTFSwizard::get_stops_sf(for_gtfs$stops)
 #Simple feature collection with 4793 features and 3 fields
 #Geometry type: POINT
 #Dimension:     XY
@@ -312,14 +368,17 @@ GTFSwizard autodetects and reconstructs missing shape tables using the `get_shap
 ## Objects
 GTFS features the `for_data` object, a GTFS sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
 ``` r
-> gtfs <- GTFSwizard::for_data
+gtfs <- GTFSwizard::for_data
 
-> plot(gtfs)
+plot(gtfs)
 ```
-<img align="center" src="figs/plot.for_gtfs.png" alt="plot.for_gtfs" width="350"/></a>
+<img src="figs/plot.for_gtfs.png" alt="plot.for_gtfs" width="350"/></a>
 
 ## Cheat Sheet
 _Under development..._
+
+## Contributing
+Contributions are welcome! To report a bug, suggest a feature, or contribute code, please use the repository’s [Issues](https://www.linkedin.com/).
 
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
