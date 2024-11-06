@@ -50,7 +50,7 @@ GTFS feeds are read using the `read_gtfs()` function. `read_gtfs()` returns a `w
 #271.4  meters is the average distance between sequencial stops in a given route 
 ```
 
-GTFS feeds are explored using the `explore_gtfs()` function:
+GTFS feeds are mainly explored using the `explore_gtfs()` function:
 ``` r
 > explore_gtfs(for_gtfs)
 ```
@@ -78,8 +78,7 @@ You can check `service_pattern` using the `get_servicepattern()` function.
 #3 D          servicepattern-3                13
 ```
 
-Most of the functions will consider service_patterns, _e.g._ `get_frequency()` and `plot_routefrequency()`.
-
+Most of the functions will account for service_patterns, _e.g._ `get_frequency()` and `plot_routefrequency()`. The latter highligths the most frequency service pattern, _i.e._ the typical day.
 ```r
 > GTFSwizard::get_frequency(for_gtfs)
 ## A tibble: 667 × 4
@@ -111,7 +110,7 @@ You can use `plot_calendar()` to check the numer of trips along the calendar and
 <img align="center" src="figs/plot_calendar.png" alt="exploregtfs" width="600"/></a>
 
 ## Exploring
-Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration`, the `get_distances`, the `get_speed()`, and the `get_fleet ` functions. These functions can support several `methods` such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
+Routes, frequency, headways, dell times, speeds, shapes, stops, durations, distances, and fleet are retrieved using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration`, the `get_distances`, the `get_speed()`, and the `get_fleet()` functions. These functions support several `methods`, such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
 ``` r
 > GTFSwizard::get_headways(for_gtfs, method = 'by.hour')
 #This method assumes constant headways along stops.
