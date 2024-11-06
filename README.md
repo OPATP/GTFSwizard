@@ -111,13 +111,131 @@ You can use `plot_calendar()` to check the numer of trips along the calendar and
 <img align="center" src="figs/plot_calendar.png" alt="exploregtfs" width="600"/></a>
 
 ## Exploring
-Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, and the `get_speed()` functions:
+Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration`, the `get_distances`, the `get_speed()`, and the `get_fleet ` functions. These functions can support several `methods` such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
 ``` r
-> get_headways(gtfs, simplify = TRUE)
+> GTFSwizard::get_headways(for_gtfs, method = 'by.hour')
+#This method assumes constant headways along stops.
+## A tibble: 75 × 5
+#   hour  trips average.headway service_pattern  pattern_frequency
+#   <chr> <int>           <dbl> <fct>                        <int>
+# 1 00       15           5248  servicepattern-1                65
+# 2 00       15           5248  servicepattern-2                13
+# 3 00       15           5248  servicepattern-3                13
+# 4 01       15           5848  servicepattern-1                65
+# 5 01       14           6107. servicepattern-2                13
+# 6 01       14           6060  servicepattern-3                13
+# 7 02        6          10610  servicepattern-1                65
+# 8 02        6           4320  servicepattern-2                13
+# 9 02        5           3132  servicepattern-3                13
+#10 03        7           3720  servicepattern-1                65
+## ℹ 65 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_dwelltimes(for_gtfs, max.dwelltime = 60, method = 'by.trip')
+## A tibble: 52,304 × 5
+#   route_id trip_id          average.dwelltime service_pattern  pattern_frequency
+#   <chr>    <chr>                        <dbl> <fct>                        <int>
+# 1 004      U004-T01V01B01-I                 0 servicepattern-1                65
+# 2 004      U004-T01V01B01-V                 0 servicepattern-1                65
+# 3 004      U004-T01V02B01-I                 0 servicepattern-1                65
+# 4 004      U004-T01V02B01-V                 0 servicepattern-1                65
+# 5 004      U004-T01V03B01-I                 0 servicepattern-1                65
+# 6 004      U004-T01V03B01-V                 0 servicepattern-1                65
+# 7 004      U004-T01V04B01-I                 0 servicepattern-1                65
+# 8 004      U004-T01V04B01-V                 0 servicepattern-1                65
+# 9 004      U004-T02V01B01-I                 0 servicepattern-1                65
+#10 004      U004-T02V01B01-V                 0 servicepattern-1                65
+## ℹ 52,294 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_durations(for_gtfs, method = 'detailed')
+## A tibble: 1,398,251 × 8
+#   route_id trip_id          hour  from_stop_id to_stop_id duration service_pattern 
+#   <chr>    <chr>            <chr> <chr>        <chr>         <dbl> <fct>           
+# 1 011      D011-T01V01B01-I 05    7038         1015             60 servicepattern-3
+# 2 011      D011-T01V01B01-I 05    1015         4251             60 servicepattern-3
+# 3 011      D011-T01V01B01-I 05    4251         990              60 servicepattern-3
+# 4 011      D011-T01V01B01-I 05    990          6182             60 servicepattern-3
+# 5 011      D011-T01V01B01-I 05    6182         989             120 servicepattern-3
+# 6 011      D011-T01V01B01-I 05    989          1600            120 servicepattern-3
+# 7 011      D011-T01V01B01-I 05    1600         1608             60 servicepattern-3
+# 8 011      D011-T01V01B01-I 05    1608         4767            120 servicepattern-3
+# 9 011      D011-T01V01B01-I 05    4767         6450             60 servicepattern-3
+#10 011      D011-T01V01B01-I 05    6450         2055            120 servicepattern-3
+## ℹ 1,398,241 more rows
+## ℹ 1 more variable: pattern_frequency <int>
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_distances(for_gtfs, method = 'by.trip')
+## A tibble: 52,304 × 5
+#   route_id trip_id          distance service_pattern  pattern_frequency
+#   <chr>    <chr>                 [m] <fct>                        <int>
+# 1 011      D011-T01V01B01-I   17348. servicepattern-3                13
+# 2 011      D011-T01V02B01-I   17348. servicepattern-3                13
+# 3 011      D011-T01V03B01-I   17348. servicepattern-3                13
+# 4 011      D011-T01V04B01-I   17348. servicepattern-3                13
+# 5 011      D011-T01V05B01-I   17348. servicepattern-3                13
+# 6 011      D011-T01V06B01-I   17348. servicepattern-3                13
+# 7 011      D011-T01V07B01-I   17348. servicepattern-3                13
+# 8 011      D011-T01V08B01-I   17348. servicepattern-3                13
+# 9 011      D011-T01V09B01-I   17348. servicepattern-3                13
+#10 011      D011-T01V10B01-I   17348. servicepattern-3                13
+## ℹ 52,294 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_distances(for_gtfs, method = 'by.route')
+## A tibble: 667 × 5
+#   route_id trips average.distance service_pattern  pattern_frequency
+#   <chr>    <int>              [m] <fct>                        <int>
+# 1 004         66           18664. servicepattern-1                65
+# 2 011         53           17348. servicepattern-1                65
+# 3 011         30           17348. servicepattern-2                13
+# 4 011         17           17348. servicepattern-3                13
+# 5 012         53           17013. servicepattern-1                65
+# 6 012         28           17013. servicepattern-2                13
+# 7 012         20           17013. servicepattern-3                13
+# 8 014         30           11897. servicepattern-1                65
+# 9 014         19           11897. servicepattern-2                13
+#10 014         19           11897. servicepattern-3                13
+## ℹ 657 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_speeds(for_gtfs, method = 'by.route')
+## A tibble: 667 × 5
+#   route_id trips average.speed service_pattern  pattern_frequency
+#   <chr>    <int>         <dbl> <fct>                        <int>
+# 1 004          1          17.4 servicepattern-1                65
+# 2 011          3          13.2 servicepattern-1                65
+# 3 011          3          15.0 servicepattern-2                13
+# 4 011          3          15.7 servicepattern-3                13
+# 5 012          3          14.6 servicepattern-1                65
+# 6 012          3          14.3 servicepattern-2                13
+# 7 012          3          17.8 servicepattern-3                13
+# 8 014          3          12.4 servicepattern-1                65
+# 9 014          3          14.3 servicepattern-2                13
+#10 014          3          14.3 servicepattern-3                13
+## ℹ 657 more rows
+## ℹ Use `print(n = ...)` to see more rows
+
+> GTFSwizard::get_fleet(for_gtfs, method = 'peak')
+#This method returns the number of simultaneous trips for the three busiest hours.
+## A tibble: 9 × 4
+## Groups:   service_pattern [3]
+#   hour fleet service_pattern  pattern_frequency
+#  <dbl> <int> <fct>                        <int>
+#1     7  1296 servicepattern-1                65
+#2     6  1295 servicepattern-1                65
+#3     4  1294 servicepattern-1                65
+#4     7   783 servicepattern-2                13
+#5     6   782 servicepattern-2                13
+#6     4   780 servicepattern-2                13
+#7     7   381 servicepattern-3                13
+#8     6   380 servicepattern-3                13
+#9     4   374 servicepattern-3                13
 ```
 
 ## Handling Geografic Data
-GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame from `simple feature` shapes object, using `get_shapes_df()` function.
+GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes object, using `get_shapes_df()` function.
 
 ``` r
 > gtfs$shapes
@@ -148,19 +266,19 @@ GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. 
 #Dimension:     XY
 #Bounding box:  xmin: -38.65624 ymin: -3.897338 xmax: -38.41016 ymax: -3.694365
 #Geodetic CRS:  WGS 84
-## A tibble: 509 × 3
-#   shape_id   shape_dist_traveled                                                              geometry
-#   <chr>                    <dbl>                                                      <LINESTRING [°]>
-# 1 shape004-I                   0 (-38.50181 -3.831178, -38.50185 -3.831165, -38.50242 -3.831016, -38.…
-# 2 shape004-V                   0 (-38.4845 -3.738462, -38.48455 -3.738554, -38.48457 -3.738583, -38.4…
-# 3 shape011-I                   0 (-38.53249 -3.722036, -38.53255 -3.722017, -38.53286 -3.721924, -38.…
-# 4 shape012-V                   0 (-38.53251 -3.722151, -38.53242 -3.722182, -38.53195 -3.722339, -38.…
-# 5 shape014-V                   0 (-38.53121 -3.757169, -38.53111 -3.757062, -38.53102 -3.756946, -38.…
-# 6 shape015-I                   0 (-38.60755 -3.772986, -38.60752 -3.772894, -38.60741 -3.772499, -38.…
-# 7 shape015-V                   0 (-38.58454 -3.737546, -38.58455 -3.73752, -38.58455 -3.737483, -38.5…
-# 8 shape016-I                   0 (-38.58995 -3.709432, -38.59 -3.709269, -38.59003 -3.70917, -38.5900…
-# 9 shape016-V                   0 (-38.48468 -3.738597, -38.48476 -3.738568, -38.48484 -3.738538, -38.…
-#10 shape017-I                   0 (-38.47904 -3.796202, -38.47898 -3.796908, -38.47975 -3.796987, -38.…
+# A tibble: 509 × 2
+#   shape_id                                                                        geometry
+#   <chr>                                                                   <LINESTRING [°]>
+# 1 shape004-I (-38.50181 -3.831178, -38.50185 -3.831165, -38.50242 -3.831016, -38.50177 -3…
+# 2 shape004-V (-38.4845 -3.738462, -38.48455 -3.738554, -38.48457 -3.738583, -38.48468 -3.…
+# 3 shape011-I (-38.53249 -3.722036, -38.53255 -3.722017, -38.53286 -3.721924, -38.53297 -3…
+# 4 shape012-V (-38.53251 -3.722151, -38.53242 -3.722182, -38.53195 -3.722339, -38.53178 -3…
+# 5 shape014-V (-38.53121 -3.757169, -38.53111 -3.757062, -38.53102 -3.756946, -38.53095 -3…
+# 6 shape015-I (-38.60755 -3.772986, -38.60752 -3.772894, -38.60741 -3.772499, -38.60732 -3…
+# 7 shape015-V (-38.58454 -3.737546, -38.58455 -3.73752, -38.58455 -3.737483, -38.58459 -3.…
+# 8 shape016-I (-38.58995 -3.709432, -38.59 -3.709269, -38.59003 -3.70917, -38.59009 -3.708…
+# 9 shape016-V (-38.48468 -3.738597, -38.48476 -3.738568, -38.48484 -3.738538, -38.48563 -3…
+#10 shape017-I (-38.47904 -3.796202, -38.47898 -3.796908, -38.47975 -3.796987, -38.47983 -3…
 ## ℹ 499 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
