@@ -239,7 +239,7 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, durations, dista
 ## Editing
 
 ## Handling Geografic Data
-GTFSwizard autodetects and reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes object, using `get_shapes_df()` function.
+GTFSwizard autodetects and reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes objects, using `get_shapes_df()` function.
 
 ``` r
 > gtfs$shapes
