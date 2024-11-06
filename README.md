@@ -259,6 +259,14 @@ filtered_gtfs <- filter_trip(for_gtfs, for_gtfs$trips$trip_id[1:2], FALSE)
 
 # Filter by time range
 filtered_gtfs <- filter_time(gtfs = for_gtfs, "06:30:00", "10:00:00")
+
+# Spatial filter using filter_stop
+stops <- sf::st_filter(GTFSwizard::get_stops_sf(for_gtfs$stops),
+                       GTFSwizard::get_shapes_sf(for_gtfs$shapes)) |>
+    tibble::tibble() |>
+    dplyr::pull(stop_id)
+
+GTFSwizard::filter_stop(for_gtfs, stops)
 ```
 
 ## Visualizing
@@ -284,7 +292,29 @@ GTFSwizard::plot_headways(for_gtfs)
 
 
 ## Editing
+The GTFSwizard package provides functions to edit GTFS data directly. With tools for delaying, splitting, and merging trips, users can effectively simulate service changes and export modified GTFS files.
 
+Delay Trips
+The delay_trip() function allows users to apply a delay to specific trips, either across all stops or only selected stops within the trip.
+
+r
+Copiar código
+# Delay trips by a specified number of seconds
+delayed_gtfs <- delay_trip(gtfs, trip_id = "trip_123", delay = 300)
+Split Trips
+The split_trip() function divides a trip at a specified stop, creating two separate trips. This can be useful for analyzing partial routes or for simulating route adjustments.
+
+r
+Copiar código
+# Split a trip at a specified stop
+split_gtfs <- split_trip(gtfs, trip_id = "trip_123", stop_id = "stop_456")
+Merge GTFS Files
+The merge_gtfs() function combines multiple GTFS files, allowing for the integration of distinct GTFS datasets into a single cohesive dataset.
+
+r
+Copiar código
+# Merge two GTFS files into one
+merged_gtfs <- merge_gtfs(gtfs1, gtfs2)
 ``` r
 
 ```
