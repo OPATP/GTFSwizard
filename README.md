@@ -233,9 +233,14 @@ Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated u
 #8     6   380 servicepattern-3                13
 #9     4   374 servicepattern-3                13
 ```
+## Filtering
+
+## Visualizing
+
+## Editing
 
 ## Handling Geografic Data
-GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes object, using `get_shapes_df()` function.
+GTFSwizard autodetects and reconstructs missing shape tables using the `get_shapes()` function. Variations of this function can create `simple feature` objects from `stops` or `shapes` tables, using `get_stops_sf()` or `get_shapes_sf()` functions, or even standard GTFS `shapes` data frame tables from `simple feature` shapes object, using `get_shapes_df()` function.
 
 ``` r
 > gtfs$shapes
@@ -306,7 +311,7 @@ GTFSwizard reconstructs missing shape tables using the `get_shapes()` function. 
 ```
 
 ## Objects
-GTFS features the `for_data` object, a sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
+GTFS features the `for_data` object, a GTFS sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
 ``` r
 > gtfs <- GTFSwizard::for_data
 
