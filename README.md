@@ -16,9 +16,7 @@ remotes::install_github('OPATP/GTFSwizard')
 ## Cheat Sheet
 
 ## Usage
-GTFS feeds are read using the `read_gtfs()` function.\
-`read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object.\
-You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as_wizardgtfs()` function
+GTFS feeds are read using the `read_gtfs()` function. `read_gtfs()` returns a `wizardgtfs` object, which is a slightly improved `gtfs` object. You can also convert a regular `gtfs` object to a `wizardgtfs` object using the `as_wizardgtfs()` function
 ``` r
 library(GTFSwizard)
 
@@ -56,10 +54,11 @@ summary(gtfs)
 
 GTFS feeds are explored using the `explore_gtfs()` function:
 ``` r
-explore_gtfs(gtfs)
+explore_gtfs(for_gtfs)
 ```
+<img align="center" src="figs/exploregtfs.png" alt="exploregtfs"/></a>
 
-Routes frequency, headways, dell times, and speeds are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, and the `get_speed()` functions:
+Routes, frequency, headways, dell times, speeds, shapes, stops, are calculated using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, and the `get_speed()` functions:
 ``` r
 get_frequency(gtfs, simplify = FALSE)
 ## A tibble: 5,487 × 5
@@ -154,6 +153,27 @@ gtfs$shapes
 ## ℹ Use `print(n = ...)` to see more rows
 
 ```
+## Service Pattern
+The concept of a service_pattern in **GTFSwizard** helps to address a common limitation of GTFS: its lack of a standardized way to distinguish distinct service patterns within the same route. GTFS files can have multiple service_ids for trips within the same route on the same day, such as regular and extra services. However, GTFS does not inherently identify unique service patterns, _i.e._ unique set of 'service_id's.
+
+In wizardgtfs objects, the column dates_services is an extended feature that consolidates dates and associated service_ids into a single, organized table. This column is not standard in typical GTFS files but is added specifically in wizardgtfs objects. The dates_services table is structured so that each date is associated with a list of service_ids representing the transit services operating on that specific day. Essentially, every unique list of service_ids observed across dates defines a distinct "service pattern."
+
+- Structure of dates_services: Each date in the dates_services table has an associated list of service_ids, capturing the set of services active on that particular day.
+
+- Defining Service Patterns: A unique service pattern is identified by a unique combination of service_ids operating on a given date. For instance, if two dates share the exact same list of service_ids, they are considered part of the same service pattern.
+
+This approach helps overcome GTFS's limitation in which unique patterns of services (e.g., regular and extra services for the same route on a single day) are not easily identified by a single service_pattern identifier. By grouping dates by their unique service_id lists, wizardgtfs can assign a service_pattern label, enabling more flexible analysis and scheduling based on actual service combinations rather than individual service IDs alone.
+``` r
+> GTFSwizard::get_servicepattern(for_gtfs)
+## A tibble: 3 × 3
+#  service_id service_pattern  pattern_frequency
+#  <chr>      <fct>                        <int>
+#1 U          servicepattern-1                65
+#2 S          servicepattern-2                13
+#3 D          servicepattern-3                13
+```
+
+
 ## Objects
 GTFS features the `for_data` object, a sample of the real urban regular bus system in the city of Fortaleza, Brazil, on the 2020's.
 ``` r
@@ -161,7 +181,7 @@ gtfs <- GTFSwizard::for_data
 
 plot(gtfs)
 ```
-<img align="center" src="figs/plot.for_gtfs.png" alt="OPA-TP"/></a>
+<img align="center" src="figs/plot.for_gtfs.png" alt="plot.for_gtfs"/></a>
 
 ## Related Packages
 GTFSwizard mainly rellies on [dplyr](https://dplyr.tidyverse.org/), [tidytransit](https://cran.r-project.org/web/packages/tidytransit/vignettes/introduction.html) and [gtfsio](https://r-transit.github.io/gtfsio/articles/gtfsio.html) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, and [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling.
