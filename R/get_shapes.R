@@ -15,7 +15,9 @@
 #'
 #' - Grouping unique paths into distinct shape IDs
 #'
-#' Note: This approximation may not perfectly represent real-world shapes, especially for complex or curved routes.
+#' @note
+#' This approximation may not perfectly represent real-world shapes, especially for complex or curved routes.
+#' `get_shapes()` uses stop sequences to recriate the shapes table; accordingly, it should not be used after `filter_time()`, as this function removes invalid `stop_times`.
 #'
 #' @examples
 #' \dontrun{
@@ -34,7 +36,7 @@
 
 get_shapes <- function(gtfs){
 
-  message('\nThis algorithm reconstructs the shapes table using euclidean approximation, based on the coordinates and sequence of stops for each trip, and', crayon::cyan(' may not be accurate'), '.')
+  message(crayon::cyan('get_shapes()'), ' reconstructs the shapes table using euclidean approximation, based on the coordinates and sequence of stops for each trip, and', crayon::red(' may not be accurate'), '.')
 
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
