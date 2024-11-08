@@ -25,11 +25,9 @@
 #' The resulting data frame conforms to the GTFS `shapes.txt` format. Distances are expressed in meters.
 #'
 #' @examples
-#' \dontrun{
 #' # Convert a shape geometry to a GTFS-compliant shapes data frame
-#' shape <- get_shapes_sf(for_gtfs$shapes)
+#' shape <- get_shapes_sf(for_rail_gtfs$shapes)
 #' shapes_df <- get_shapes_df(shape = shape)
-#' }
 #'
 #' @seealso
 #' [GTFSwizard::get_shapes()], [GTFSwizard::get_shapes_sf()]
@@ -44,13 +42,11 @@
 get_shapes_df <- function(shape){
 
   if(!'sf' %in% class(shape)){
-    warning(crayon::cyan('shape'), ' is not a ', crayon::cyan('simple feature'), ' object.')
-    stop()
+    stop(crayon::cyan('shape'), ' is not a ', crayon::cyan('simple feature'), ' object.')
   }
 
   if(purrr::is_null(shape$shape_id)){
-    warning(crayon::cyan('shape'), ' does not contains the ', crayon::cyan('shape_id'), ' column.')
-    stop()
+    stop(crayon::cyan('shape'), ' does not contains the ', crayon::cyan('shape_id'), ' column.')
   }
 
   x <- 0
@@ -68,9 +64,9 @@ get_shapes_df <- function(shape){
     data.table::data.table() %>%
     stats::setNames(c('shape_id', 'shape_pt_lon', 'shape_pt_lat')) %>%
     dplyr::group_by(shape_id) %>%
-    st_as_sf(coords = c('shape_pt_lon', 'shape_pt_lat'), remove = F, crs = 4326) %>%
+    st_as_sf(coords = c('shape_pt_lon', 'shape_pt_lat'), remove = FALSE, crs = 4326) %>%
     dplyr::mutate(shape_pt_sequence = 1:n(),
-                  shape_dist_traveled = abs(sf::st_distance(geometry, lag(geometry), by_element = T)) %>%
+                  shape_dist_traveled = abs(sf::st_distance(geometry, lag(geometry), by_element = TRUE)) %>%
                     tidyr::replace_na(x) %>%
                     cumsum %>%
                     as.numeric()) %>%

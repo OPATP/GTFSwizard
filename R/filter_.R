@@ -35,22 +35,20 @@
 #' @return A filtered `wizardgtfs` object containing only the records that match the specified criteria.
 #'
 #' @examples
-#' \dontrun{
 #' # Filter by service pattern
-#' filtered_gtfs <- filter_servicepattern(gtfs = for_gtfs, servicepattern = "servicepattern-2")
+#' filtered_gtfs <- filter_servicepattern(gtfs = for_rail_gtfs, servicepattern = "servicepattern-1")
 #'
 #' # Filter by a specific date
-#' filtered_gtfs <- filter_date(gtfs = for_gtfs, dates = "2023-01-01")
+#' filtered_gtfs <- filter_date(gtfs = for_rail_gtfs, dates = "2021-02-10")
 #'
 #' # Filter by route ID, keeping only specified routes
-#' filtered_gtfs <- filter_route(gtfs = for_gtfs, route = for_gtfs$routes$route_id[1:2])
+#' filtered_gtfs <- filter_route(gtfs = for_rail_gtfs, route = for_rail_gtfs$routes$route_id[1:2])
 #'
 #' # Filter by trip ID, excluding specified trips
-#' filtered_gtfs <- filter_trip(gtfs = for_gtfs, trip = for_gtfs$trips$trip_id[1:2], keep = FALSE)
+#' filtered_gtfs <- filter_trip(gtfs = for_rail_gtfs, trip = for_rail_gtfs$trips$trip_id[1:2], keep = FALSE)
 #'
 #' # Filter by a time range
-#' filtered_gtfs <- filter_time(gtfs = for_gtfs, from = "06:30:00", to = "10:00:00")
-#' }
+#' filtered_gtfs <- filter_time(gtfs = for_rail_gtfs, from = "06:30:00", to = "10:00:00")
 #'
 #' @seealso
 #' [GTFSwizard::as_wizardgtfs()], [GTFSwizard::get_servicepattern()]
@@ -79,11 +77,11 @@ filter_servicepattern <- function(gtfs, servicepattern = NULL){
     GTFSwizard::get_servicepattern(gtfs)
 
   if(any(!servicepattern %in% unique(service_pattern$service_pattern))){
-    message(paste0('\nService pattern should be one of ',
-                   paste(unique(service_pattern$service_pattern), collapse = ', '),
-                   '.',
-                   '\nUse get_paservicepattern() function to check service patterns.'))
-    stop()
+
+    stop(paste0('\nService pattern should be one of ',
+                paste(unique(service_pattern$service_pattern), collapse = ', '),
+                '.',
+                '\nUse get_paservicepattern() function to check service patterns.'))
 
   }
 
@@ -201,8 +199,7 @@ filter_date <- function(gtfs, dates = NULL){
     }
 
   if(any(!date %in% as.Date(gtfs$dates_services$date))){
-    message(crayon::red('Date(s) do not belongs to calendar.'), '\nMust be either a ', crayon::cyan('YYYY-MM-DD'), ' character vector or a ', crayon::cyan('POSIXct'), ' object.\nPlease use ', crayon::cyan('get_calendar()'), ' to check available dates.')
-    stop()
+    stop(crayon::red('Date(s) do not belongs to calendar.'), ' Must be either a ', crayon::cyan('YYYY-MM-DD'), ' character vector or a ', crayon::cyan('POSIXct'), ' object. Please use ', crayon::cyan('get_calendar()'), ' to check available dates.')
   }
 
   services <-
@@ -315,15 +312,13 @@ filter_service <- function(gtfs, service){
   }
 
   if(is.null(service)){
-    message('\nNo service(s) provided.\nUse get_servicepattern() to check available services.')
-    stop()
+    stop('\nNo service(s) provided.\nUse get_servicepattern() to check available services.')
   }
 
   if(any(!service %in% gtfs$trips$service_id)){
-    message(paste0('\nService(s) should be one of ',
-                   paste(unique(gtfs$trips$service_id), collapse = ', '),
-                   '.'))
-    stop()
+    stop(paste0('\nService(s) should be one of ',
+                paste(unique(gtfs$trips$service_id), collapse = ', '),
+                '.'))
 
   }
 
@@ -427,13 +422,11 @@ filter_route <- function(gtfs, route, keep = TRUE){
   }
 
   if(purrr::is_null(route)){
-    message('\nNo route(s) provided.\nRun gtfs$routes to check available routes.')
-    stop()
+    stop('\nNo route(s) provided.\nRun gtfs$routes to check available routes.')
   }
 
   if(any(!route %in% gtfs$routes$route_id)){
-    message('\nThere is no such route(s).\nRun gtfs$routes to check available routes.')
-    stop()
+    stop('\nThere is no such route(s).\nRun gtfs$routes to check available routes.')
 
   }
 
@@ -546,13 +539,11 @@ filter_trip <- function(gtfs, trip, keep = TRUE){
 
 
   if(is.null(trip)){
-    message('\nNo trip(s) provided.\nRun gtfs$trips to check available trips.')
-    stop()
+    stop('\nNo trip(s) provided.\nRun gtfs$trips to check available trips.')
   }
 
   if(any(!trip %in% gtfs$trips$trip_id)){
-    message('\nThere is no such trip(s).\nRun gtfs$trips to check available trips.')
-    stop()
+    stop('\nThere is no such trip(s).\nRun gtfs$trips to check available trips.')
 
   }
 
@@ -664,13 +655,11 @@ filter_stop <- function(gtfs, stop){
   }
 
   if(is.null(stop)){
-    message('\nNo stop(s) provided.\nRun gtfs$stops to check available stops.')
-    stop()
+    stop('\nNo stop(s) provided.\nRun gtfs$stops to check available stops.')
   }
 
   if(any(!stop %in% gtfs$stops$stop_id)){
-    message('\nThere is no such stop(s).\nRun gtfs$stops to check available stops.')
-    stop()
+    stop('\nThere is no such stop(s).\nRun gtfs$stops to check available stops.')
 
   }
 
@@ -778,14 +767,12 @@ filter_time <- function(gtfs, from = '0:0:0', to = "48:00:00"){
 
   if(suppressWarnings(is.na(stringr::str_split(from, ":") %>%
                             lapply(FUN = as.numeric)))){
-    warning('Wrong ', crayon::cyan('from'), ' time format. Please use ', crayon::cyan('HH:MM:SS'), '.')
-    stop()
+    stop('Wrong ', crayon::cyan('from'), ' time format. Please use ', crayon::cyan('HH:MM:SS'), '.')
   }
 
   if(suppressWarnings(is.na(stringr::str_split(to, ":") %>%
                             lapply(FUN = as.numeric)))){
-    warning('Wrong ', crayon::cyan('to'), ' time format. Please use ', crayon::cyan('HH:MM:SS'), '.')
-    stop()
+    stop('Wrong ', crayon::cyan('to'), ' time format. Please use ', crayon::cyan('HH:MM:SS'), '.')
   }
 
   from <-

@@ -19,11 +19,12 @@
 #'
 #' - Be aware: `get_shapes` reconstructs shapes using euclidean approximation and may not be accurate.
 #'
+#' @note
+#' `split_trip()` uses stop sequences to recriate the shapes table of split trips; accordingly, it should not be used after `filter_time()`, as this function removes invalid `stop_times`.
+#'
 #' @examples
-#' \dontrun{
 #' # Split a trip into 3 segments
-#' gtfs_split <- split_trip(for_gtfs, trip = for_gtfs$trips$trip_id[1:3], split = 2)
-#' }
+#' gtfs_split <- split_trip(for_rail_gtfs, trip = for_rail_gtfs$trips$trip_id[1:3], split = 2)
 #'
 #' @seealso
 #' [GTFSwizard::get_shapes()], [GTFSwizard::merge_gtfs()]
@@ -54,8 +55,8 @@ split_trip <- function(gtfs, trip, split = 1){
     gtfs$stop_times %>%
     dplyr::mutate(split = trip_id %in% trip) %>%
     dplyr::group_by(trip_id) %>%
-    dplyr::mutate(subtrip = if_else(split == T, ceiling(1:n()/n() * groups), NA),
-           dupe = split == T & !subtrip == lead(subtrip)) %>%
+    dplyr::mutate(subtrip = if_else(split == TRUE, ceiling(1:n()/n() * groups), NA),
+           dupe = split == TRUE & !subtrip == lead(subtrip)) %>%
     dplyr::ungroup() %>%
     dplyr::bind_rows(dplyr::slice(., .$dupe %>% which()) %>% mutate(subtrip = subtrip + 1))
 

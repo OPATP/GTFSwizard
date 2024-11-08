@@ -6,40 +6,40 @@
 
 `%intersects%` <- function(x,y){
   x_ <- st_sfc(unique(x),crs = 4326)
-  res_match <- st_intersects(x_,y,sparse = F) %>%
+  res_match <- st_intersects(x_,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
   return(res_match[match(x,x_)])
 }
 
 `%touches%` <- function(x,y){
   x_ <- st_sfc(unique(x),crs = 4326)
-  res_match <- st_touches(x_,y,sparse = F) %>%
+  res_match <- st_touches(x_,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
   return(res_match[match(x,x_)])
 }
 
 `%crosses%` <- function(x,y){
-  st_crosses(x,y,sparse = F) %>%
+  st_crosses(x,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
 }
 
 `%within%` <- function(x,y){
-  st_within(x,y,sparse = F) %>%
+  st_within(x,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
 }
 
 `%contains%` <- function(x,y){
-  st_contains(x,y,sparse = F) %>%
+  st_contains(x,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
 }
 
 `%overlaps%` <- function(x,y){
-  st_overlaps(x,y,sparse = F) %>%
+  st_overlaps(x,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
 }
 
 `%equals%` <- function(x,y){
-  st_equals(x,y,sparse = F) %>%
+  st_equals(x,y,sparse = FALSE) %>%
     apply( MARGIN = 1, FUN = any)
 }
 
@@ -80,29 +80,27 @@
 #' @details The function evaluates the provided expressions in an environment restricted to recognized variables (`stop_id`, `route_id`, `trip_id`, `geometry`). An error is thrown if an unrecognized variable is used, indicating that only specific variables are allowed.
 #'
 #' @examples
-#' \dontrun{
 #' # Apply the selection function
-#' result <- selection(for_gtfs,
-#'  stop_id == for_gtfs$stops$stop_id[1] & trip_id %in% for_gtfs$trips$trip_id[1:5])
+#' result <- selection(for_rail_gtfs,
+#'  stop_id == for_rail_gtfs$stops$stop_id[1] & trip_id %in% for_rail_gtfs$trips$trip_id[1:5])
 #'
 #' # Check the selection
 #' class(result)
 #' attr(result, 'selection')
 #'
 #' # Use geometry selection
-#'
-#' bbox <- st_bbox(c(
-#'   xmin = -38.55219059002416,
-#'   ymin = -3.7699496173114118,
-#'   xmax = -38.54455165901261,
+#' bbox <- sf::st_bbox(c(
+#'   xmin = -38.57219059002416,
+#'   ymin = -3.7999496173114118,
+#'   xmax = -38.50455165901261,
 #'   ymax = -3.756631724636505
-#' ), crs = st_crs(4326))  # Set CRS to WGS 84
-#' # Convert the bounding box to a polygon
-#' polygon <- st_as_sfc(bbox)
+#' ),
+#' crs = sf::st_crs(4326))  # Set CRS to WGS 84
 #'
-#' result <- for_gtfs %>%
-#'   selection(geometry %intersects% polygon)
-#'   }
+#' # Convert the bounding box to a polygon
+#' polygon <- sf::st_as_sfc(bbox)
+#'
+#' result <- for_rail_gtfs |> selection(geometry %intersects% polygon)
 #'
 #' @rdname selection
 #' @aliases selection
@@ -136,7 +134,7 @@ selection.list <- function(gtfs,...,add = FALSE){
 selection.wizardgtfs <- function(gtfs,...,add = FALSE){
 
   if(add){
-    cat('add=TRUE, but there is no selection in the gtfsect')
+    message('add=TRUE, but there is no selection in the gtfsect')
   }
 
   expr <- substitute(...)
@@ -158,6 +156,7 @@ selection.wizardgtfs <- function(gtfs,...,add = FALSE){
 
     selection <- eval(expr,stop_times)
     if(sum(selection)==0){
+      warning('The expression returned a null selection.')
       return(gtfs)
     }
 
@@ -182,10 +181,11 @@ selection.wizardgtfs <- function(gtfs,...,add = FALSE){
       dplyr::left_join(
         get_stops_sf(gtfs$stops)[,'stop_id'],
         by = 'stop_id'
-      ) %>% st_as_sf()
+      ) %>% sf::st_as_sf()
 
     selection <- eval(expr,stop_times)
     if(sum(selection)==0){
+      warning('The expression returned a null selection.')
       return(gtfs)
     }
 
@@ -230,6 +230,7 @@ selection.wizardgtfs_selected <- function(gtfs,...,add = FALSE){
 
       selection <- eval(expr,stop_times)
       if(sum(selection)==0){
+        warning('The expression returned a null selection.')
         return(gtfs)
       }
 
@@ -254,10 +255,11 @@ selection.wizardgtfs_selected <- function(gtfs,...,add = FALSE){
         dplyr::left_join(
           get_stops_sf(gtfs$stops)[,'stop_id'],
           by = 'stop_id'
-        ) %>% st_as_sf()
+        ) %>% sf::st_as_sf()
 
       selection <- eval(expr,stop_times)
       if(sum(selection)==0){
+        warning('The expression returned a null selection.')
         return(gtfs)
       }
 

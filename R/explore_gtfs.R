@@ -17,9 +17,9 @@
 #' @return A Shiny app object that, when run, opens an interactive dashboard for GTFS data exploration.
 #'
 #' @examples
-#' \dontrun{
-#' # To run the Shiny application:
-#' # explore_gtfs(gtfs = for_gtfs)
+#' if (interactive()) {
+#'   # To run the Shiny application:
+#'   explore_gtfs(gtfs = GTFSwizard::for_rail_gtfs)
 #' }
 #'
 #' @seealso
@@ -128,7 +128,7 @@ explore_gtfs <-
                         shiny::selectizeInput(inputId = 'selected.routes',
                                               label = 'Choose routes of interest:',
                                               choices = sort(unique(gtfs$routes$route_id)),
-                                              multiple = T)
+                                              multiple = TRUE)
                       ),
                       shiny::hr(),
                       fluidRow(
@@ -147,9 +147,6 @@ explore_gtfs <-
                         shiny::column(
                           width = 5,
                           shiny::fluidRow(plotly::plotlyOutput('freq.sparkline.byroute',
-                                               #shiny::plotOutput('freq.sparkline.byroute',
-                                               height = '350px')),
-                          shiny::fluidRow(plotly::plotlyOutput('headway.byroute.sparkline',
                                                #shiny::plotOutput('freq.sparkline.byroute',
                                                height = '350px'))
                           )
@@ -215,7 +212,7 @@ explore_gtfs <-
       output$fleet.sparkline <- plotly::renderPlotly({
 
         fleet.hline <-
-          weighted.mean(fleet$fleet, fleet$pattern_frequency, na.rm = T)
+          weighted.mean(fleet$fleet, fleet$pattern_frequency, na.rm = TRUE)
 
         p.fleet.sparkline <-
           ggplot2::ggplot() +
@@ -253,7 +250,7 @@ explore_gtfs <-
         p.hist.speed <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = speed, ggplot2::aes(x = average.speed, weight = trips * pattern_frequency)) +
-          ggplot2::geom_vline(ggplot2::aes(xintercept = mean(speed$average.speed, na.rm = T), color = paste('Overall\naverage\nhourly\nSpeed of\n', mean(speed$average.speed, na.rm = T) %>% round, 'km/h')), linetype = 'dashed', linewidth = .75) +
+          ggplot2::geom_vline(ggplot2::aes(xintercept = mean(speed$average.speed, na.rm = TRUE), color = paste('Overall\naverage\nhourly\nSpeed of\n', mean(speed$average.speed, na.rm = TRUE) %>% round, 'km/h')), linetype = 'dashed', linewidth = .75) +
           ggplot2::labs(title = 'Speeds Distribution (for all dates)', x = 'Speed (km/h)', y = 'Frequency (# route)', colour = '') +
           hrbrthemes::scale_x_comma(big.mark = " ") +
           hrbrthemes::scale_y_comma(big.mark = " ") +
@@ -277,7 +274,7 @@ explore_gtfs <-
         p.hist.dt <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = dwell_time, ggplot2::aes(x = average.dwelltime, weight = (trips * pattern_frequency))) +
-          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(dwell_time$average.dwelltime, dwell_time$pattern_frequency, na.rm = T), color = paste('Overall\nAverage\nDwell Time\n', weighted.mean(dwell_time$average.dwelltime, dwell_time$pattern_frequency, na.rm = T) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
+          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(dwell_time$average.dwelltime, dwell_time$pattern_frequency, na.rm = TRUE), color = paste('Overall\nAverage\nDwell Time\n', weighted.mean(dwell_time$average.dwelltime, dwell_time$pattern_frequency, na.rm = TRUE) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
           ggplot2::labs(title = 'Dwell Time Distribution (for all dates)', x = 'Dwell time (s)', y = 'Frequency (# trips.days)', colour = '') +
           hrbrthemes::scale_x_comma(big.mark = " ") +
           hrbrthemes::scale_y_comma(big.mark = " ") +
@@ -303,7 +300,7 @@ explore_gtfs <-
         p.hist.dist <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = distances, ggplot2::aes(x = average.distance, weight = (trips * pattern_frequency))) +
-          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(distances$average.distance, distances$pattern_frequency, na.rm = T), color = paste('Overall\nAverage\nDistance\n', weighted.mean(distances$average.distance, distances$pattern_frequency, na.rm = T) %>% round, 'm\n')), linetype = 'dashed', linewidth = .75) +
+          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(distances$average.distance, distances$pattern_frequency, na.rm = TRUE), color = paste('Overall\nAverage\nDistance\n', weighted.mean(distances$average.distance, distances$pattern_frequency, na.rm = TRUE) %>% round, 'm\n')), linetype = 'dashed', linewidth = .75) +
           ggplot2::labs(title = 'Distance Distribution (for all dates)', x = 'Distance (m)', y = 'Frequency (# trips.days)', colour = '') +
           hrbrthemes::scale_x_comma(big.mark = " ") +
           hrbrthemes::scale_y_comma(big.mark = " ") +
@@ -328,7 +325,7 @@ explore_gtfs <-
         p.hist.dur <-
           ggplot2::ggplot() +
           ggplot2::geom_histogram(data = durations, ggplot2::aes(x = average.duration, weight = (trips * pattern_frequency))) +
-          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(durations$average.duration, durations$pattern_frequency, na.rm = T), color = paste('Overall\nAverage\nDuration\n', weighted.mean(durations$average.duration, durations$pattern_frequency, na.rm = T) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
+          ggplot2::geom_vline(ggplot2::aes(xintercept = weighted.mean(durations$average.duration, durations$pattern_frequency, na.rm = TRUE), color = paste('Overall\nAverage\nDuration\n', weighted.mean(durations$average.duration, durations$pattern_frequency, na.rm = TRUE) %>% round, 'seconds\n')), linetype = 'dashed', linewidth = .75) +
           ggplot2::labs(title = 'Duration Distribution (for all dates)', x = 'Duration (s)', y = 'Frequency (# trips.days)', colour = '') +
           hrbrthemes::scale_x_comma(big.mark = " ") +
           hrbrthemes::scale_y_comma(big.mark = " ") +
@@ -348,7 +345,7 @@ explore_gtfs <-
       output$p.calendar <- shiny::renderPlot({
 
         suppressMessages({
-          GTFSwizard::plot_calendar(gtfs, facet_by_year = T)
+          GTFSwizard::plot_calendar(gtfs, facet_by_year = TRUE)
         })
 
       })
@@ -401,8 +398,6 @@ explore_gtfs <-
       headway.byroute <- shiny::reactive({
         GTFSwizard::get_headways(gtfs.filtered(), method = 'detailed')
       })
-
-      output$headway.byroute.sparkline <- plotly::renderPlotly({plot_routeheadways(gtfs, route())})
 
 
     }

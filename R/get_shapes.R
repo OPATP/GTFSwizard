@@ -20,10 +20,8 @@
 #' `get_shapes()` uses stop sequences to recriate the shapes table; accordingly, it should not be used after `filter_time()`, as this function removes invalid `stop_times`.
 #'
 #' @examples
-#' \dontrun{
 #' # Generate a shapes table for a GTFS object
-#' gtfs_with_shapes <- get_shapes(gtfs = for_gtfs)
-#' }
+#' gtfs_with_shapes <- get_shapes(gtfs = for_rail_gtfs)
 #'
 #' @seealso
 #' [GTFSwizard::as_wizardgtfs()], [GTFSwizard::get_shapes_df()]
@@ -40,7 +38,7 @@ get_shapes <- function(gtfs){
 
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('\nThis gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class.\nComputation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
+    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
 
   if(!purrr::is_null(gtfs$shapes)){
@@ -52,14 +50,14 @@ get_shapes <- function(gtfs){
     dplyr::select(trip_id, stop_id, stop_sequence) %>%
     dplyr::arrange(trip_id, stop_sequence) %>%
     dplyr::left_join(gtfs$stops %>%
-                       tidytransit::stops_as_sf() %>%
+                       GTFSwizard::get_stops_sf() %>%
                        dplyr::select(stop_id),
                      by = dplyr::join_by(stop_id)
                      ) %>%
     sf::st_as_sf(crs = 4326) %>%
     dplyr::group_by(trip_id) %>%
     dplyr::arrange(stop_sequence) %>%
-    dplyr::summarise(geometry = st_combine(geometry) %>% sf::st_cast('LINESTRING')) %>% #plot
+    dplyr::summarise(geometry = sf::st_combine(geometry) %>% sf::st_cast('LINESTRING')) |>
     dplyr::left_join(gtfs$trips %>%
                        dplyr::select(trip_id, route_id)) %>%
     dplyr::group_by(geometry) %>%

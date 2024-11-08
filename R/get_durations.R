@@ -29,16 +29,14 @@
 #' If an invalid `method` is specified, the function defaults to `"by.route"` and provides a warning.
 #'
 #' @examples
-#' \dontrun{
 #' # Calculate average route durations
-#' durations_by_route <- get_durations(gtfs = for_gtfs, method = "by.route")
+#' durations_by_route <- get_durations(gtfs = for_rail_gtfs, method = "by.route")
 #'
 #' # Calculate trip durations
-#' durations_by_trip <- get_durations(gtfs = for_gtfs, method = "by.trip")
+#' durations_by_trip <- get_durations(gtfs = for_rail_gtfs, method = "by.trip")
 #'
 #' # Calculate detailed durations between stops
-#' detailed_durations <- get_durations(gtfs = for_gtfs, method = "detailed")
-#' }
+#' detailed_durations <- get_durations(gtfs = for_rail_gtfs, method = "detailed")
 #'
 #' @seealso
 #' [GTFSwizard::as_wizardgtfs()], [GTFSwizard::get_servicepattern()]
@@ -62,7 +60,7 @@ get_durations <- function(gtfs, method = 'by.route'){
 
   if (!method %in% c('by.route', 'detailed', 'by.trip')) {
     durations <- get_durations_byroute(gtfs)
-    warning('\n"method" should be one of "by.route", "by.trip" or "detailed".\nReturning "method = by.route"".')
+    warning('"method" should be one of "by.route", "by.trip" or "detailed". Returning "method = by.route"".')
   }
 
   return(durations)
@@ -73,7 +71,7 @@ get_durations_byroute <- function(gtfs){
 
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
 
   service_pattern <-
@@ -118,7 +116,7 @@ get_durations_bytrip <- function(gtfs){
 
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
 
   service_pattern <-
@@ -160,7 +158,7 @@ get_durations_detailed <- function(gtfs){
 
   if(!"wizardgtfs" %in% class(gtfs)){
     gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    warning('\nThis gtfs object is not of the wizardgtfs class.\nComputation may take longer.\nUsing as.gtfswizard() is advised.')
+    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   }
 
   service_pattern <-

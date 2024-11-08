@@ -4,7 +4,7 @@
 \alias{as_wizardgtfs}
 \title{Convert GTFS Object to wizardgtfs Format}
 \usage{
-as_wizardgtfs(gtfs_list, build_shapes = T)
+as_wizardgtfs(gtfs_list, build_shapes = TRUE)
 }
 \arguments{
 \item{gtfs_list}{A GTFS object in list or `tidygtfs` format.}
@@ -23,10 +23,8 @@ An object of class `wizardgtfs`, which includes multiple data frames for transit
 - The `wizardgtfs` format includes additional processing and checks, such as validation of unique IDs and structure formatting.
 }
 \examples{
-\dontrun{
 # Convert a GTFS object to wizardgtfs format
-gtfs_wizard <- as_wizardgtfs(for_gtfs, build_shapes = TRUE)
-}
+gtfs_wizard <- as_wizardgtfs(for_rail_gtfs, build_shapes = TRUE)
 
 }
 \seealso{
