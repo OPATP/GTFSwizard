@@ -8,9 +8,9 @@ Its main purpose is to provide researchers and practitioners with a seamless and
 
 ## Installation
 ``` r
-# SOON ON CRAN
+install.packages("GTFSwizard")
 
-# for dev version:
+# dev version:
 install.packages('remotes') # if not already installed
 # wait for the installation to complete
 
