@@ -128,5 +128,4 @@ rm_servicepattern <- function(gtfs){
   gtfs[names(gtfs) != "dates_services"]
 }
 
-write_gtfs(wiz.read)
 
