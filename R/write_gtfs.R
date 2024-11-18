@@ -120,7 +120,7 @@ as_df_ordinary <- function(df){
 
   attributes(df2) <- attributes(df)
 
-  return(df)
+  return(df2)
 
 }
 
