@@ -240,7 +240,7 @@ GTFSwizard::get_fleet(for_bus_gtfs, method = 'peak')
 #8     6   380 servicepattern-3                13
 #9     4   374 servicepattern-3                13
 
-get_1stdeparture(for_bus_gtfs)
+GTFSwizard::get_1stdeparture(for_bus_gtfs)
 ## A tibble: 35,456 × 4
 #   route_id trip_id          departure_time stop_id
 #   <chr>    <chr>            <chr>          <chr>  
