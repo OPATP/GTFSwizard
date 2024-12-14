@@ -8,14 +8,16 @@
 #'     \item{"by.route"}{Calculates the average headway for each route, assuming constant headways along stops.}
 #'     \item{"by.hour"}{Calculates the hourly headway for each route, assuming constant headways along stops.}
 #'     \item{"by.trip"}{Calculates headways for each trip, assuming constant headways along stops.}
+#'     \item{"by.stop"}{Calculates headways for each stop.}
 #'     \item{"detailed"}{Calculates detailed headways between consecutive stops within each route and trip.}
 #'   }
 #'
 #' @return A data frame containing service headways based on the specified method:
 #'   \describe{
-#'     \item{If `method = "by.route"`}{Returns a data frame with columns: `route_id`, `trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
-#'     \item{If `method = "by.hour"`}{Returns a data frame with columns: `hour`, `trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
+#'     \item{If `method = "by.route"`}{Returns a data frame with columns: `route_id`, `valid_trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
+#'     \item{If `method = "by.hour"`}{Returns a data frame with columns: `hour`, `valid_trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
 #'     \item{If `method = "by.trip"`}{Returns a data frame with columns: `route_id`, `trip_id`, `headway`, `service_pattern`, and `pattern_frequency`.}
+#'     \item{If `method = "by.stop"`}{Returns a data frame with columns: `stop_id`, `direction_id`, `valid_trips`, , `headway`, `service_pattern`, and `pattern_frequency`.}
 #'     \item{If `method = "detailed"`}{Returns a data frame with columns: `route_id`, `trip_id`, `stop_id`, `hour`, `headway`, `service_pattern`, and `pattern_frequency`.}
 #'   }
 #'
@@ -27,6 +29,8 @@
 #' - "by.hour": Calculates the hourly headway for each route, grouping trips by hour.
 #'
 #' - "by.trip": Calculates headways for each trip, considering only the first stop time.
+#'
+#' - "by.stop": Calculates headways for each stop.
 #'
 #' - "detailed": Provides headway calculations for each consecutive stop within each trip.
 #'
@@ -41,6 +45,9 @@
 #'
 #' # Calculate headways for each trip
 #' headways_by_trip <- get_headways(gtfs = for_rail_gtfs, method = "by.trip")
+#'
+#' # Calculate headways for each stop
+#' headways_by_stop <- get_headways(gtfs = for_rail_gtfs, method = "by.stop")
 #'
 #' # Calculate detailed stop-level headways
 #' detailed_headways <- get_headways(gtfs = for_rail_gtfs, method = "detailed")
@@ -73,9 +80,13 @@ get_headways <- function(gtfs, method = 'by.route'){
     hw <- get_headway_detailed(gtfs)
   }
 
-  if (!method %in% c("by.route", 'detailed', 'by.trip', 'by.hour')) {
+  if (method == 'by.stop') {
+    hw <- get_headway_bystop(gtfs)
+  }
+
+  if (!method %in% c("by.route", 'detailed', 'by.trip', 'by.hour', 'by.stop')) {
     hw <- get_headway_byroute(gtfs)
-    warning(crayon::cyan("method"), ' should be one of ', crayon::cyan("by.hour"), ', ', crayon::cyan("by.route"), ', ', crayon::cyan("by.trip"), ' or ', crayon::cyan("detailed"), '. Returning  ', crayon::cyan('method = "by.route"'), '.')
+    warning(crayon::cyan("method"), ' should be one of ', crayon::cyan("by.hour"), ', ', crayon::cyan("by.route"), ', ', crayon::cyan("by.trip"), ', ', crayon::cyan("by.stop"), ' or ', crayon::cyan("detailed"), '. Returning  ', crayon::cyan('method = "by.route"'), '.')
   }
 
   return(hw)
@@ -234,6 +245,18 @@ get_headway_detailed <- function(gtfs){
     ungroup() %>%
     dplyr::select(route_id, trip_id, direction_id, stop_id, hour, headway_minutes, service_pattern, pattern_frequency) %>%
     na.omit()
+
+  return(hw)
+
+}
+
+get_headway_bystop <- function(gtfs){
+
+  hw <-
+    get_headways(gtfs, method = "detailed") %>%
+    group_by(stop_id, direction_id, service_pattern, pattern_frequency) %>%
+    reframe(headway_minutes = mean(headway_minutes),
+            valid_trips = n())
 
   return(hw)
 
