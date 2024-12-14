@@ -20,8 +20,8 @@ get_headways(gtfs, method = "by.route")
 \value{
 A data frame containing service headways based on the specified method:
   \describe{
-    \item{If `method = "by.route"`}{Returns a data frame with columns: `route_id`, `trips`, `average.headway`, `service_pattern`, and `pattern_frequency`.}
-    \item{If `method = "by.hour"`}{Returns a data frame with columns: `hour`, `trips`, `average.headway`, `service_pattern`, and `pattern_frequency`.}
+    \item{If `method = "by.route"`}{Returns a data frame with columns: `route_id`, `trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
+    \item{If `method = "by.hour"`}{Returns a data frame with columns: `hour`, `trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
     \item{If `method = "by.trip"`}{Returns a data frame with columns: `route_id`, `trip_id`, `headway`, `service_pattern`, and `pattern_frequency`.}
     \item{If `method = "detailed"`}{Returns a data frame with columns: `route_id`, `trip_id`, `stop_id`, `hour`, `headway`, `service_pattern`, and `pattern_frequency`.}
   }
