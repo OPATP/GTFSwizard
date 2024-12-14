@@ -15,6 +15,7 @@ get_headways(gtfs, method = "by.route")
   \item{"by.hour"}{Calculates the hourly headway for each route, assuming constant headways along stops.}
   \item{"by.trip"}{Calculates headways for each trip, assuming constant headways along stops.}
   \item{"by.stop"}{Calculates headways for each stop.}
+  \item{"by.shape"}{Calculates headways for each shape}
   \item{"detailed"}{Calculates detailed headways between consecutive stops within each route and trip.}
 }}
 }
@@ -24,7 +25,8 @@ A data frame containing service headways based on the specified method:
     \item{If `method = "by.route"`}{Returns a data frame with columns: `route_id`, `valid_trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
     \item{If `method = "by.hour"`}{Returns a data frame with columns: `hour`, `valid_trips`, `average_headway`, `service_pattern`, and `pattern_frequency`.}
     \item{If `method = "by.trip"`}{Returns a data frame with columns: `route_id`, `trip_id`, `headway`, `service_pattern`, and `pattern_frequency`.}
-    \item{If `method = "by.stop"`}{Returns a data frame with columns: `stop_id`, `direction_id`, `valid_trips`, , `headway`, `service_pattern`, and `pattern_frequency`.}
+    \item{If `method = "by.stop"`}{Returns a data frame with columns: `stop_id`, `direction_id`, `valid_trips`, `headway`, `service_pattern`, and `pattern_frequency`.}
+    \item{If `method = "by.shape"`}{Returns a data frame with columns: `shape_id`, `direction_id`, `valid_trips`, `headway`, `service_pattern`, and `pattern_frequency`.}
     \item{If `method = "detailed"`}{Returns a data frame with columns: `route_id`, `trip_id`, `stop_id`, `hour`, `headway`, `service_pattern`, and `pattern_frequency`.}
   }
 }
@@ -42,6 +44,8 @@ This function calls specific sub-functions based on the selected method:
 
 - "by.stop": Calculates headways for each stop.
 
+- "by.shape": Calculates headways for each shape.
+
 - "detailed": Provides headway calculations for each consecutive stop within each trip.
 
 If an invalid `method` is specified, the function defaults to `"by.route"` and provides a warning.
@@ -58,6 +62,9 @@ headways_by_trip <- get_headways(gtfs = for_rail_gtfs, method = "by.trip")
 
 # Calculate headways for each stop
 headways_by_stop <- get_headways(gtfs = for_rail_gtfs, method = "by.stop")
+
+# Calculate headways for each shape
+headways_by_shape <- get_headways(gtfs = for_rail_gtfs, method = "by.shape")
 
 # Calculate detailed stop-level headways
 detailed_headways <- get_headways(gtfs = for_rail_gtfs, method = "detailed")
