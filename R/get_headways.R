@@ -75,7 +75,7 @@ get_headways <- function(gtfs, method = 'by.route'){
 
   if (!method %in% c("by.route", 'detailed', 'by.trip', 'by.hour')) {
     hw <- get_headway_byroute(gtfs)
-    warning('"method" should be one of "by.hour", "by.route", "by.trip" or "detailed". Returning "method = "by.route"".')
+    warning(crayon::cyan("method"), ' should be one of ', crayon::cyan("by.hour"), ', ', crayon::cyan("by.route"), ', ', crayon::cyan("by.trip"), ' or ', crayon::cyan("detailed"), '. Returning  ', crayon::cyan('method = "by.route"'), '.')
   }
 
   return(hw)
