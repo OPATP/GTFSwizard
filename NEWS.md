@@ -15,7 +15,9 @@
 * Bug fix & improvements
   - Better column naming;
   - Minor bug fixed on filter_date();
-  - get_headways() output fixed.
+  - get_headways() output fixed;
+  - split_trip() can now be used after filter_time().
+  
 
 # GTFSwizard 1.0.0
 
