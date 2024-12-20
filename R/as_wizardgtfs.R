@@ -40,9 +40,6 @@ as_wizardgtfs.tidygtfs <- function(gtfs_list, build_shapes = TRUE){
       gtfs_list <- get_shapes(gtfs_list)
     }
   }
-
-  attr(gtfs_list,'service_pattern') <- get_servicepattern_internal(gtfs_list)
-
   return(gtfs_list)
 }
 
@@ -73,7 +70,6 @@ as_wizardgtfs.list <- function(gtfs_list, build_shapes = TRUE){
         gtfs_obj <- get_shapes(gtfs_obj)
       }
     }
-    attr(gtfs_obj,'service_pattern') <- get_servicepattern_internal(gtfs_obj)
     return(gtfs_obj)
   }
 }
