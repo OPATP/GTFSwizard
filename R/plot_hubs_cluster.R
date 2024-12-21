@@ -26,28 +26,28 @@ plot.wzd_transfercluster <- function(x,hour){
     ggplot2::labs(title = 'Clusters oh high transfers',subtitle = paste0('Hour: ',hour))
 }
 
-if(interactive()){
-  plot(transfer_clusters)
-
-
-  transfer_clusters %>%
-    dplyr::filter(hour == 6) %>%
-    dplyr::filter(service_pattern == 'servicepattern-1') %>%
-    dplyr::filter(cluster == 4|stop_id=='5819') %>%
-    dplyr::left_join(attr(transfer_clusters,'stop_position'),by = 'stop_id') %>%
-    sf::st_as_sf(coords = c('stop_lon','stop_lat'),crs = 4326) %>%
-    leaflet::leaflet() %>%
-    leaflet::addMarkers(label =  ~n_routes) %>%
-    leaflet::addTiles()
-
-
-  gtfs$stops %>%
-    dplyr::filter(stringr::str_detect(stop_name,'TERMINAL')) %>%
-    sf::st_as_sf(coords = c('stop_lon','stop_lat'),crs = 4326) %>%
-    leaflet::leaflet() %>%
-    leaflet::addMarkers() %>%
-    leaflet::addTiles()
-}
-
-
-
+# if(interactive()){
+#   plot(transfer_clusters)
+#
+#
+#   transfer_clusters %>%
+#     dplyr::filter(hour == 6) %>%
+#     dplyr::filter(service_pattern == 'servicepattern-1') %>%
+#     dplyr::filter(cluster == 4|stop_id=='5819') %>%
+#     dplyr::left_join(attr(transfer_clusters,'stop_position'),by = 'stop_id') %>%
+#     sf::st_as_sf(coords = c('stop_lon','stop_lat'),crs = 4326) %>%
+#     leaflet::leaflet() %>%
+#     leaflet::addMarkers(label =  ~n_routes) %>%
+#     leaflet::addTiles()
+#
+#
+#   gtfs$stops %>%
+#     dplyr::filter(stringr::str_detect(stop_name,'TERMINAL')) %>%
+#     sf::st_as_sf(coords = c('stop_lon','stop_lat'),crs = 4326) %>%
+#     leaflet::leaflet() %>%
+#     leaflet::addMarkers() %>%
+#     leaflet::addTiles()
+# }
+#
+#
+#
