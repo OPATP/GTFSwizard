@@ -4,10 +4,10 @@ get_transfer_clusters <- function(obj){
   UseMethod('get_transfer_clusters')
 }
 
-get_transfer_clusters.wizardgtfs <- function(obj){
-  transfers <- get_high_transfer_stops(obj)
-  get_transfer_clusters(transfers)
-}
+# get_transfer_clusters.wizardgtfs <- function(obj){
+#   transfers <- get_high_transfer_stops(obj)
+#   get_transfer_clusters(transfers)
+# }
 
 
 get_transfer_clusters.wzd_transfers <- function(obj){
