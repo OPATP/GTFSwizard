@@ -10,6 +10,7 @@
 #' \describe{
 #'   \item{corridor}{A unique identifier for each corridor, prefixed with "corridor-".}
 #'   \item{stops}{A list of stop IDs included in each corridor.}
+#'   \item{trip_id}{A list of trip IDs included in each corridor.}
 #'   \item{length}{The total length of the corridor, in meters.}
 #'   \item{geometry}{The spatial representation of the corridor as an `sf` linestring object.}
 #' }
@@ -53,7 +54,7 @@ get_corridor <- function(gtfs, i = .01, min.lenght = 1500) {
 
   stops_sf <- get_stops_sf(gtfs$stops)
 
-  transit_data <-
+  suppressMessages({transit_data <-
     gtfs$stop_times %>%
     dplyr::filter(arrival_time != '') %>%
     dplyr::arrange(trip_id, arrival_time) %>%
@@ -61,7 +62,8 @@ get_corridor <- function(gtfs, i = .01, min.lenght = 1500) {
     dplyr::mutate(stop_to = dplyr::lead(stop_from)) %>%
     stats::na.omit() %>%
     dplyr::group_by(stop_from, stop_to) %>%
-    dplyr::reframe(trips = n()) %>%
+    dplyr::reframe(trips = dplyr::n(),
+                   trip_id = list(trip_id)) %>%
     dplyr::filter(dplyr::percent_rank(trips) >= (1 - i)) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(origin = stops_sf$geometry[stops_sf$stop_id == stop_from],
@@ -71,9 +73,13 @@ get_corridor <- function(gtfs, i = .01, min.lenght = 1500) {
     dplyr::mutate(geometry = purrr::map2(origin, destination, ~sf::st_sfc(sf::st_linestring(rbind(sf::st_coordinates(.x), sf::st_coordinates(.y))), crs = 4326))) %>%
     dplyr::select(-origin, -destination) %>%
     tidyr::unnest(cols = 'geometry') %>%
-    sf::st_as_sf()
+    sf::st_as_sf()})
 
-  adjacency_matrix <- sf::st_touches(transit_data$geometry) # Step 1: Create a spatial adjacency matrix using 'st_touches'
+  if(nrow(transit_data) == 0) {
+    stop(crayon::red('No'), ' corridors found for current ', crayon::cyan('i'), ' and ',  crayon::cyan('min.length'), ' values.')
+  }
+
+  suppressMessages({adjacency_matrix <- sf::st_touches(transit_data$geometry)}) # Step 1: Create a spatial adjacency matrix using 'st_touches'
 
   graph <- igraph::graph_from_adj_list(adjacency_matrix, mode = "all") # Step2: Build an undirected graph from the adjacency matrix
 
@@ -81,19 +87,21 @@ get_corridor <- function(gtfs, i = .01, min.lenght = 1500) {
 
   transit_data$group_id <- components$membership # Step 4: Add the component ID as a new column to your data
 
-  transit_data <-
+  suppressMessages({transit_data <-
     transit_data %>%
     dplyr::group_by(group_id) %>%
     dplyr::reframe(geometry = sf::st_union(geometry),
-                   stops = list(c(unique(stop_from), unique(stop_to)))
+                   stops = list(c(unique(stop_from), unique(stop_to))),
+                   trip_id = list(unique(unlist(trip_id)))
     ) %>%
     dplyr::mutate(length = sf::st_length(geometry)) %>%
     dplyr::filter(as.numeric(length) >= min.lenght) %>%
     dplyr::arrange(-length) %>%
-    dplyr::mutate(corridor = paste0('corridor-', 1:n())) %>%
-    dplyr::select(corridor, stops, length, geometry) %>%
-    sf::st_as_sf()
+    dplyr::mutate(corridor = paste0('corridor-', 1:dplyr::n())) %>%
+    dplyr::select(corridor, stop_id = stops, trip_id, length, geometry) %>%
+    sf::st_as_sf()})
 
   return(transit_data)
 
 }
+

@@ -157,7 +157,7 @@ GTFSwizard::get_dwelltimes(for_bus_gtfs, max.dwelltime = 60, method = 'by.trip')
 ## ℹ 52,294 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-GTFSwizard::get_durations(for_bus_gtfs, method = 'detailed')
+GTFSwizard::get_durations(for_bus_gtfs, method = 'detailed', trips = 'all')
 ## A tibble: 1,398,251 × 8
 #   route_id trip_id          hour  from_stop_id to_stop_id duration service_pattern 
 #   <chr>    <chr>            <chr> <chr>        <chr>         <dbl> <fct>           
@@ -175,7 +175,7 @@ GTFSwizard::get_durations(for_bus_gtfs, method = 'detailed')
 ## ℹ 1 more variable: pattern_frequency <int>
 ## ℹ Use `print(n = ...)` to see more rows
 
-GTFSwizard::get_distances(for_bus_gtfs, method = 'by.trip')
+GTFSwizard::get_distances(for_bus_gtfs, method = 'by.trip', trips = 'all')
 ## A tibble: 52,304 × 5
 #   route_id trip_id          distance service_pattern  pattern_frequency
 #   <chr>    <chr>                 [m] <fct>                        <int>
@@ -192,7 +192,7 @@ GTFSwizard::get_distances(for_bus_gtfs, method = 'by.trip')
 ## ℹ 52,294 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-GTFSwizard::get_distances(for_bus_gtfs, method = 'by.route')
+GTFSwizard::get_distances(for_bus_gtfs, method = 'by.route', trips = 'all')
 ## A tibble: 667 × 5
 #   route_id trips average.distance service_pattern  pattern_frequency
 #   <chr>    <int>              [m] <fct>                        <int>
@@ -209,7 +209,7 @@ GTFSwizard::get_distances(for_bus_gtfs, method = 'by.route')
 ## ℹ 657 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-GTFSwizard::get_speeds(for_bus_gtfs, method = 'by.route')
+GTFSwizard::get_speeds(for_bus_gtfs, method = 'by.route', trips = 'all')
 ## A tibble: 667 × 5
 #   route_id trips average.speed service_pattern  pattern_frequency
 #   <chr>    <int>         <dbl> <fct>                        <int>
@@ -265,16 +265,17 @@ GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500) # (dev only)
 #Dimension:     XY
 #Bounding box:  xmin: -38.58585 ymin: -3.795361 xmax: -38.47989 ymax: -3.723135
 #Geodetic CRS:  WGS 84
-## A tibble: 7 × 4
-#  corridor   stops      length                                 geometry
-#  <chr>      <list>        [m]                           <GEOMETRY [°]>
-#1 corridor-1 <chr [20]>  5155. LINESTRING (-38.47989 -3.795361, -38.48…
-#2 corridor-2 <chr [18]>  4123. LINESTRING (-38.58585 -3.737602, -38.58…
-#3 corridor-3 <chr [18]>  4083. LINESTRING (-38.54677 -3.731971, -38.55…
-#4 corridor-4 <chr [16]>  3691. LINESTRING (-38.48669 -3.758195, -38.48…
-#5 corridor-5 <chr [15]>  3690. MULTILINESTRING ((-38.48341 -3.737655, …
-#6 corridor-6 <chr [10]>  1913. LINESTRING (-38.54209 -3.741748, -38.54…
-#7 corridor-7 <chr [11]>  1632. MULTILINESTRING ((-38.53348 -3.72369, -…
+## A tibble: 8 × 5
+#  corridor   stops      trip_id        length                      geometry
+#  <chr>      <list>     <list>            [m]                <GEOMETRY [°]>
+#1 corridor-1 <chr [24]> <chr [3,929]>   6531. LINESTRING (-38.47989 -3.795…
+#2 corridor-2 <chr [18]> <chr [2,569]>   4123. LINESTRING (-38.58585 -3.737…
+#3 corridor-3 <chr [18]> <chr [2,873]>   4083. LINESTRING (-38.54677 -3.731…
+#4 corridor-4 <chr [15]> <chr [12,908]>  3690. MULTILINESTRING ((-38.48341 …
+#5 corridor-5 <chr [13]> <chr [4,193]>   3137. MULTILINESTRING ((-38.54209 …
+#6 corridor-6 <chr [11]> <chr [11,465]>  2352. MULTILINESTRING ((-38.5936 -…
+#7 corridor-7 <chr [6]>  <chr [3,417]>   1635. LINESTRING (-38.4845 -3.7587…
+#8 corridor-8 <chr [8]>  <chr [9,086]>   1625. MULTILINESTRING ((-38.50203 …
 ```
 ## Filtering
 Filtering tools allows customized GTFS data by service patterns, specific dates, service IDs, route IDs, trip IDs, stop IDs, and time ranges. These `filter_` functions help retain only the relevant data, making analysis easier and more focused.
