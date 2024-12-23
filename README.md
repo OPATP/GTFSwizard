@@ -355,7 +355,7 @@ split_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$
 merged_gtfs <- GTFSwizard::merge_gtfs(for_bus_gtfs, for_rail_gtfs)
 
 # Double the speed of all trips
-faster_gtfs = edit_speed(for_rail_gtfs, factor = 2) # (dev only)
+faster_gtfs <- GTFSwizard::edit_speed(for_rail_gtfs, factor = 2) # (dev only)
 ```
 
 Feeds are, then, exported using the `write_gtfs()` function. It saves a standard GTFS `.zip` file, located as declared.
