@@ -42,7 +42,7 @@
 #' @importFrom stats kmeans quantile
 #' @export
 get_hubs_clusters <- function(obj,...){
-  UseMethod('get_transfer_clusters')
+  UseMethod('get_hubs_clusters')
 }
 
 #' @exportS3Method GTFSwizard::get_hubs_clusters wizardgtfs
