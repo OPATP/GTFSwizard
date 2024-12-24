@@ -51,6 +51,7 @@ plot_hubs_cluster <- function(obj,hour){
 plot_hubs_cluster.wzd_hubscluster <- function(obj,hour){
 
   h = hour
+  checkmate::assert_subset(hour,obj$hour)
   pal <- leaflet::colorFactor(palette = viridis::viridis_pal(option = 'H')(4),domain = obj$cluster)
   obj %>%
     dplyr::filter(hour == h) %>%
@@ -72,7 +73,7 @@ plot.wzd_hubscluster <- function(x,hour){
     hour <- x$hour[which.max(x$n_trips)] %>% as.numeric()
   }
   checkmate::assert_numeric(hour)
-
+  checkmate::assert_subset(hour,x$hour)
   h <- hour
   x %>%
     dplyr::filter(hour == h) %>%

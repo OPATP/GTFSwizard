@@ -44,7 +44,7 @@
 get_stop_hubs <- function(gtfs,
                           walk_distance=100,
                           hour,
-                          service=higher_servicepattern()){
+                          service=higher_servicepattern){
 
   if(missing('hour')){
     stop("'hour' is missing with no default")
@@ -67,7 +67,7 @@ get_stop_hubs <- function(gtfs,
 get_stop_hubs.list <- function(gtfs,
                                      walk_distance=100,
                                      hour,
-                                     service=higher_servicepattern()){
+                                     service=higher_servicepattern){
   message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
   gtfs <- as_wizardgtfs(gtfs)
   get_stop_hubs.wizardgtfs(gtfs,walk_distance,hour,service)
@@ -77,13 +77,15 @@ get_stop_hubs.list <- function(gtfs,
 get_stop_hubs.wizardgtfs <- function(gtfs,
                           walk_distance=100,
                           hour,
-                          service){
+                          service=higher_servicepattern){
   service_pattern <- get_servicepattern(gtfs)
 
   if(hour=='all'){
     hour <-  0:24
   }
-
+  if(is.function(service)){
+    service <-  service(gtfs)
+  }
   stops_groups <- get_stops_sf(gtfs$stops) %>%
     latlon2epsg() %>%
     sf::st_buffer(walk_distance) %>%
