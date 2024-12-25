@@ -24,6 +24,7 @@
 #'
 #' @note
 #' - Ensure the input `obj` contains high-transfer stop data if passing a `wzd_transfers` object.
+#'
 #' - The clustering process uses k-means, so results may vary depending on the data distribution.
 #'
 #' @examples

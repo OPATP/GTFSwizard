@@ -19,6 +19,7 @@
 #'
 #' @note
 #' - Ensure the input object `obj` contains valid hub cluster data and stop positions.
+#'
 #' - The hour must be specified as a numeric value between 0 and 24.
 #'
 #' @examples
@@ -66,7 +67,7 @@ plot_hubs_cluster.wzd_hubscluster <- function(obj,hour){
 
 
 #' @exportS3Method base::plot wzd_hubscluster
-plot.wzd_hubscluster <- function(x,hour){
+plot.wzd_hubscluster <- function(x,...){
 
   if(missing('hour')){
     message("Filtering the time with the most trips")

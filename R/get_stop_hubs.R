@@ -24,6 +24,7 @@
 #'
 #' @note
 #' - Ensure the `gtfs` object contains `stop_times`, `trips`, and `stops` tables.
+#'
 #' - If `hour` is missing or invalid, an error will be raised.
 #'
 #' @examples
