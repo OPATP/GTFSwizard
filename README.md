@@ -6,10 +6,9 @@ release 2025-03-15
 
 [![CRAN/METACRAN Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/GTFSwizard?color=blue)](https://CRAN.R-project.org/package=GTFSwizard) <br />
 
-The public transport system is fundamental to sustainable urban mobility, offering cost-
-effectiveness, scalability, and environmental benefits while addressing equity challenges.GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
+GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
 
-Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, and route frequencies. Editing functions to delay and split trips, and to merge distictins GTFS, are available. This is an ongoing work and new features are planned to be implemented soon.
+Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, route frequencies, travel time, corridors and hubs. Editing functions to delay and split trips, and to merge distictins GTFS, are available. This is an ongoing work and new features are planned to be implemented soon.
 
 ## Installation
 ``` r
