@@ -1,12 +1,13 @@
-# GTFSwizard <img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" height="180"> <img align="right" src="figs/logo_ufc.png?raw=true" alt="logo" height="140">
-##### v1.0.0 {CRAN}
-release 2024-11-11
+# GTFSwizard <img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" height="180">
+##### v1.1.0 {CRAN}
+release 2025-03-15
 
 [![Lifecycle: experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
 [![CRAN/METACRAN Total downloads](https://cranlogs.r-pkg.org/badges/grand-total/GTFSwizard?color=blue)](https://CRAN.R-project.org/package=GTFSwizard) <br />
 
-GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
+The public transport system is fundamental to sustainable urban mobility, offering cost-
+effectiveness, scalability, and environmental benefits while addressing equity challenges.GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
 
 Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, and route frequencies. Editing functions to delay and split trips, and to merge distictins GTFS, are available. This is an ongoing work and new features are planned to be implemented soon.
 
@@ -225,7 +226,7 @@ GTFSwizard::get_fleet(for_bus_gtfs, method = 'peak')
 #8     6   380 servicepattern-3                13
 #9     4   374 servicepattern-3                13
 
-GTFSwizard::get_1stdeparture(for_bus_gtfs) # (dev only)
+GTFSwizard::get_1stdeparture(for_bus_gtfs)
 ## A tibble: 35,456 × 4
 #   route_id trip_id          departure_time stop_id
 #   <chr>    <chr>            <chr>          <chr>  
@@ -247,7 +248,7 @@ Corridors and hubs are simplified representations of critical links and nodes on
 - Corridors: the `get_corridor()` and `plot_corridor()` functions retrieves and visualizes high-density transit sections.
 
 ``` r
-GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500) # (dev only)
+GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500)
 #Simple feature collection with 7 features and 3 fields
 #Geometry type: GEOMETRY
 #Dimension:     XY
@@ -265,14 +266,14 @@ GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500) # (dev only)
 #7 corridor-7 <chr [6]>  <chr [3,417]>   1635. LINESTRING (-38.4845 -3.7587…
 #8 corridor-8 <chr [8]>  <chr [9,086]>   1625. MULTILINESTRING ((-38.50203 …
 
-GTFSwizard::plot_corridor(for_bus_gtfs) # (dev only)
+GTFSwizard::plot_corridor(for_bus_gtfs)
 ```
 <img align="center" src="figs/plot_corridor.png" width="400"/>
 
 - Hubs: the `get_hubs()` and `plot_hubs()` functions retrieves and visualizes high-density transit stops.
 
 ``` r
-GTFSwizard::get_hubs(for_bus_gtfs) # (dev only)
+GTFSwizard::get_hubs(for_bus_gtfs)
 #Simple feature collection with 4676 features and 5 fields
 #Geometry type: POINT
 #Dimension:     XY
@@ -294,7 +295,7 @@ GTFSwizard::get_hubs(for_bus_gtfs) # (dev only)
 ## ℹ 4,666 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 
-GTFSwizard::plot_hubs(for_bus_gtfs) # (dev only)
+GTFSwizard::plot_hubs(for_bus_gtfs)
 ```
 <img align="center" src="figs/plot_hubs.png" width="400"/>
 
@@ -360,8 +361,8 @@ GTFSwizard::plot_headways(for_bus_gtfs)
 GTFSwizard provides functions to edit GTFS data directly.
 The `delay_trip()` function allows users to apply a delay to specific trips.
 The `split_trip()` function equally divides a trip in `split` number of points, creating `split + 1` separate trips. This can be useful for analyzing partial routes or for simulating route adjustments.
-The `edit_speed()` (dev only) function adjusts the travel speeds between stops in a GTFS dataset by modifying trip durations based on a specified speed multiplier. It allows selective adjustments for specific trips and stops or applies changes globally.
-The `set_dwelltime()` (dev only) function overwrites dwell times preserving start time and end time of trips. The `edit_dwelltime()` function edit dwell times adjusting the total duration of trips.
+The `edit_speed()` function adjusts the travel speeds between stops in a GTFS dataset by modifying trip durations based on a specified speed multiplier. It allows selective adjustments for specific trips and stops or applies changes globally.
+The `set_dwelltime()` function overwrites dwell times preserving start time and end time of trips. The `edit_dwelltime()` function edit dwell times adjusting the total duration of trips.
 The `merge_gtfs()` function combines two GTFS files, allowing for the integration of distinct GTFS datasets into a single dataset.
 
 ```r
@@ -375,15 +376,15 @@ split_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$
 merged_gtfs <- GTFSwizard::merge_gtfs(for_bus_gtfs, for_rail_gtfs)
 
 # Double the speed of all trips
-faster_gtfs <- GTFSwizard::edit_speed(for_rail_gtfs, factor = 2) # (dev only)
+faster_gtfs <- GTFSwizard::edit_speed(for_rail_gtfs, factor = 2)
 
 # Set and edit dwell times for specific trips
-gtfs <- set_dwelltime(for_rail_gtfs,                             # (dev only)
+gtfs <- set_dwelltime(for_rail_gtfs,                            
                    trips = for_rail_gtfs$trips$trip_id[1:100],
                    stops = for_rail_gtfs$stops$stop_id[1:20],
                    duration = 10)
 
-gtfs <- edit_dwelltime(gtfs,                                     # (dev only)
+gtfs <- edit_dwelltime(gtfs,                                    
                    trips = for_rail_gtfs$trips$trip_id[1:100],
                    stops = for_rail_gtfs$stops$stop_id[1:20],
                    factor = 1.5)
@@ -412,7 +413,7 @@ Feeds are, then, exported using the `write_gtfs()` function. It saves a standard
 GTFSwizard::write_gtfs(for_bus_gtfs, 'path-to-file.zip')
 ```
 
-## Travel Time Matrix (dev only)
+## Travel Time Matrix
 GTFSwizard implements the `tidytransit::raptor()` algorithm that estimates travel time matrices from a `wizardgtfs` object and a few other arguments.
 
 ``` r
@@ -510,10 +511,10 @@ GTFSwizard::get_stops_sf(for_bus_gtfs$stops)
 ## ℹ 4,783 more rows
 ## ℹ Use `print(n = ...)` to see more rows
 ```
-The `latlon2epsg()` function (dev only) determines the appropriate UTM (Universal Transverse Mercator) EPSG code for a given `sf` object based on its centroid's latitude and longitude. This can be very useful for conveniently geoprocessing data in meters.
+The `latlon2epsg()` function determines the appropriate UTM (Universal Transverse Mercator) EPSG code for a given `sf` object based on its centroid's latitude and longitude. This can be very useful for conveniently geoprocessing data in meters.
 
 ``` r
-GTFSwizard::latlon2epsg(get_shapes_sf(for_bus_gtfs)$shapes) # (dev only)
+GTFSwizard::latlon2epsg(get_shapes_sf(for_bus_gtfs)$shapes)
 #Simple feature collection with 675 features and 2 fields
 #Geometry type: LINESTRING
 #Dimension:     XY
@@ -545,6 +546,37 @@ plot(gtfs)
 ```
 <img src="figs/plot.for_gtfs.png" alt="plot.for_gtfs" width="350"/>
 
+## Applications
+The functions described facilitate the analysis, simulation, and evaluation of public
+transportation systems. They assist the replication of real-world transit interventions, enabling
+researchers, planners, and policymakers to test and refine system modifications in a controlled
+and efficient manner. Key applications are outlined below along with their potential uses in
+addressing typical challenges and opportunities in public transit systems.
+
+- **Bus Rapid Transit (BRT) and Exclusive Lanes:** BRT systems often rely on exclusive
+corridors to reduce travel times and enhance reliability. Using `edit_speed()`, users can
+represent changes towards smaller travel times on these corridors by adjusting travel
+speeds. In addition, `edit_dwelltime()` allows the representation of optimized boarding
+and alighting processes, reflecting reduced dwell times at stations due to level boarding,
+pre-payment mechanisms, or increased operational efficiency;
+
+- **Frequency Modifications:** Frequency adjustments are among the most common transit
+interventions. By using `filter_trip()` to select trips to be doubled, `delay_trip()` to
+change its first departure_time, and `merge_gtfs()` to add them to the original GTFS,
+users can represente increased frequencies, reflecting higher service levels. Conversely,
+filter_trip can be used to reduce service frequencies, allowing for the evaluation of
+cost-saving measures or temporary schedule adjustments;
+
+- **Route Segmentation and Partial Adjustments:** With `split_trip()`, users can divide
+existing routes into smaller segments, enabling partial route adjustments. This is
+particularly relevant in studies assessing the feasibility of feeder services, route
+rationalization, or service redundancy elimination.
+
+- **Express Services:** Transit stops significantly influence travel times, operating costs, and
+network coverage. Using `edit_dwell()` and `filter_stop()` can subtract dwell times from
+total trip durations and remove unused stops, representing the introduction of express
+services.
+
 ## Cheat Sheet
 _Under development..._
 
@@ -563,13 +595,17 @@ A BibTeX entry for LaTeX users is
 ``` tex
   @Manual{quesado.guimaraes.2024,
     title = {GTFSwizard: Exploring and Manipulating GTFS Files},
-    author = {Nelson de O. {Quesado Filho} and Caio G. C. Guimarães},
-    year = {2024},
-    note = {R package version 1.0.0},
+    author = {Nelson de O. {Quesado Filho} and Caio G. C. Guimarães} and Francisco Moraes de {Oliveira Neto},
+    year = {2025},
+    note = {R package version 1.1.0},
     url = {https://cran.r-project.org/package=GTFSwizard},
-    doi = {10.32614/CRAN.package.GTFSwizard},
-  }
+    doi = {10.32614/CRAN.package.GTFSwizard}}
   ```
 
-## Acknowledgement <a href="https://det.ufc.br/petran"><img align="right" src="figs/opatp.png" alt="OPA-TP" width="150" /></a>
-**GTFSwizard** is developed by [Nelson Quesado](https://github.com/nelsonquesado/) and [Caio Guimarães](https://github.com/cgmobility) at OPA-TP research group, Universidade Federal do Ceará.
+## Related Publications
+[QUESADO FILHO, N. de O.; GUIMARÃES, C. G. C.; OLIVEIRA NETO, F. M. de. GTFSwizard: a set of tools for exploring and manipulating general transit feed specification in R language. **CONTRIBUCIONES A LAS CIENCIAS SOCIALES**, [S. l.], v. 18, n. 1, p. e14620, 2025. DOI: 10.55905/revconv.18n.1-197.](https://ojs.revistacontribuciones.com/ojs/index.php/clcs/article/view/14620)
+
+
+## Acknowledgement <img align="right" src="figs/logo_ufc.png?raw=true" alt="logo" height="120"> <a href="https://det.ufc.br/petran"><img align="right" src="figs/opatp.png" alt="OPA-TP" width="120" /></a>
+**GTFSwizard** is developed by [Nelson Quesado](https://github.com/nelsonquesado/), [Caio Guimarães](https://github.com/cgmobility) and [Fco. Moraes](https://github.com/orgs/OPATP/people/OliveiraNetoFM) at OPA-TP research group, Universidade Federal do Ceará.
+
