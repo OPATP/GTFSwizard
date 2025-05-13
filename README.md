@@ -8,7 +8,7 @@ release 2025-03-15
 
 GTFSwizard is a set of tools for exploring and manipulating [General Transit Feed Specification (GTFS)](https://gtfs.org/) files in R.
 
-Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within a GTFS file, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, route frequencies, travel time, corridors and hubs. Editing functions to delay and split trips, and to merge distictins GTFS, are available. This is an ongoing work and new features are planned to be implemented soon.
+Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within GTFS files, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, route frequencies, travel times, corridors and hubs. Editing functions to delay, speed change, and split trips, and to merge distinct GTFS are available. This is an ongoing work and new features are planned to be implemented soon.
 
 ## Installation
 ``` r
@@ -56,7 +56,7 @@ summary(gtfs)
 #4676  stops 
 #85410  trips 
 #823  valid days of service 
-#271.4  meters is the average distance between sequencial stops in a given route 
+#271.4  meters is the average distance between sequential stops in a given route 
 ```
 
 GTFS feeds are mainly browsed using the `explore_gtfs()` function. It pops-up an informative and interactive dashboard.
@@ -110,7 +110,7 @@ GTFSwizard::plot_routefrequency(for_bus_gtfs, route = for_bus_gtfs$routes$route_
 
 <img align="center" src="figs/get_routefrequency.png" width="600"/>
 
-You can use `plot_calendar()` to check the numer of trips along the calendar and get a better sense of the `service_pattern` rationale.
+You can use `plot_calendar()` to check the number of trips along the calendar and get a better sense of the `service_pattern` rationale.
 ``` r
 GTFSwizard::plot_calendar(for_bus_gtfs)
 ```
@@ -119,7 +119,7 @@ GTFSwizard::plot_calendar(for_bus_gtfs)
 
 ## Exploring
 
-Routes, frequency, headways, dell times, speeds, shapes, stops, durations, distances, fleet, first departures, and corridors are retrieved using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration()`, the `get_distances()`, the `get_speed()`, the `get_fleet()`, and the `get_1stdeparture()` functions. Some of these functions support several `methods`, such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
+Routes, frequency, headways, dwell times, speeds, shapes, stops, durations, distances, fleet, first departures, and corridors are retrieved using the `get_frequency()`, the `get_headways()`, the `get_dwelltimes()`, the `get_duration()`, the `get_distances()`, the `get_speed()`, the `get_fleet()`, and the `get_1stdeparture()` functions. Some of these functions support several `methods`, such as `by.trip` or `detailed`. Refer to documentation `?` for more information.
 
 ``` r
 GTFSwizard::get_headways(for_bus_gtfs, method = 'by.hour')
@@ -299,14 +299,14 @@ GTFSwizard::plot_hubs(for_bus_gtfs)
 <img align="center" src="figs/plot_hubs.png" width="400"/>
 
 ## Filtering
-Filtering tools allows customized GTFS data by service patterns, specific dates, service IDs, route IDs, trip IDs, stop IDs, and time ranges. These `filter_` functions help retain only the relevant data, making analysis easier and more focused.
+Filtering tools allows customization of GTFS data by service patterns, specific dates, service IDs, route IDs, trip IDs, stop IDs, and time ranges. These `filter_` functions help retain only the relevant data, making analysis easier and more focused.
 
 - `filter_servicepattern()`: Filter by specified service patterns. Defaults to the most frequent pattern (typical day) if none is provided.
 - `filter_date()`: Filter data by specific dates, returning only services active on those dates.
 - `filter_service()`: Filter by specific service IDs to retain.
 - `filter_route()`: Filter by route ID. Set `keep = TRUE` to retain specified routes or `keep = FALSE` to exclude them.
 - `filter_trip()`: Filter by trip ID. Set `keep = TRUE` to retain specified trips or `keep = FALSE` to exclude them.
-- `filter_stop()`: Filter by stop ID, keeping only associated stops and related data. It is very usefull when used together with `GTFSwizard::get_stops_sf` and `sf::st_filter()`, as can geographically filter GTFS data.
+- `filter_stop()`: Filter by stop ID, keeping only associated stops and related data. It is very useful when used together with `GTFSwizard::get_stops_sf` and `sf::st_filter()`, as can geographically filter GTFS data.
 - `filter_time()`: Filter by a specified time range (`from` and `to`).
 
 ``` r
@@ -366,7 +366,7 @@ The `merge_gtfs()` function combines two GTFS files, allowing for the integratio
 
 ```r
 # Delay trips by 5 minutes (300 seconds)
-delayed_gtfs <- GTFSwizard::delay_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$trips_id[1:2], delay = 300)
+delayed_gtfs <- GTFSwizard::delay_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$trip_id[1:2], delay = 300)
 
 # Split a trip in 3 sections (2 splits)
 split_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$trip_id[1:2], split = 2)
@@ -562,7 +562,7 @@ pre-payment mechanisms, or increased operational efficiency;
 - **Frequency Modifications:** Frequency adjustments are among the most common transit
 interventions. By using `filter_trip()` to select trips to be doubled, `delay_trip()` to
 change its first departure_time, and `merge_gtfs()` to add them to the original GTFS,
-users can represente increased frequencies, reflecting higher service levels. Conversely,
+users can represent increased frequencies, reflecting higher service levels. Conversely,
 filter_trip can be used to reduce service frequencies, allowing for the evaluation of
 cost-saving measures or temporary schedule adjustments;
 
@@ -583,7 +583,7 @@ _Under development..._
 Contributions are welcome! To report a bug, suggest a feature, or contribute code, please use the repository’s [Issues](https://github.com/OPATP/GTFSwizard/issues).
 
 ## Related Packages
-GTFSwizard mainly relies on [dplyr](https://dplyr.tidyverse.org/) and [sf](https://r-spatial.github.io/sf/) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling, and [tidytansit](https://github.com/r-transit/tidytransit) for the `raptor` implementation.
+GTFSwizard mainly relies on [dplyr](https://dplyr.tidyverse.org/) and [sf](https://r-spatial.github.io/sf/) for data wrangling, [leaflet](https://leafletjs.com/) for map rendering, [ggplot2](https://ggplot2.tidyverse.org/) and [plotly](https://plotly.com/r/) for data visualization, [shiny](https://shiny.posit.co/) for the `explore_gtfs()` application assembling, and [tidytransit](https://github.com/r-transit/tidytransit) for the `raptor` implementation.
 
 ## Citation
 To cite package ‘GTFSwizard’ in publications use:
@@ -594,7 +594,7 @@ A BibTeX entry for LaTeX users is
 ``` tex
   @Manual{quesado.guimaraes.2024,
     title = {GTFSwizard: Exploring and Manipulating GTFS Files},
-    author = {Nelson de O. {Quesado Filho} and Caio G. C. Guimarães} and Francisco Moraes de {Oliveira Neto},
+    author = {Nelson de O. {Quesado Filho} and Caio G. C. {Guimarães} and Francisco Moraes de {Oliveira Neto},
     year = {2025},
     note = {R package version 1.1.0},
     url = {https://cran.r-project.org/package=GTFSwizard},
