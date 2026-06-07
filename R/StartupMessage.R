@@ -1,5 +1,6 @@
 GTFSwizard.StartupMessage <- function(){
-  msg <- paste0(crayon::blue$bold("
+  paste0(
+    "
       _____ _______ ______ _____
      / ____|__   __|  ____/ ____|
     | |  __   | |  | |__ | (___
@@ -10,8 +11,10 @@ GTFSwizard.StartupMessage <- function(){
     \\ \\ /\\ / | |_  / _` | '__/ _` |
      \\ V  V /| |/ | (_| | | | (_| |
       \\_/\\_/ |_/___\\__,_|_|  \\__,_|
-"))
-  msg <- paste0(msg, crayon::cyan$italic("######## "), crayon::green$italic("version "), crayon::green$italic('1.2.0'), crayon::green(' (dev)'), crayon::cyan$italic(' ##########'),"\n")
-  msg <- paste0(msg, crayon::cyan('Type \'citation("GTFSwizard")\' for\nciting this R package in publications. \n'))
-  return(msg)
+",
+    "######## version ", utils::packageVersion("GTFSwizard"),
+    " ##########\n",
+    "Type 'citation(\"GTFSwizard\")' for\n",
+    "citing this R package in publications."
+  )
 }

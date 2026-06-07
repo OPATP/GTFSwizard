@@ -21,13 +21,13 @@ get_durations(gtfs, method = "by.route", trips = "all")
 \value{
 A data frame containing trip durations based on the specified method:
   \describe{
-    \item{If `method = "by.route"`}{It includes dwell times. Returns a summary data frame with columns: `route_id`, `trips`, `average.duration`, `service_pattern`, and `pattern_frequency`.}
-    \item{If `method = "by.trip"`}{It includes dwell times. Returns a data frame with columns: `route_id`, `trip_id`, `duration`, `service_pattern`, and `pattern_frequency`.}
+    \item{If `method = "by.route"`}{Includes dwell from first departure to final arrival.}
+    \item{If `method = "by.trip"`}{Includes dwell from first departure to final arrival.}
     \item{If `method = "detailed"`}{It does not include dwell times. Returns a data frame with columns: `route_id`, `trip_id`, `hour`, `from_stop_id`, `to_stop_id`, `duration`, `service_pattern`, and `pattern_frequency`.}
   }
 }
 \description{
-The `get_durations` function calculates trip durations within a `wizardgtfs` object using different methods. Depending on the selected `method`, it can provide average durations per route, durations for individual trips, or detailed segment durations between stops.
+Calculates scheduled trip and segment durations in seconds.
 }
 \details{
 This function calls specific sub-functions based on the selected method:

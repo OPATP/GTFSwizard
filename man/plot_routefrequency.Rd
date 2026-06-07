@@ -7,30 +7,24 @@
 plot_routefrequency(gtfs, route = NULL)
 }
 \arguments{
-\item{gtfs}{A GTFS object. Ideally, this should be of the `wizardgtfs` class, or it will be converted.}
+\item{gtfs}{A GTFS object.}
 
-\item{route}{A character vector specifying one or more `route_id` values to plot. If `NULL`, all routes are included.}
+\item{route}{Optional character vector of route IDs. `NULL` includes all
+routes.}
 }
 \value{
-A `plotly` interactive plot displaying the frequency distribution by hour for each selected route, with:
-
-  - Hourly Frequency: A line for each route, indicating its frequency distribution across the day.
-
-  - Service Patterns: Transparency levels indicate different service patterns, with the primary pattern highlighted.
+A `ggplot` object.
 }
 \description{
-`plot_routefrequency` generates an interactive plot of the frequency of trips by hour for specified routes in a GTFS dataset. The plot shows the hourly frequency distribution for each route and visualizes different service patterns.
-}
-\details{
-The function filters the GTFS dataset by route and computes hourly frequencies for each service pattern. The plot shows variations in service frequency across hours and highlights the primary service pattern.
+Plot Route Frequency by Hour
 }
 \examples{
-if (interactive()) {
-# Plot frequency by hour for specific routes
-plot_routefrequency(for_rail_gtfs, route = for_rail_gtfs$routes$route_id[1:2])
-}
+plot_routefrequency(
+  for_rail_gtfs,
+  route = for_rail_gtfs$routes$route_id[1:2]
+)
 
 }
 \seealso{
-[GTFSwizard::filter_route()], [GTFSwizard::get_frequency()]
+[GTFSwizard::get_frequency()]
 }

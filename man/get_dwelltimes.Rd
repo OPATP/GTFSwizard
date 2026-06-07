@@ -38,9 +38,9 @@ This function calls specific sub-functions based on the selected method:
 
 - "by.route": Calculates average dwell times across each route.
 
-- "by.trip": Calculates the total dwell time for each trip.
+- "by.trip": Calculates the mean dwell time for each trip.
 
-- "detailed": Calculates the dwell time between consecutive stops within each trip.
+- "detailed": Calculates departure minus arrival at each stop call.
 
 If an invalid `method` is specified, the function defaults to `"by.route"` and provides a warning.
 }

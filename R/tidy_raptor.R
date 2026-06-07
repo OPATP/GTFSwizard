@@ -45,10 +45,6 @@
 #' @seealso [tidytransit::raptor()], [GTFSwizard::as_wizardgtfs()], [GTFSwizard::filter_time()]
 #'
 #' @importFrom dplyr mutate
-#' @importFrom stringr str_split
-#' @importFrom data.table data.table
-#' @importFrom tidytransit raptor
-#' @importFrom hms as_hms
 #' @export
 
 tidy_raptor <- function(gtfs,
@@ -62,15 +58,21 @@ tidy_raptor <- function(gtfs,
                         keep = "all",
                         filter = TRUE) {
 
-  if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('The gtfs object is not of the wizardgtfs class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
+  require_pkg("tidytransit", "`tidy_raptor()`")
+  require_pkg("data.table", "`tidy_raptor()`")
+  require_pkg("hms", "`tidy_raptor()`")
+  gtfs <- ensure_wizardgtfs(gtfs)
+
+  checkmate::assert_flag(filter)
+  checkmate::assert_flag(arrival)
+  assert_known_ids(stop_ids, gtfs$stops$stop_id, "stop", "`gtfs$stops`")
+
+  limits <- gtfs_time_to_seconds(c(min_departure, max_arrival))
+  if(anyNA(limits)){
+    gw_stop("`min_departure` and `max_arrival` must be valid GTFS times.")
   }
-
-  checkmate::assert_logical(filter)
-
-  if(stringr::str_split(max_arrival, ":") %>% lapply(FUN = as.numeric) %>% lapply(FUN = function(x){x[1]*60*60+x[2]*60+x[3]}) %>% unlist > 86399){
-    stop(crayon::cyan('max.arrival'), ' must be', crayon::cyan(' 23:59:59'), ' or earlier')
+  if(limits[2] > 86399){
+    gw_stop('`max_arrival` must be 23:59:59 or earlier.')
   }
 
   if(filter) {
@@ -82,37 +84,24 @@ tidy_raptor <- function(gtfs,
     gtfs2 <- gtfs
   }
 
-  stop_times <-
-    gtfs2$stop_times %>%
-    dplyr::mutate(arrival_time_num = arrival_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  departure_time_num = departure_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit()) %>%
-    dplyr::mutate(arrival_time = hms::as_hms(arrival_time),
-                  departure_time = hms::as_hms(departure_time)) %>%
+  stop_times <- gtfs2$stop_times |>
+    dplyr::mutate(
+      arrival_time_num = gtfs_time_to_seconds(arrival_time),
+      departure_time_num = gtfs_time_to_seconds(departure_time),
+      arrival_time = hms::as_hms(arrival_time_num),
+      departure_time = hms::as_hms(departure_time_num)
+    ) |>
     data.table::data.table()
 
   raptor_results <-
     tidytransit::raptor(
       stop_times = stop_times,
       transfers = NULL,
-      stop_ids,
-      arrival,
-      time_range,
-      max_transfers,
-      keep
+      stop_ids = stop_ids,
+      arrival = arrival,
+      time_range = time_range,
+      max_transfers = max_transfers,
+      keep = keep
     )
 
   raptor_results <-

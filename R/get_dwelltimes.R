@@ -27,9 +27,9 @@
 #'
 #' - "by.route": Calculates average dwell times across each route.
 #'
-#' - "by.trip": Calculates the total dwell time for each trip.
+#' - "by.trip": Calculates the mean dwell time for each trip.
 #'
-#' - "detailed": Calculates the dwell time between consecutive stops within each trip.
+#' - "detailed": Calculates departure minus arrival at each stop call.
 #'
 #' If an invalid `method` is specified, the function defaults to `"by.route"` and provides a warning.
 #'
@@ -50,208 +50,98 @@
 #' [GTFSwizard::as_wizardgtfs()], [GTFSwizard::get_servicepattern()]
 #'
 #' @importFrom dplyr mutate group_by reframe select left_join filter
-#' @importFrom stringr str_split str_extract
 #' @export
 get_dwelltimes <- function(gtfs, max.dwelltime = 90, method = 'by.route'){
-
-  if (method == 'by.hour') {
-    dwell_time <- get_dwelltime_byhour(gtfs, max.dwelltime = max.dwelltime)
-  }
-
-  if (method == 'by.route') {
-    dwell_time <- get_dwelltime_byroute(gtfs, max.dwelltime = max.dwelltime)
-  }
-
-  if (method == 'by.trip') {
-    dwell_time <- get_dwelltime_bytrip(gtfs, max.dwelltime = max.dwelltime)
-  }
-
-  if (method == 'detailed') {
-    dwell_time <- get_dwelltime_detailed(gtfs, max.dwelltime = max.dwelltime)
+  if(!is.numeric(max.dwelltime) || length(max.dwelltime) != 1L ||
+     is.na(max.dwelltime) || max.dwelltime < 0){
+    gw_stop("`max.dwelltime` must be one non-negative number of seconds.")
   }
 
   if (!method %in% c('by.hour', 'by.route', 'detailed', 'by.trip')) {
-    dwell_time <- get_dwelltime_byroute(gtfs)
-    warning(crayon::cyan('method'), ' should be one of ', crayon::cyan('by.hour'), ',', crayon::cyan(' by.route'), ',', crayon::cyan(' by.trip'), ', or ', crayon::cyan('detailed'), '. Returning ', crayon::cyan('method = "by.route"'),'.')
+    gw_warn_invalid_method(
+      method,
+      c('by.hour', 'by.route', 'by.trip', 'detailed'),
+      'by.route'
+    )
+    method <- 'by.route'
   }
 
-  return(dwell_time)
+  switch(
+    method,
+    by.hour = get_dwelltime_byhour(gtfs, max.dwelltime),
+    by.route = get_dwelltime_byroute(gtfs, max.dwelltime),
+    by.trip = get_dwelltime_bytrip(gtfs, max.dwelltime),
+    detailed = get_dwelltime_detailed(gtfs, max.dwelltime)
+  )
 
 }
 
 get_dwelltime_byhour <- function(gtfs, max.dwelltime = 90){
 
-  if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
-  }
-
-  service_pattern <-
-    GTFSwizard::get_servicepattern(gtfs)
-
-  dwell_time <-
-    gtfs$stop_times %>%
-    dplyr::filter(!arrival_time == '' & !departure_time == "") %>%
-    dplyr::left_join(gtfs$trips, by = dplyr::join_by(trip_id)) %>%
-    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>%
-    dplyr::group_by(arrival_time, departure_time, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(n = n()) %>%
-    dplyr::mutate(hour = str_extract(arrival_time, "\\d+") %>% as.numeric(),
-                  arrival_time = arrival_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  departure_time = departure_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  dwell_time = departure_time - arrival_time
-    ) %>%
-    dplyr::filter(dwell_time <= max.dwelltime) %>%
+  dwell_time_data(gtfs, max.dwelltime) %>%
     dplyr::group_by(hour, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n),
-                   trips = n()) %>%
+    dplyr::reframe(
+      average.dwelltime = mean(dwell_time),
+      trips = dplyr::n(),
+      .groups = "drop"
+    ) %>%
     dplyr::select(hour, trips, average.dwelltime, service_pattern, pattern_frequency)
-
-  return(dwell_time)
 
 }
 
 get_dwelltime_byroute <- function(gtfs, max.dwelltime = 90){
 
-  if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
-  }
-
-  service_pattern <-
-    GTFSwizard::get_servicepattern(gtfs)
-
-  dwell_time <-
-    gtfs$stop_times %>%
-    dplyr::filter(!arrival_time == '' & !departure_time == "") %>%
-    dplyr::left_join(gtfs$trips, by = dplyr::join_by(trip_id)) %>%
-    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>%
-    dplyr::group_by(route_id, trip_id, arrival_time, departure_time, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(n = n()) %>%
-    dplyr::mutate(arrival_time = arrival_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  departure_time = departure_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  dwell_time = departure_time - arrival_time
-    ) %>%
-    dplyr::filter(dwell_time <= max.dwelltime) %>%
+  dwell_time_data(gtfs, max.dwelltime) %>%
     dplyr::group_by(route_id, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n),
-                   trips = n()) %>%
+    dplyr::reframe(
+      average.dwelltime = mean(dwell_time),
+      trips = dplyr::n(),
+      .groups = "drop"
+    ) %>%
     dplyr::select(route_id, trips, average.dwelltime, service_pattern, pattern_frequency)
-
-  return(dwell_time)
 
 }
 
 get_dwelltime_bytrip <- function(gtfs, max.dwelltime = 90){
 
-  if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
-  }
-
-  service_pattern <-
-    GTFSwizard::get_servicepattern(gtfs)
-
-  dwell_time <-
-    gtfs$stop_times %>%
-    dplyr::filter(!arrival_time == '' & !departure_time == "") %>%
-    dplyr::left_join(gtfs$trips, by = dplyr::join_by(trip_id)) %>%
-    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>%
-    dplyr::group_by(route_id, trip_id, arrival_time, departure_time, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(n = n()) %>%
-    dplyr::mutate(arrival_time = arrival_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  departure_time = departure_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  dwell_time = departure_time - arrival_time
-    ) %>%
-    dplyr::filter(dwell_time <= max.dwelltime) %>%
+  dwell_time_data(gtfs, max.dwelltime) %>%
     dplyr::group_by(route_id, trip_id, service_pattern, pattern_frequency) %>%
-    dplyr::reframe(average.dwelltime = weighted.mean(dwell_time, n)) %>%
+    dplyr::reframe(
+      average.dwelltime = mean(dwell_time),
+      .groups = "drop"
+    ) %>%
     dplyr::select(route_id, trip_id, average.dwelltime, service_pattern, pattern_frequency)
-
-  return(dwell_time)
 
 }
 
 get_dwelltime_detailed <- function(gtfs, max.dwelltime = 90){
 
-  if(!"wizardgtfs" %in% class(gtfs)){
-    gtfs <- GTFSwizard::as_wizardgtfs(gtfs)
-    message('This gtfs object is not of the ', crayon::cyan('wizardgtfs'), ' class. Computation may take longer. Using ', crayon::cyan('as_gtfswizard()'), ' is advised.')
-  }
-
-  service_pattern <-
-    GTFSwizard::get_servicepattern(gtfs)
-
-  dwell_time <-
-    gtfs$stop_times %>%
-    dplyr::filter(!arrival_time == '' & !departure_time == "") %>%
-    dplyr::mutate(hour = str_extract(arrival_time, "\\d+") %>% as.numeric(),
-                  arrival_time = arrival_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  departure_time = departure_time %>%
-                    stringr::str_split(":") %>%
-                    lapply(FUN = as.numeric) %>%
-                    lapply(FUN = function(x){
-                      x[1]*60*60+x[2]*60+x[3]
-                    }) %>%
-                    unlist() %>%
-                    na.omit(),
-                  dwell_time = departure_time - arrival_time
-    ) %>%
-    dplyr::filter(dwell_time <= max.dwelltime) %>%
-    dplyr::left_join(gtfs$trips, by = dplyr::join_by(trip_id)) %>%
-    dplyr::left_join(service_pattern, by = 'service_id', relationship = 'many-to-many') %>%
+  dwell_time_data(gtfs, max.dwelltime) %>%
     dplyr::select(route_id, trip_id, stop_id, hour, dwell_time, service_pattern, pattern_frequency)
-
-  return(dwell_time)
 
 }
 
+dwell_time_data <- function(gtfs, max.dwelltime){
+  gtfs <- ensure_wizardgtfs(gtfs)
+  service_pattern <- GTFSwizard::get_servicepattern(gtfs)
+
+  gtfs$stop_times %>%
+    dplyr::filter(!arrival_time == '' & !departure_time == "") %>%
+    dplyr::mutate(
+      arrival_seconds = gtfs_time_to_seconds(arrival_time),
+      departure_seconds = gtfs_time_to_seconds(departure_time),
+      hour = floor(arrival_seconds / 3600),
+      dwell_time = departure_seconds - arrival_seconds
+    ) %>%
+    dplyr::filter(
+      !is.na(dwell_time),
+      dwell_time >= 0,
+      dwell_time <= max.dwelltime
+    ) %>%
+    dplyr::left_join(gtfs$trips, by = "trip_id") %>%
+    dplyr::left_join(
+      service_pattern,
+      by = "service_id",
+      relationship = "many-to-many"
+    )
+}
