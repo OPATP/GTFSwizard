@@ -1,3 +1,32 @@
+# GTFSwizard 1.1.1
+
+* `create_gtfs()` introduced.
+
+* CRAN resubmission release following archival caused by the archived
+  `hrbrthemes` dependency. The dependency has been removed, and the package
+  dependency set has been substantially reduced.
+
+* GTFS editing and selection
+  - `filter_stop()` and `filter_time()` now preserve partial trips for
+    experimentation instead of restoring complete stop sequences.
+  - `selection()` now supports grouping columns and computed groups in a style
+    similar to `dplyr::group_by()`, while continuing to support logical and
+    spatial selections without altering GTFS tables.
+
+* Plotting and dashboard
+  - Fixed repeated warnings and `-Inf` values when
+    `shape_dist_traveled` contains only missing values.
+  - `explore_gtfs()` removes duplicated system information, assigns distinct
+    route colors, and filters non-finite plotting values.
+  - All static plots use a shared visual theme and palette.
+
+* Package quality
+  - Added Francisco Moraes de Oliveira Neto as an author.
+  - Expanded integrity, round-trip, selection, spatial, plotting, and
+    regression tests.
+  - Reviewed exported function documentation and GTFS logic against the
+    current GTFS Schedule reference.
+
 # GTFSwizard 1.1.0
 
 * Now featuring travel time matrices, trip speed and dweel time edition, corridors, hubs, and more!

@@ -1,18 +1,19 @@
-── R CMD check results ──────────────────────────── GTFSwizard 1.1.0 ────
-Duration: 3m 4.1s
+## R CMD check results
 
-❯ checking package dependencies ... NOTE
-  Imports includes 28 non-default packages.
-  Importing from so many packages makes the package vulnerable to any of
-  them becoming unavailable.  Move as many as possible to Suggests and
-  use conditionally.
+0 errors | 0 warnings | 1 note
 
-❯ checking installed package size ... NOTE
-    installed size is  5.3Mb
-    sub-directories of 1Mb or more:
-      data   4.8Mb
+## Resubmission
 
-❯ checking for future file timestamps ... NOTE
-  unable to verify current time
+This is version 1.1.1, a resubmission after GTFSwizard was archived on
+2025-09-09 because it imported the archived package `hrbrthemes`.
 
-0 errors ✔ | 0 warnings ✔ | 3 notes ✖
+The `hrbrthemes` dependency has been removed. The package now uses a smaller
+set of necessary imports and no longer depends on any archived package.
+
+The version has been increased from the previously published 1.1.0 to 1.1.1.
+
+The NOTE reports that this is a new submission of a package archived on
+2025-09-09 because of the former `hrbrthemes` dependency. This is the reason
+for the resubmission.
+
+All examples, tests, Rd files, dependencies, and package code passed.
