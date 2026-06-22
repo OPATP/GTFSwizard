@@ -4,7 +4,7 @@
 \alias{get_corridor}
 \title{Identify High-Frequency Transit Corridors}
 \usage{
-get_corridor(gtfs, i = 0.01, min.length = 1500)
+get_corridor(gtfs, i = 0.01, min_length = 1500, ...)
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
@@ -12,7 +12,9 @@ get_corridor(gtfs, i = 0.01, min.length = 1500)
 \item{i}{Proportion of the highest-frequency stop pairs to retain. Must be
 greater than 0 and no greater than 1.}
 
-\item{min.length}{Minimum corridor length in meters.}
+\item{min_length}{Minimum corridor length in meters.}
+
+\item{...}{Supports the legacy argument `min.length`.}
 }
 \value{
 An `sf` object with `corridor`, list-columns `stop_id` and
@@ -24,7 +26,7 @@ Finds frequently served adjacent stop pairs, joins connected pairs into
 corridors, and measures them in a local metric CRS.
 }
 \examples{
-corridors <- get_corridor(for_rail_gtfs, i = 0.2, min.length = 100)
+corridors <- get_corridor(for_rail_gtfs, i = 0.2, min_length = 100)
 
 }
 \seealso{

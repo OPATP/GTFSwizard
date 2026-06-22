@@ -4,8 +4,9 @@
 #' foreign-key references receive feed-specific suffixes, preventing accidental
 #' collisions.
 #'
-#' @param gtfs.x,gtfs.y GTFS objects.
+#' @param gtfs_x,gtfs_y GTFS objects.
 #' @param suffix Logical. Append `.x` and `.y` to identifiers when `TRUE`.
+#' @param ... Supports the legacy arguments `gtfs.x` and `gtfs.y`.
 #'
 #' @return A validated `wizardgtfs` object.
 #'
@@ -21,23 +22,36 @@
 #' @references
 #' [GTFS Schedule Reference](https://gtfs.org/documentation/schedule/reference/)
 #' @export
-merge_gtfs <- function(gtfs.x, gtfs.y, suffix = TRUE){
-  checkmate::assert_flag(suffix)
-  gtfs.x <- ensure_wizardgtfs(gtfs.x)
-  gtfs.y <- ensure_wizardgtfs(gtfs.y)
-  gtfs.x$dates_services <- NULL
-  gtfs.y$dates_services <- NULL
+merge_gtfs <- function(gtfs_x = NULL, gtfs_y = NULL, suffix = TRUE, ...){
+  dots <- list(...)
+  resolved_x <- resolve_legacy_argument(
+    gtfs_x, missing(gtfs_x), dots, "gtfs.x", "gtfs_x"
+  )
+  gtfs_x <- resolved_x$value
+  resolved_y <- resolve_legacy_argument(
+    gtfs_y, missing(gtfs_y), resolved_x$dots, "gtfs.y", "gtfs_y"
+  )
+  gtfs_y <- resolved_y$value
+  gw_check_unused_dots(resolved_y$dots)
+  if(is.null(gtfs_x) || is.null(gtfs_y)){
+    gw_stop("supply both `gtfs_x` and `gtfs_y`.")
+  }
+  gw_assert_flag(suffix, "suffix")
+  gtfs_x <- ensure_wizardgtfs(gtfs_x)
+  gtfs_y <- ensure_wizardgtfs(gtfs_y)
+  gtfs_x$dates_services <- NULL
+  gtfs_y$dates_services <- NULL
 
   if(suffix){
-    gtfs.x <- suffix_gtfs_ids(gtfs.x, ".x")
-    gtfs.y <- suffix_gtfs_ids(gtfs.y, ".y")
+    gtfs_x <- suffix_gtfs_ids(gtfs_x, ".x")
+    gtfs_y <- suffix_gtfs_ids(gtfs_y, ".y")
   }
 
-  table_names <- union(names(gtfs.x), names(gtfs.y))
+  table_names <- union(names(gtfs_x), names(gtfs_y))
   merged <- setNames(vector("list", length(table_names)), table_names)
   for(table_name in table_names){
     merged[[table_name]] <- dplyr::distinct(dplyr::bind_rows(
-      gtfs.x[[table_name]], gtfs.y[[table_name]]
+      gtfs_x[[table_name]], gtfs_y[[table_name]]
     ))
   }
   GTFSwizard::as_wizardgtfs(merged, build_shapes = FALSE)

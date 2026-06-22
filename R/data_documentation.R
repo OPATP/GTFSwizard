@@ -34,25 +34,6 @@
 #' head(for_bus_gtfs$stops)
 #'
 #' @importFrom dplyr %>%
-#' @importFrom dplyr n
-#' @importFrom dplyr lag
-#' @importFrom dplyr lead
-#' @importFrom dplyr if_else
-#' @importFrom sf st_contains
-#' @importFrom sf st_crosses
-#' @importFrom sf st_crs<-
-#' @importFrom sf st_drop_geometry
-#' @importFrom sf st_equals
-#' @importFrom sf st_intersects
-#' @importFrom sf st_overlaps
-#' @importFrom sf st_point
-#' @importFrom sf st_sfc
-#' @importFrom sf st_touches
-#' @importFrom sf st_within
-#' @importFrom ggplot2 element_blank
-#' @importFrom ggplot2 element_text
-#' @importFrom ggplot2 theme_light
-#' @importFrom ggplot2 theme_linedraw
 utils::globalVariables(c("hour", "period", "n", "count", "direction_id"))
 #data("for_bus_gtfs")
 

@@ -4,24 +4,26 @@
 \alias{get_fleet}
 \title{Estimate Simultaneous Vehicles}
 \usage{
-get_fleet(gtfs, method = "by.route")
+get_fleet(gtfs, method = "by_route")
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
 
-\item{method}{One of `"by.route"`, `"by.hour"`, `"peak"`, or `"detailed"`.}
+\item{method}{One of `"by_route"`, `"by_hour"`, `"peak"`, or `"detailed"`.
+Legacy dotted values remain accepted.}
 }
 \value{
 A tibble containing fleet estimates by the selected grouping and
 service pattern. GTFS times beyond 24 hours remain in the following service
-day rather than being wrapped.
+day rather than being wrapped. Route outputs include `direction_id` when
+available.
 }
 \description{
 Estimates the number of active trip instances from their first departure to
 final arrival. Frequency-based services are expanded from `frequencies.txt`.
 }
 \examples{
-get_fleet(for_rail_gtfs, "by.route")
-get_fleet(for_rail_gtfs, "by.hour")
+get_fleet(for_rail_gtfs, "by_route")
+get_fleet(for_rail_gtfs, "by_hour")
 
 }

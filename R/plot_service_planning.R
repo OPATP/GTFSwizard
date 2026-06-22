@@ -17,7 +17,7 @@
 #' [GTFS Routes, Stops, and Trips](https://gtfs.org/documentation/schedule/examples/routes-stops-trips/)
 #' @export
 plot_servicespan <- function(gtfs, top_n = 30L){
-  checkmate::assert_int(top_n, lower = 1L)
+  gw_assert_int(top_n, "top_n", lower = 1L)
   gtfs <- ensure_wizardgtfs(gtfs)
   durations <- trip_duration_table(gtfs)
   starts <- get_1stdeparture(gtfs) |>
@@ -124,7 +124,10 @@ plot_serviceheatmap <- function(gtfs){
       service_dates = dplyr::n_distinct(.data$date),
       .groups = "drop"
     ) |>
-    dplyr::filter(is.finite(.data$average_departures))
+    dplyr::filter(
+      is.finite(.data$hour),
+      is.finite(.data$average_departures)
+    )
   if(!nrow(data)){
     gw_stop("no weekday-hour service data are available to plot.")
   }
@@ -170,7 +173,7 @@ plot_serviceheatmap <- function(gtfs){
 #' [FTA Evaluation Introduction](https://www.transit.dot.gov/research-innovation/evaluation-introduction)
 #' @export
 plot_routeduration <- function(gtfs, top_n = 20L){
-  checkmate::assert_int(top_n, lower = 1L)
+  gw_assert_int(top_n, "top_n", lower = 1L)
   gtfs <- ensure_wizardgtfs(gtfs)
   data <- trip_duration_table(gtfs) |>
     dplyr::left_join(
@@ -230,7 +233,7 @@ plot_routeduration <- function(gtfs, top_n = 20L){
 #' [FTA National Transit Database](https://www.transit.dot.gov/ntd)
 #' @export
 plot_servicesupply <- function(gtfs, top_n = 20L){
-  checkmate::assert_int(top_n, lower = 1L)
+  gw_assert_int(top_n, "top_n", lower = 1L)
   gtfs <- ensure_wizardgtfs(gtfs)
   data <- trip_duration_table(gtfs) |>
     dplyr::left_join(

@@ -4,19 +4,22 @@
 \alias{plot_routefrequency}
 \title{Plot Route Frequency by Hour}
 \usage{
-plot_routefrequency(gtfs, route = NULL)
+plot_routefrequency(gtfs, route = NULL, top_n = 25L)
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
 
 \item{route}{Optional character vector of route IDs. `NULL` includes all
-routes.}
+routes after applying `top_n`.}
+
+\item{top_n}{Maximum number of routes to display when `route` is `NULL`.}
 }
 \value{
 A `ggplot` object.
 }
 \description{
-Plot Route Frequency by Hour
+Creates a heatmap of scheduled departures by route, hour, and service
+pattern. The tile fill is the number of scheduled trips.
 }
 \examples{
 plot_routefrequency(

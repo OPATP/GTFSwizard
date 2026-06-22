@@ -22,9 +22,8 @@ omitted, GTFS dates use `YYYYMMDD`, and spatial stops/shapes are converted
 back to standard text-table columns.
 }
 \examples{
-\dontrun{
-write_gtfs(for_rail_gtfs, "gtfs_export.zip")
-}
+path <- tempfile(fileext = ".zip")
+write_gtfs(for_rail_gtfs, path)
 
 }
 \seealso{

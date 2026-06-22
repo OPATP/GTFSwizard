@@ -4,14 +4,16 @@
 \alias{plot_corridor}
 \title{Plot High-Frequency Corridors}
 \usage{
-plot_corridor(gtfs, i = 0.01, min.length = 1500)
+plot_corridor(gtfs, i = 0.01, min_length = 1500, ...)
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
 
 \item{i}{Proportion of highest-frequency segments to retain.}
 
-\item{min.length}{Minimum corridor length in meters.}
+\item{min_length}{Minimum corridor length in meters.}
+
+\item{...}{Supports the legacy argument `min.length`.}
 }
 \value{
 A `ggplot` map.

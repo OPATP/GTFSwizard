@@ -1,21 +1,26 @@
 gtfswizard_colors <- function(){
   c(
-    ink = "#24323D",
-    blue = "#2F6B8A",
-    teal = "#2F8174",
-    coral = "#D95D39",
-    gold = "#C9952E",
+    ink = "#1B1B1B",
+    blue = "#0072B2",
+    teal = "#009E73",
+    coral = "#D55E00",
+    gold = "#E69F00",
+    purple = "#CC79A7",
+    sky = "#56B4E9",
+    yellow = "#F0E442",
     gray = "#87939D",
     light = "#E8EDF0"
   )
 }
 
 gtfswizard_palette <- function(n){
-  base <- unname(gtfswizard_colors()[c("teal", "blue", "coral", "gold", "ink")])
+  base <- unname(gtfswizard_colors()[c(
+    "blue", "coral", "teal", "purple", "gold", "sky", "ink", "yellow"
+  )])
   if(n <= length(base)){
     return(base[seq_len(n)])
   }
-  grDevices::hcl.colors(n, palette = "Dark 3")
+  grDevices::hcl.colors(n, palette = "Dynamic")
 }
 
 theme_gtfswizard <- function(base_size = 11){

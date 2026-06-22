@@ -16,8 +16,9 @@ A Shiny app object.
 }
 \description{
 Opens a lightweight Shiny dashboard for exploring a GTFS feed. The dashboard
-shows system summary cards, route and stop maps, service calendar, and key
-operational charts.
+shows summary cards, route and stop maps, service calendar, and key
+operational charts. Route, service, service-pattern, stop, date, and time
+filters update the dashboard without changing the original object.
 }
 \examples{
 if (interactive()) {
@@ -25,6 +26,12 @@ if (interactive()) {
   explore_gtfs(GTFSwizard::for_rail_gtfs)
 }
 
+}
+\references{
+Ceder, A. (2007). *Public Transit Planning and Operation*.
+Vuchic, V. R. (2005). *Urban Transit: Operations, Planning, and Economics*.
+White, P. (2008). *Public Transport: Its Planning, Management and Operation*.
+Cascetta, E. (2009). *Transportation Systems Analysis*.
 }
 \seealso{
 [GTFSwizard::as_wizardgtfs()], [GTFSwizard::get_shapes()], [GTFSwizard::plot_calendar()]

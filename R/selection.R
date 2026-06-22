@@ -107,7 +107,7 @@ selection.list <- function(gtfs, ..., add = FALSE){
 
 #' @exportS3Method GTFSwizard::selection wizardgtfs
 selection.wizardgtfs <- function(gtfs, ..., add = FALSE){
-  checkmate::assert_flag(add)
+  gw_assert_flag(add, "add")
   quosures <- rlang::enquos(..., .ignore_empty = "all")
   if(!length(quosures)){
     gw_stop("supply at least one grouping or logical selection expression.")
@@ -117,7 +117,7 @@ selection.wizardgtfs <- function(gtfs, ..., add = FALSE){
 
 #' @exportS3Method GTFSwizard::selection wizardgtfs_selected
 selection.wizardgtfs_selected <- function(gtfs, ..., add = FALSE){
-  checkmate::assert_flag(add)
+  gw_assert_flag(add, "add")
   new_quosures <- rlang::enquos(..., .ignore_empty = "all")
   if(!length(new_quosures)){
     gw_stop("supply at least one grouping or logical selection expression.")

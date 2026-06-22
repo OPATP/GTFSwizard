@@ -59,9 +59,13 @@ plot_frequency <- function(gtfs){
 
 #' Plot Route Frequency by Hour
 #'
+#' Creates a heatmap of scheduled departures by route, hour, and service
+#' pattern. The tile fill is the number of scheduled trips.
+#'
 #' @param gtfs A GTFS object.
 #' @param route Optional character vector of route IDs. `NULL` includes all
-#'   routes.
+#'   routes after applying `top_n`.
+#' @param top_n Maximum number of routes to display when `route` is `NULL`.
 #' @return A `ggplot` object.
 #'
 #' @examples
@@ -72,7 +76,8 @@ plot_frequency <- function(gtfs){
 #'
 #' @seealso [GTFSwizard::get_frequency()]
 #' @export
-plot_routefrequency <- function(gtfs, route = NULL){
+plot_routefrequency <- function(gtfs, route = NULL, top_n = 25L){
+  gw_assert_int(top_n, "top_n", lower = 1L)
   requested_routes <- route
   if(!is.null(route)){
     gtfs <- GTFSwizard::filter_route(gtfs, route)
@@ -85,48 +90,54 @@ plot_routefrequency <- function(gtfs, route = NULL){
   if(!nrow(data)){
     gw_stop("no route-frequency data are available to plot.")
   }
-  primary <- get_servicepattern(gtfs)$service_pattern[1L]
-  data$.emphasis <- ifelse(data$service_pattern == primary, "Primary pattern", "Other patterns")
-  route_values <- stats::setNames(
-    gtfswizard_palette(length(unique(data$route_id))),
-    unique(data$route_id)
-  )
-  show_route_legend <- !is.null(requested_routes) &&
-    length(unique(data$route_id)) <= 12L
+  data <- data |>
+    dplyr::filter(is.finite(.data$hour), is.finite(.data$frequency)) |>
+    dplyr::group_by(.data$route_id, .data$service_pattern, .data$hour) |>
+    dplyr::summarise(frequency = sum(.data$frequency), .groups = "drop")
+  route_order <- data |>
+    dplyr::group_by(.data$route_id) |>
+    dplyr::summarise(total_trips = sum(.data$frequency), .groups = "drop") |>
+    dplyr::arrange(dplyr::desc(.data$total_trips))
+  if(is.null(requested_routes)){
+    route_order <- utils::head(route_order, top_n)
+    data <- data |>
+      dplyr::filter(.data$route_id %in% route_order$route_id)
+  }
+  if(!nrow(data)){
+    gw_stop("no route-frequency data are available to plot.")
+  }
+  route_order <- route_order |>
+    dplyr::arrange(.data$total_trips)
+  data$route_id <- factor(data$route_id, levels = route_order$route_id)
+  subtitle <- if(is.null(requested_routes)){
+    paste(
+      "Each tile is scheduled departures; showing up to",
+      top_n, "routes with the most scheduled trips"
+    )
+  } else {
+    "Each tile is scheduled departures for one selected route, hour, and service pattern"
+  }
 
   plot <- ggplot2::ggplot(
     data,
     ggplot2::aes(
-      hour, frequency, color = route_id,
-      group = interaction(route_id, service_pattern),
-      alpha = .emphasis
+      x = hour, y = route_id, fill = frequency
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.9) +
-    ggplot2::geom_point(size = 1.5) +
-    ggplot2::scale_alpha_manual(
-      values = c("Primary pattern" = 1, "Other patterns" = 0.28)
+    ggplot2::geom_tile(color = "white", linewidth = 0.25) +
+    ggplot2::facet_wrap(~service_pattern, ncol = 1) +
+    ggplot2::scale_fill_gradient(
+      low = "#E7F1EF", high = gtfswizard_colors()[["blue"]],
+      labels = function(x) format(round(x), big.mark = ",", trim = TRUE)
     ) +
-    ggplot2::scale_color_manual(values = route_values) +
     ggplot2::labs(
       title = "Route Frequency",
-      subtitle = "Scheduled departures by hour and service pattern",
-      x = "Hour", y = "Scheduled trips", color = "Route", alpha = NULL
+      subtitle = subtitle,
+      x = "Hour", y = "Route", fill = "Trips"
     ) +
     hour_scale(data$hour) +
-    ggplot2::expand_limits(y = 0) +
     theme_gtfswizard()
-  if(show_route_legend){
-    plot + ggplot2::guides(
-      color = ggplot2::guide_legend(
-        title = "Route", nrow = min(2L, length(route_values)),
-        override.aes = list(alpha = 1, linewidth = 1.2)
-      ),
-      alpha = ggplot2::guide_legend(title = "Service pattern")
-    )
-  } else {
-    plot + ggplot2::theme(legend.position = "none")
-  }
+  plot
 }
 
 #' Plot System Headway by Hour
@@ -141,7 +152,7 @@ plot_routefrequency <- function(gtfs, route = NULL){
 #' @export
 plot_headways <- function(gtfs){
   colors <- gtfswizard_colors()
-  data <- GTFSwizard::get_headways(gtfs, method = "by.hour") |>
+  data <- GTFSwizard::get_headways(gtfs, method = "by_hour") |>
     dplyr::mutate(
       weight = .data$pattern_frequency * .data$valid_trips,
       hour = as.numeric(.data$hour)
@@ -189,16 +200,22 @@ plot_headways <- function(gtfs){
 #'
 #' @param gtfs A GTFS object.
 #' @param i Proportion of highest-frequency segments to retain.
-#' @param min.length Minimum corridor length in meters.
+#' @param min_length Minimum corridor length in meters.
+#' @param ... Supports the legacy argument `min.length`.
 #' @return A `ggplot` map.
 #'
 #' @seealso [GTFSwizard::get_corridor()]
 #' @export
-plot_corridor <- function(gtfs, i = 0.01, min.length = 1500){
+plot_corridor <- function(gtfs, i = 0.01, min_length = 1500, ...){
+  resolved <- resolve_legacy_argument(
+    min_length, missing(min_length), list(...), "min.length", "min_length"
+  )
+  min_length <- resolved$value
+  gw_check_unused_dots(resolved$dots)
   colors <- gtfswizard_colors()
   gtfs <- ensure_shapes(ensure_wizardgtfs(gtfs))
   shapes <- get_shapes_sf(gtfs$shapes)
-  corridors <- get_corridor(gtfs, i = i, min.length = min.length)
+  corridors <- get_corridor(gtfs, i = i, min_length = min_length)
   corridor_values <- stats::setNames(
     gtfswizard_palette(nrow(corridors)), corridors$corridor
   )

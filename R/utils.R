@@ -11,12 +11,81 @@ gw_stop <- function(...){
   stop("GTFSwizard: ", paste0(..., collapse = ""), call. = FALSE)
 }
 
+gw_assert_flag <- function(x, name){
+  if(!is.logical(x) || length(x) != 1L || is.na(x)){
+    gw_stop("`", name, "` must be `TRUE` or `FALSE`.")
+  }
+  invisible(TRUE)
+}
+
+gw_assert_int <- function(x, name, lower = -Inf){
+  if(!is.numeric(x) || length(x) != 1L || is.na(x) ||
+     !is.finite(x) || x != as.integer(x) || x < lower){
+    qualifier <- if(is.finite(lower)){
+      paste0(" greater than or equal to ", as.integer(lower))
+    } else {
+      ""
+    }
+    gw_stop("`", name, "` must be one integer", qualifier, ".")
+  }
+  invisible(TRUE)
+}
+
 gw_warn_invalid_method <- function(method, choices, default){
   gw_warn(
     "`method` must be one of ",
     paste(sprintf("`%s`", choices), collapse = ", "),
     ". Using `method = \"", default, "\"`."
   )
+}
+
+normalize_method <- function(method, choices, default){
+  if(!is.character(method) || length(method) != 1L || is.na(method)){
+    gw_warn_invalid_method(method, choices, default)
+    return(default)
+  }
+  normalized <- gsub(".", "_", method, fixed = TRUE)
+  if(!normalized %in% choices){
+    gw_warn_invalid_method(method, choices, default)
+    return(default)
+  }
+  normalized
+}
+
+resolve_legacy_argument <- function(value, was_missing, dots, legacy, modern){
+  dot_names <- names(dots)
+  if(is.null(dot_names)){
+    dot_names <- rep("", length(dots))
+  }
+  matched <- which(dot_names == legacy)
+  if(length(matched) > 1L){
+    gw_stop("`", legacy, "` was supplied more than once.")
+  }
+  if(length(matched) == 1L){
+    if(!was_missing){
+      gw_stop("supply only `", modern, "`, not both `", modern,
+              "` and legacy `", legacy, "`.")
+    }
+    value <- dots[[matched]]
+    dots <- dots[-matched]
+  }
+  list(value = value, dots = dots)
+}
+
+gw_check_unused_dots <- function(dots){
+  if(!length(dots)){
+    return(invisible(TRUE))
+  }
+  dot_names <- names(dots)
+  if(is.null(dot_names) || any(!nzchar(dot_names))){
+    gw_stop("all arguments in `...` must be named.")
+  }
+  gw_stop("unused argument(s): ",
+          paste(sprintf("`%s`", dot_names), collapse = ", "), ".")
+}
+
+direction_field <- function(data){
+  if("direction_id" %in% names(data)) "direction_id" else character()
 }
 
 ensure_wizardgtfs <- function(gtfs){
@@ -198,6 +267,103 @@ create_dates_services_table <- function(gtfs_list){
     dplyr::group_by(date) |>
     dplyr::summarise(service_id = list(service_id), .groups = "drop")
   gtfs_list
+}
+
+drop_short_stop_time_trips <- function(tables){
+  if(!all(c("trips", "stop_times") %in% names(tables)) ||
+     !"trip_id" %in% names(tables$trips) ||
+     !"trip_id" %in% names(tables$stop_times)){
+    return(tables)
+  }
+  stop_counts <- table(as.character(tables$stop_times$trip_id))
+  trip_ids <- as.character(tables$trips$trip_id)
+  trip_counts <- setNames(integer(length(trip_ids)), trip_ids)
+  matched <- intersect(names(stop_counts), trip_ids)
+  trip_counts[matched] <- as.integer(stop_counts[matched])
+  invalid_trips <- names(trip_counts)[trip_counts < 2L]
+  if(!length(invalid_trips)){
+    return(tables)
+  }
+  if(length(invalid_trips) == length(trip_ids)){
+    gw_stop("all trips have fewer than two stop-time records.")
+  }
+  gw_warn(
+    "removed ", length(invalid_trips),
+    " trip(s) with fewer than two stop-time records."
+  )
+  filter_gtfs_tables_by_trips(tables, setdiff(trip_ids, invalid_trips))
+}
+
+filter_gtfs_tables_by_trips <- function(tables, trip_ids){
+  trip_ids <- unique(as.character(trip_ids))
+  tables$trips <- filter_table_key(tables$trips, "trip_id", trip_ids)
+  tables$stop_times <- filter_table_key(tables$stop_times, "trip_id", trip_ids)
+  route_ids <- unique(tables$trips$route_id)
+  service_ids <- unique(tables$trips$service_id)
+  stop_ids <- unique(tables$stop_times$stop_id)
+  shape_ids <- if("shape_id" %in% names(tables$trips)){
+    unique(tables$trips$shape_id)
+  } else {
+    character()
+  }
+
+  tables$routes <- filter_table_key(tables$routes, "route_id", route_ids)
+  tables$stops <- filter_table_key(tables$stops, "stop_id", stop_ids)
+  tables[["calendar"]] <- filter_table_key(
+    tables[["calendar"]], "service_id", service_ids
+  )
+  tables[["calendar_dates"]] <- filter_table_key(
+    tables[["calendar_dates"]], "service_id", service_ids
+  )
+  tables$shapes <- filter_table_key(tables$shapes, "shape_id", shape_ids)
+  tables$frequencies <- filter_table_key(tables$frequencies, "trip_id", trip_ids)
+  tables$fare_rules <- filter_table_key(tables$fare_rules, "route_id", route_ids)
+  if(!is.null(tables$fare_attributes) && !is.null(tables$fare_rules) &&
+     "fare_id" %in% names(tables$fare_rules)){
+    tables$fare_attributes <- filter_table_key(
+      tables$fare_attributes, "fare_id", unique(tables$fare_rules$fare_id)
+    )
+  }
+  if(!is.null(tables$agency) && "agency_id" %in% names(tables$agency) &&
+     "agency_id" %in% names(tables$routes)){
+    tables$agency <- filter_table_key(
+      tables$agency, "agency_id", unique(tables$routes$agency_id)
+    )
+  }
+  if(!is.null(tables$transfers)){
+    keep <- tables$transfers$from_stop_id %in% stop_ids &
+      tables$transfers$to_stop_id %in% stop_ids
+    if("from_route_id" %in% names(tables$transfers)){
+      keep <- keep & (
+        is.na(tables$transfers$from_route_id) |
+          !nzchar(as.character(tables$transfers$from_route_id)) |
+          tables$transfers$from_route_id %in% route_ids
+      )
+    }
+    if("to_route_id" %in% names(tables$transfers)){
+      keep <- keep & (
+        is.na(tables$transfers$to_route_id) |
+          !nzchar(as.character(tables$transfers$to_route_id)) |
+          tables$transfers$to_route_id %in% route_ids
+      )
+    }
+    if("from_trip_id" %in% names(tables$transfers)){
+      keep <- keep & (
+        is.na(tables$transfers$from_trip_id) |
+          !nzchar(as.character(tables$transfers$from_trip_id)) |
+          tables$transfers$from_trip_id %in% trip_ids
+      )
+    }
+    if("to_trip_id" %in% names(tables$transfers)){
+      keep <- keep & (
+        is.na(tables$transfers$to_trip_id) |
+          !nzchar(as.character(tables$transfers$to_trip_id)) |
+          tables$transfers$to_trip_id %in% trip_ids
+      )
+    }
+    tables$transfers <- tables$transfers[keep, , drop = FALSE]
+  }
+  tables
 }
 
 validate_gtfs_tables <- function(tables){
@@ -518,6 +684,10 @@ prune_gtfs <- function(gtfs, trip_ids, stop_times = NULL){
   gtfs[["calendar_dates"]] <- filter_table_key(
     gtfs[["calendar_dates"]], "service_id", service_ids
   )
+  if(!is.null(gtfs[["calendar_dates"]]) &&
+     !nrow(gtfs[["calendar_dates"]])){
+    gtfs[["calendar_dates"]] <- NULL
+  }
   gtfs$shapes <- filter_table_key(gtfs$shapes, "shape_id", shape_ids)
   gtfs$frequencies <- filter_table_key(gtfs$frequencies, "trip_id", trip_ids)
   gtfs$fare_rules <- filter_table_key(gtfs$fare_rules, "route_id", route_ids)

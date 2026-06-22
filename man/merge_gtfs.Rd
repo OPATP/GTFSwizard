@@ -4,12 +4,14 @@
 \alias{merge_gtfs}
 \title{Merge Two GTFS Feeds}
 \usage{
-merge_gtfs(gtfs.x, gtfs.y, suffix = TRUE)
+merge_gtfs(gtfs_x = NULL, gtfs_y = NULL, suffix = TRUE, ...)
 }
 \arguments{
-\item{gtfs.x, gtfs.y}{GTFS objects.}
+\item{gtfs_x, gtfs_y}{GTFS objects.}
 
 \item{suffix}{Logical. Append `.x` and `.y` to identifiers when `TRUE`.}
+
+\item{...}{Supports the legacy arguments `gtfs.x` and `gtfs.y`.}
 }
 \value{
 A validated `wizardgtfs` object.

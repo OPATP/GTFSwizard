@@ -4,8 +4,8 @@
 #' based trips are expanded according to `frequencies.txt`.
 #'
 #' @param gtfs A GTFS object.
-#' @param method One of `"by.route"`, `"by.hour"`, `"by.trip"`, `"by.stop"`,
-#'   `"by.shape"`, or `"detailed"`.
+#' @param method One of `"by_trip"`, `"by_route"`, `"by_hour"`, `"by_stop"`,
+#'   `"by_shape"`, or `"detailed"`. Legacy dotted values remain accepted.
 #'
 #' @return A tibble. Headway values are always returned in
 #'   `headway_minutes`; `valid_trips` is the number of intervals summarized.
@@ -17,25 +17,22 @@
 #' omitted.
 #'
 #' @examples
-#' get_headways(for_rail_gtfs, "by.route")
-#' get_headways(for_rail_gtfs, "by.hour")
+#' get_headways(for_rail_gtfs, "by_route")
+#' get_headways(for_rail_gtfs, "by_hour")
 #'
 #' @references
 #' [GTFS Schedule Reference](https://gtfs.org/documentation/schedule/reference/#frequenciestxt)
 #' @seealso [GTFSwizard::get_frequency()]
 #' @export
-get_headways <- function(gtfs, method = "by.route"){
-  choices <- c("by.route", "by.hour", "by.trip", "by.stop", "by.shape", "detailed")
-  if(!method %in% choices){
-    gw_warn_invalid_method(method, choices, "by.route")
-    method <- "by.route"
-  }
+get_headways <- function(gtfs, method = "by_trip"){
+  choices <- c("by_route", "by_hour", "by_trip", "by_stop", "by_shape", "detailed")
+  method <- normalize_method(method, choices, "by_trip")
   gtfs <- ensure_wizardgtfs(gtfs)
   patterns <- get_servicepattern(gtfs)
   trips <- gtfs$trips
-  direction <- if("direction_id" %in% names(trips)) "direction_id" else character()
+  direction <- direction_field(trips)
 
-  if(method %in% c("by.stop", "detailed")){
+  if(method %in% c("by_stop", "detailed")){
     data <- stop_call_instances(gtfs) |>
       dplyr::left_join(trips, by = "trip_id") |>
       dplyr::left_join(patterns, by = "service_id")
@@ -70,19 +67,19 @@ get_headways <- function(gtfs, method = "by.route"){
   data <- calculate_headway_rows(data, grouping, "start_seconds")
   data$hour <- floor(data$start_seconds / 3600)
 
-  if(method == "by.trip"){
+  if(method == "by_trip"){
     fields <- c(
       "route_id", "trip_id", direction, "headway_minutes",
       "service_pattern", "pattern_frequency"
     )
     return(data[, fields, drop = FALSE])
   }
-  if(method == "by.shape"){
+  if(method == "by_shape"){
     if(!"shape_id" %in% names(data)){
-      gw_stop("`by.shape` requires `trips$shape_id`.")
+      gw_stop("`by_shape` requires `trips$shape_id`.")
     }
     groups <- c("shape_id", direction, "service_pattern", "pattern_frequency")
-  } else if(method == "by.hour"){
+  } else if(method == "by_hour"){
     groups <- c("hour", "service_pattern", "pattern_frequency")
   } else {
     groups <- c("route_id", direction, "service_pattern", "pattern_frequency")

@@ -4,35 +4,40 @@
 #' final arrival. Frequency-based services are expanded from `frequencies.txt`.
 #'
 #' @param gtfs A GTFS object.
-#' @param method One of `"by.route"`, `"by.hour"`, `"peak"`, or `"detailed"`.
+#' @param method One of `"by_route"`, `"by_hour"`, `"peak"`, or `"detailed"`.
+#'   Legacy dotted values remain accepted.
 #'
 #' @return A tibble containing fleet estimates by the selected grouping and
 #' service pattern. GTFS times beyond 24 hours remain in the following service
-#' day rather than being wrapped.
+#' day rather than being wrapped. Route outputs include `direction_id` when
+#' available.
 #'
 #' @examples
-#' get_fleet(for_rail_gtfs, "by.route")
-#' get_fleet(for_rail_gtfs, "by.hour")
+#' get_fleet(for_rail_gtfs, "by_route")
+#' get_fleet(for_rail_gtfs, "by_hour")
 #'
 #' @export
-get_fleet <- function(gtfs, method = "by.route"){
-  choices <- c("by.route", "by.hour", "peak", "detailed")
-  if(!method %in% choices){
-    gw_warn_invalid_method(method, choices, "by.route")
-    method <- "by.route"
-  }
+get_fleet <- function(gtfs, method = "by_route"){
+  choices <- c("by_route", "by_hour", "peak", "detailed")
+  method <- normalize_method(method, choices, "by_route")
   switch(
     method,
-    by.route = get_fleet_byroute(gtfs),
-    by.hour = get_fleet_byhour(gtfs),
+    by_route = get_fleet_byroute(gtfs),
+    by_hour = get_fleet_byhour(gtfs),
     peak = get_fleet_peak(gtfs),
     detailed = get_fleet_detailed(gtfs)
   )
 }
 
 get_fleet_byroute <- function(gtfs){
-  fleet_event_table(gtfs, by_route = TRUE) |>
-    dplyr::group_by(route_id, service_pattern, pattern_frequency) |>
+  data <- fleet_event_table(gtfs, by_route = TRUE)
+  data |>
+    dplyr::group_by(
+      dplyr::across(dplyr::all_of(c(
+        "route_id", direction_field(data),
+        "service_pattern", "pattern_frequency"
+      )))
+    ) |>
     dplyr::summarise(fleet = max(fleet), .groups = "drop")
 }
 
@@ -53,7 +58,7 @@ get_fleet_peak <- function(gtfs){
 get_fleet_detailed <- function(gtfs){
   fleet_event_table(gtfs, by_route = TRUE) |>
     dplyr::select(
-      route_id, net.fleet, fleet, time,
+      route_id, dplyr::any_of("direction_id"), net.fleet, fleet, time,
       service_pattern, pattern_frequency
     )
 }
@@ -81,6 +86,7 @@ fleet_event_table <- function(gtfs, by_route = FALSE){
     dplyr::left_join(get_servicepattern(gtfs), by = "service_id")
   group_cols <- c(
     if(by_route) "route_id",
+    if(by_route) direction_field(intervals),
     "service_pattern", "pattern_frequency"
   )
   starts <- intervals[group_cols]

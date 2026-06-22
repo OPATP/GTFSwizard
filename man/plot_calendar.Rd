@@ -4,7 +4,12 @@
 \alias{plot_calendar}
 \title{Plot the GTFS Service Calendar}
 \usage{
-plot_calendar(gtfs, ncol = 4, facet_by_year = FALSE)
+plot_calendar(
+  gtfs,
+  ncol = 4,
+  facet_by_year = FALSE,
+  fill = c("trips", "service_pattern")
+)
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
@@ -12,6 +17,9 @@ plot_calendar(gtfs, ncol = 4, facet_by_year = FALSE)
 \item{ncol}{Number of facet columns when `facet_by_year = FALSE`.}
 
 \item{facet_by_year}{Logical. Arrange years in rows and months in columns.}
+
+\item{fill}{Calendar fill. `"trips"` shows trip counts; `"service_pattern"`
+uses a discrete color for each service pattern.}
 }
 \value{
 A `ggplot` object.
@@ -21,6 +29,11 @@ Creates a calendar heatmap of scheduled trips by service date.
 }
 \examples{
 plot_calendar(for_rail_gtfs, ncol = 4)
+plot_calendar(
+  for_rail_gtfs,
+  facet_by_year = TRUE,
+  fill = "service_pattern"
+)
 
 }
 \seealso{

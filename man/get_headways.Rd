@@ -4,13 +4,13 @@
 \alias{get_headways}
 \title{Calculate Scheduled Headways}
 \usage{
-get_headways(gtfs, method = "by.route")
+get_headways(gtfs, method = "by_trip")
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
 
-\item{method}{One of `"by.route"`, `"by.hour"`, `"by.trip"`, `"by.stop"`,
-`"by.shape"`, or `"detailed"`.}
+\item{method}{One of `"by_trip"`, `"by_route"`, `"by_hour"`, `"by_stop"`,
+`"by_shape"`, or `"detailed"`. Legacy dotted values remain accepted.}
 }
 \value{
 A tibble. Headway values are always returned in
@@ -27,8 +27,8 @@ pattern. The first service instance in each group has no headway and is
 omitted.
 }
 \examples{
-get_headways(for_rail_gtfs, "by.route")
-get_headways(for_rail_gtfs, "by.hour")
+get_headways(for_rail_gtfs, "by_route")
+get_headways(for_rail_gtfs, "by_hour")
 
 }
 \references{

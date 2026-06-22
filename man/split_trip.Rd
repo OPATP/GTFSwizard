@@ -12,7 +12,8 @@ split_trip(gtfs, trip, split = 1L)
 \item{trip}{Character vector of `trip_id` values.}
 
 \item{split}{Positive integer number of split points. `split = 1` creates
-two parts.}
+two parts. For each trip, the maximum is the number of stop-time records
+minus two, so every resulting part contains at least two stops.}
 }
 \value{
 A modified `wizardgtfs` object.
@@ -27,6 +28,7 @@ New IDs use `.part1`, `.part2`, and so on. New straight-line shapes are
 inferred from stop coordinates for the split parts. Frequency periods are
 shifted by each part's offset from the original first departure. Trip-level
 transfers are reassigned to the part containing their transfer stop.
+Trips with fewer than three retained stop-time records cannot be split.
 }
 \examples{
 gtfs_split <- split_trip(

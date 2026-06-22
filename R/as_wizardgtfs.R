@@ -28,7 +28,7 @@ as_wizardgtfs <- function(gtfs_list, build_shapes = TRUE){
 
 #' @exportS3Method GTFSwizard::as_wizardgtfs tidygtfs
 as_wizardgtfs.tidygtfs <- function(gtfs_list, build_shapes = TRUE){
-  checkmate::assert_flag(build_shapes)
+  gw_assert_flag(build_shapes, "build_shapes")
 
   if(!is.null(gtfs_list$.) && !is.null(gtfs_list$.$dates_services)){
     dates_services <- gtfs_list$.$dates_services
@@ -46,13 +46,14 @@ as_wizardgtfs.tidygtfs <- function(gtfs_list, build_shapes = TRUE){
 
 #' @exportS3Method GTFSwizard::as_wizardgtfs list
 as_wizardgtfs.list <- function(gtfs_list, build_shapes = TRUE){
-  checkmate::assert_flag(build_shapes)
+  gw_assert_flag(build_shapes, "build_shapes")
   if(is.null(names(gtfs_list)) || any(!nzchar(names(gtfs_list)))){
     gw_stop("`gtfs_list` must be a named list of GTFS tables.")
   }
 
   gtfs_obj <- convert_to_tibble(gtfs_list)
   gtfs_obj$dates_services <- NULL
+  gtfs_obj <- drop_short_stop_time_trips(gtfs_obj)
   validate_gtfs_tables(gtfs_obj)
   gtfs_obj <- convert_times_and_dates(gtfs_obj)
   gtfs_obj <- create_dates_services_table(gtfs_obj)

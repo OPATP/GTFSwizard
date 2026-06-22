@@ -4,16 +4,17 @@
 \alias{read_gtfs}
 \title{Read a GTFS Feed}
 \usage{
-read_gtfs(file.path, files = NULL, quiet = TRUE, ...)
+read_gtfs(file_path = NULL, files = NULL, quiet = TRUE, ...)
 }
 \arguments{
-\item{file.path}{Path to a GTFS `.zip` archive.}
+\item{file_path}{Path to a GTFS `.zip` archive.}
 
 \item{files}{Optional character vector of table names without `.txt`.}
 
 \item{quiet}{Logical. Suppress importer messages.}
 
-\item{...}{Additional arguments passed to [gtfsio::import_gtfs()].}
+\item{...}{Additional arguments passed to [gtfsio::import_gtfs()], including
+the legacy argument `file.path`.}
 }
 \value{
 A validated `wizardgtfs` object.
@@ -22,9 +23,9 @@ A validated `wizardgtfs` object.
 Imports a GTFS zip archive and converts it to `wizardgtfs`.
 }
 \examples{
-\dontrun{
-gtfs <- read_gtfs("gtfs.zip")
-}
+path <- tempfile(fileext = ".zip")
+write_gtfs(for_rail_gtfs, path)
+gtfs <- read_gtfs(path)
 
 }
 \seealso{

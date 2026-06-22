@@ -6,24 +6,30 @@
 #' @param gtfs A GTFS object.
 #' @param i Proportion of the highest-frequency stop pairs to retain. Must be
 #'   greater than 0 and no greater than 1.
-#' @param min.length Minimum corridor length in meters.
+#' @param min_length Minimum corridor length in meters.
+#' @param ... Supports the legacy argument `min.length`.
 #'
 #' @return An `sf` object with `corridor`, list-columns `stop_id` and
 #'   `trip_id`, numeric `length` in meters, and WGS84 geometry. Segments are
 #'   straight lines between stop coordinates, not shape geometry.
 #'
 #' @examples
-#' corridors <- get_corridor(for_rail_gtfs, i = 0.2, min.length = 100)
+#' corridors <- get_corridor(for_rail_gtfs, i = 0.2, min_length = 100)
 #'
 #' @seealso [GTFSwizard::plot_corridor()]
 #' @export
-get_corridor <- function(gtfs, i = 0.01, min.length = 1500){
+get_corridor <- function(gtfs, i = 0.01, min_length = 1500, ...){
+  resolved <- resolve_legacy_argument(
+    min_length, missing(min_length), list(...), "min.length", "min_length"
+  )
+  min_length <- resolved$value
+  gw_check_unused_dots(resolved$dots)
   if(!is.numeric(i) || length(i) != 1L || is.na(i) || i <= 0 || i > 1){
     gw_stop("`i` must be one number greater than 0 and no greater than 1.")
   }
-  if(!is.numeric(min.length) || length(min.length) != 1L ||
-     is.na(min.length) || min.length < 0){
-    gw_stop("`min.length` must be one non-negative number of meters.")
+  if(!is.numeric(min_length) || length(min_length) != 1L ||
+     is.na(min_length) || min_length < 0){
+    gw_stop("`min_length` must be one non-negative number of meters.")
   }
   gtfs <- ensure_wizardgtfs(gtfs)
 
@@ -92,10 +98,10 @@ get_corridor <- function(gtfs, i = 0.01, min.length = 1500){
       length = as.numeric(sum(sf::st_length(geometry))),
       .groups = "drop"
     ) |>
-    dplyr::filter(length >= min.length) |>
+    dplyr::filter(length >= min_length) |>
     dplyr::arrange(dplyr::desc(length))
   if(!nrow(metric)){
-    gw_warn("no corridors meet `min.length`; returning an empty result.")
+    gw_warn("no corridors meet `min_length`; returning an empty result.")
     return(sf::st_transform(metric, 4326))
   }
   metric$corridor <- paste("Corridor", seq_len(nrow(metric)))

@@ -7,7 +7,8 @@
 #' @param gtfs A GTFS object.
 #' @param trip Character vector of `trip_id` values.
 #' @param split Positive integer number of split points. `split = 1` creates
-#'   two parts.
+#'   two parts. For each trip, the maximum is the number of stop-time records
+#'   minus two, so every resulting part contains at least two stops.
 #'
 #' @return A modified `wizardgtfs` object.
 #'
@@ -16,6 +17,7 @@
 #' inferred from stop coordinates for the split parts. Frequency periods are
 #' shifted by each part's offset from the original first departure. Trip-level
 #' transfers are reassigned to the part containing their transfer stop.
+#' Trips with fewer than three retained stop-time records cannot be split.
 #'
 #' @examples
 #' gtfs_split <- split_trip(
@@ -28,7 +30,7 @@
 #' @export
 split_trip <- function(gtfs, trip, split = 1L){
   gtfs <- ensure_wizardgtfs(gtfs)
-  checkmate::assert_int(split, lower = 1L)
+  gw_assert_int(split, "split", lower = 1L)
   assert_known_ids(trip, gtfs$trips$trip_id, "trip", "`gtfs$trips`")
   parts_count <- split + 1L
 
@@ -41,9 +43,10 @@ split_trip <- function(gtfs, trip, split = 1L){
   counts <- table(selected_times$trip_id)
   if(any(counts < parts_count + 1L)){
     too_short <- names(counts)[counts < parts_count + 1L]
+    limits <- pmax(0L, as.integer(counts[too_short]) - 2L)
     gw_stop(
-      "trip(s) have too few stops for ", parts_count, " parts: ",
-      paste(too_short, collapse = ", "), "."
+      "`split` is too large for trip(s): ",
+      paste0(too_short, " (maximum ", limits, ")", collapse = ", "), "."
     )
   }
 

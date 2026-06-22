@@ -13,7 +13,7 @@ NULL
 #' @rdname wizardgtfs-methods
 #' @exportS3Method base::print wizardgtfs
 print.wizardgtfs <- function(x, ..., n = 5L){
-  checkmate::assert_int(n, lower = 1L)
+  gw_assert_int(n, "n", lower = 1L)
   agency_names <- if(!is.null(x$agency$agency_name)){
     paste(x$agency$agency_name, collapse = ", ")
   } else {

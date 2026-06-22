@@ -120,7 +120,7 @@ filter_service <- function(gtfs, service){
 #' @export
 filter_route <- function(gtfs, route, keep = TRUE){
   gtfs <- ensure_wizardgtfs(gtfs)
-  checkmate::assert_flag(keep)
+  gw_assert_flag(keep, "keep")
   assert_known_ids(route, gtfs$routes$route_id, "route", "`gtfs$routes`")
   selected <- if(keep){
     gtfs$trips$route_id %in% route
@@ -134,7 +134,7 @@ filter_route <- function(gtfs, route, keep = TRUE){
 #' @export
 filter_trip <- function(gtfs, trip, keep = TRUE){
   gtfs <- ensure_wizardgtfs(gtfs)
-  checkmate::assert_flag(keep)
+  gw_assert_flag(keep, "keep")
   assert_known_ids(trip, gtfs$trips$trip_id, "trip", "`gtfs$trips`")
   selected <- if(keep){
     gtfs$trips$trip_id %in% trip
