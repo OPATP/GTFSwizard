@@ -31,7 +31,7 @@ test_that("all public static plots return ggplot objects", {
   expect_s3_class(plot_routeduration(feed), "ggplot")
   expect_s3_class(plot_servicesupply(feed), "ggplot")
   expect_s3_class(plot_hubs(feed, i = 1), "ggplot")
-  expect_s3_class(plot_corridor(feed, i = 1, min.length = 0), "ggplot")
+  expect_s3_class(plot_corridor(feed, i = 1, min_length = 0), "ggplot")
 })
 
 test_that("hub counts are computed before identifier list-columns", {
@@ -50,15 +50,34 @@ test_that("map plots use readable layer order, labels, and legends", {
   expect_equal(system_plot$layers[[1]]$aes_params$size, 0.9)
 
   route_plot <- plot_routefrequency(feed)
-  expect_equal(route_plot$theme$legend.position, "none")
+  expect_s3_class(route_plot$layers[[1]]$geom, "GeomTile")
   selected_route_plot <- plot_routefrequency(feed, route = "R")
   expect_false(identical(selected_route_plot$theme$legend.position, "none"))
 
-  corridors <- get_corridor(feed, i = 1, min.length = 0)
+  corridors <- get_corridor(feed, i = 1, min_length = 0)
   expect_equal(corridors$corridor, "Corridor 1")
 
   hubs <- plot_hubs(feed, i = 1)
   expect_lte(nrow(hubs$layers[[2]]$data), 40)
+})
+
+test_that("route-frequency plot limits unselected feeds to top routes", {
+  feed <- minimal_feed()
+  extra_trips <- feed$trips
+  extra_trips$route_id <- "R2"
+  extra_trips$trip_id <- paste0(extra_trips$trip_id, "-R2")
+  extra_stop_times <- feed$stop_times
+  extra_stop_times$trip_id <- paste0(extra_stop_times$trip_id, "-R2")
+  feed$routes <- rbind(
+    feed$routes,
+    transform(feed$routes, route_id = "R2", route_short_name = "2")
+  )
+  feed$trips <- rbind(feed$trips, extra_trips)
+  feed$stop_times <- rbind(feed$stop_times, extra_stop_times)
+  feed <- as_wizardgtfs(feed)
+
+  limited <- plot_routefrequency(feed, top_n = 1)
+  expect_equal(length(unique(limited$data$route_id)), 1)
 })
 
 test_that("planning plots identify their observational units", {
@@ -69,11 +88,36 @@ test_that("planning plots identify their observational units", {
   expect_match(plot_servicesupply(feed)$labels$subtitle, "Each bar")
 })
 
+test_that("calendar service-pattern legends are discrete in both layouts", {
+  feed <- minimal_feed()
+  wrapped <- plot_calendar(feed, fill = "service_pattern")
+  faceted <- plot_calendar(
+    feed, facet_by_year = TRUE, fill = "service_pattern"
+  )
+  expect_s3_class(wrapped$scales$get_scales("fill"), "ScaleDiscrete")
+  expect_s3_class(faceted$scales$get_scales("fill"), "ScaleDiscrete")
+})
+
+test_that("planning indicators expose schedule-based system and route metrics", {
+  feed <- minimal_feed()
+  system <- planning_system_indicators(feed)
+  routes <- planning_route_indicators(feed, top_n = 2L)
+  expect_true(all(c("Indicator", "Value", "Unit") %in% names(system)))
+  expect_true(all(c(
+    "daily_trips", "average_headway_minutes", "average_speed_kmh",
+    "average_duration_minutes"
+  ) %in% names(routes)))
+  expect_lte(nrow(routes), 2L)
+})
+
 test_that("explorer requires an explicit feed outside interactive sessions", {
-  skip_if(interactive())
   skip_if_not_installed("shiny")
   skip_if_not_installed("leaflet")
-  expect_error(explore_gtfs(), "required in non-interactive sessions")
+  if(interactive()){
+    expect_s3_class(explore_gtfs(minimal_feed()), "shiny.appobj")
+  } else {
+    expect_error(explore_gtfs(), "required in non-interactive sessions")
+  }
 })
 
 test_that("summary returns a summary object", {

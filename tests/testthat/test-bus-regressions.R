@@ -8,7 +8,7 @@ test_that("Fortaleza bus feed remains warning-free in spatial workflows", {
   expect_no_warning(system_plot <- plot(for_bus_gtfs))
   expect_s3_class(system_plot, "ggplot")
   expect_no_warning(route_plot <- plot_routefrequency(for_bus_gtfs))
-  expect_equal(route_plot$theme$legend.position, "none")
+  expect_lte(length(unique(route_plot$layers[[1]]$data$route_id)), 25)
   expect_no_warning(hubs <- plot_hubs(for_bus_gtfs))
   expect_lte(nrow(hubs$layers[[2]]$data), 40)
   expect_gt(max(hubs$layers[[2]]$data$n_routes), 1)

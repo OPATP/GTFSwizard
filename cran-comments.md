@@ -1,19 +1,20 @@
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+Local check:
+
+0 errors | 0 warnings | 0 notes
+
+CRAN incoming remote check may report the standard version-status note.
 
 ## Resubmission
 
-This is version 1.1.1, a resubmission after GTFSwizard was archived on
-2025-09-09 because it imported the archived package `hrbrthemes`.
+This is development version 1.2.1, following version 1.2.0 submitted to CRAN.
 
-The `hrbrthemes` dependency has been removed. The package now uses a smaller
-set of necessary imports and no longer depends on any archived package.
+Version 1.2.1 standardizes method and argument names, improves
+`tidy_raptor()`, and adds schedule-based planning indicators to
+`explore_gtfs()`.
 
-The version has been increased from the previously published 1.1.0 to 1.1.1.
-
-The NOTE reports that this is a new submission of a package archived on
-2025-09-09 because of the former `hrbrthemes` dependency. This is the reason
-for the resubmission.
+Legacy dotted method values and argument names remain accepted for backward
+compatibility.
 
 All examples, tests, Rd files, dependencies, and package code passed.

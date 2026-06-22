@@ -1,6 +1,6 @@
 # GTFSwizard <img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" height="180">
-##### v1.1.1 {CRAN and development}
-release 2026-06-06
+##### Development version 1.2.1
+development 2026-06-21
 
 [![Lifecycle: experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 
@@ -11,14 +11,14 @@ GTFSwizard is a set of tools for creating, exploring, and manipulating [General 
 Its main purpose is to provide researchers and practitioners with a seamless and easy way to visually explore and simulate changes within GTFS files, which represent public transportation schedules and geographic data. The package allows users to filter data by routes, trips, stops, and time, generate spatial visualizations, and perform detailed analyses of transit networks, including headway, dwell times, route frequencies, travel times, corridors and hubs. Editing functions to delay, speed change, and split trips, and to merge distinct GTFS are available. This is an ongoing work and new features are planned to be implemented soon.
 
 ## Installation
-The development version and the CRAN version are currently both **1.1.1**.
+The development version is **1.2.1**. The CRAN version is **1.2.0**.
 
 ``` r
 # CRAN version:
 install.packages("GTFSwizard")
 library(GTFSwizard)
 
-# Development version (currently identical to CRAN):
+# Development version:
 install.packages('remotes') # if not already installed
 remotes::install_github('OPATP/GTFSwizard@main')
 library(GTFSwizard)
@@ -79,7 +79,7 @@ GTFSwizard::explore_gtfs(for_bus_gtfs)
 GTFSwizard::explore_gtfs()
 ```
 
-<img align="middle" src="figs/exploregtfs.png" width="550"/>
+<img align="middle" src="figs/exploregtfs.png" width="700"/>
 
 ## Service Patterns
 The concept of a `service_pattern` in GTFSwizard helps to address a common limitation of GTFS: its lack of a standardized way to distinguish distinct service patterns within the same route. GTFS files can have multiple `service_ids` for trips within the same route on the same day, such as regular and extra services. However, GTFS does not inherently identify unique service patterns, _i.e._ unique set of `service_id`s.
@@ -103,7 +103,7 @@ GTFSwizard::get_servicepattern(for_bus_gtfs)
 
 Most of the functions will account for service_patterns, _e.g._ `get_frequency()` and `plot_routefrequency()`. The former arrange service_pattern from most frequent (typical day) to less frequent (rarer day), while the latter highlights the most frequent service pattern.
 ```r
-GTFSwizard::get_frequency(for_bus_gtfs)
+GTFSwizard::get_frequency(for_bus_gtfs, method = "by_route")
 ## A tibble: 1,763 × 5
 #  route_id direction_id service_pattern  pattern_frequency daily.frequency
 #  <chr>           <dbl> <chr>                        <int>           <int>
@@ -119,21 +119,21 @@ GTFSwizard::get_frequency(for_bus_gtfs)
 GTFSwizard::plot_routefrequency(for_bus_gtfs, route = for_bus_gtfs$routes$route_id[3])
 ```
 
-<img align="center" src="figs/get_routefrequency.png" width="600"/>
+<img align="center" src="figs/get_routefrequency.png" width="700"/>
 
 You can use `plot_calendar()` to check the number of trips along the calendar and get a better sense of the `service_pattern` rationale.
 ``` r
-GTFSwizard::plot_calendar(for_bus_gtfs)
+GTFSwizard::plot_calendar(for_bus_gtfs, facet_by_year = TRUE)
 ```
 
-<img align="center" src="figs/plot_calendar.png" width="1000"/>
+<img align="center" src="figs/plot_calendar.png" width="700"/>
 
 ## Exploring
 
-Frequency, headways, dwell times, speeds, durations, distances, fleet requirements, first departures, corridors, and hubs can be calculated directly from the schedule. Several functions support aggregation methods such as `by.trip`, `by.route`, `by.hour`, and `detailed`; see each function's help page for its exact observational unit.
+Frequency, headways, dwell times, speeds, durations, distances, fleet requirements, first departures, corridors, and hubs can be calculated directly from the schedule. Several functions support aggregation methods such as `by_trip`, `by_route`, `by_hour`, and `detailed`; see each function's help page for its exact observational unit.
 
 ``` r
-GTFSwizard::get_headways(for_bus_gtfs, method = 'by.hour')
+GTFSwizard::get_headways(for_bus_gtfs, method = 'by_hour')
 ## A tibble: 73 × 5
 #   hour service_pattern  pattern_frequency headway_minutes valid_trips
 #  <dbl> <chr>                        <int>           <dbl>       <int>
@@ -147,9 +147,9 @@ GTFSwizard::get_headways(for_bus_gtfs, method = 'by.hour')
 ## ℹ Use `print(n = ...)` to see more rows
 
 GTFSwizard::get_durations(for_bus_gtfs, method = 'detailed', trips = 'all')
-GTFSwizard::get_distances(for_bus_gtfs, method = 'by.trip', trips = 'all')
-GTFSwizard::get_distances(for_bus_gtfs, method = 'by.route', trips = 'all')
-GTFSwizard::get_speeds(for_bus_gtfs, method = 'by.route', trips = 'all')
+GTFSwizard::get_distances(for_bus_gtfs, method = 'by_trip', trips = 'all')
+GTFSwizard::get_distances(for_bus_gtfs, method = 'by_route', trips = 'all')
+GTFSwizard::get_speeds(for_bus_gtfs, method = 'by_route', trips = 'all')
 GTFSwizard::get_fleet(for_bus_gtfs, method = 'peak')
 GTFSwizard::get_1stdeparture(for_bus_gtfs)
 ```
@@ -158,7 +158,7 @@ Corridors and hubs are simplified representations of critical links and nodes on
 - Corridors: the `get_corridor()` and `plot_corridor()` functions retrieves and visualizes high-density transit sections.
 
 ``` r
-GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500)
+GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min_length = 1500)
 # Simple feature collection with 4 features and 4 fields
 # Geometry type: MULTILINESTRING
 # Dimension:     XY
@@ -173,7 +173,7 @@ GTFSwizard::get_corridor(for_bus_gtfs, i = .01, min.length = 1500)
 
 GTFSwizard::plot_corridor(for_bus_gtfs)
 ```
-<img align="center" src="figs/plot_corridor.png" width="400"/>
+<img align="center" src="figs/plot_corridor.png" width="700"/>
 
 - Hubs: the `get_hubs()` and `plot_hubs()` functions retrieves and visualizes high-density transit stops.
 
@@ -194,7 +194,7 @@ GTFSwizard::get_hubs(for_bus_gtfs)
 
 GTFSwizard::plot_hubs(for_bus_gtfs)
 ```
-<img align="center" src="figs/plot_hubs.png" width="400"/>
+<img align="center" src="figs/plot_hubs.png" width="700"/>
 
 ## Filtering
 Filtering tools allows customization of GTFS data by service patterns, specific dates, service IDs, route IDs, trip IDs, stop IDs, and time ranges. These `filter_` functions help retain only the relevant data, making analysis easier and more focused.
@@ -262,19 +262,19 @@ GTFSwizard provides consistent static plots for network supply and scheduled ope
 ``` r
 GTFSwizard::plot_frequency(for_bus_gtfs)
 ```
-<img align="center" src="figs/plot_frequency.png" width="600"/>
+<img align="center" src="figs/plot_frequency.png" width="700"/>
 
-- Route Frequency by Hour: `plot_routefrequency()` displays frequency by hour for selected routes, illustrating different service patterns.
+- Route Frequency by Hour: `plot_routefrequency()` displays a tile plot where fill is the number of scheduled trips by route, hour, and service pattern. Use `top_n` to keep large feeds readable.
 ``` r
 GTFSwizard::plot_routefrequency(for_bus_gtfs, route = for_bus_gtfs$routes$route_id[4:5])
 ```
-<img align="center" src="figs/plot_routefrequency.png" width="600"/>
+<img align="center" src="figs/plot_routefrequency.png" width="700"/>
 
 - System Average Headway by Hour: `plot_headways()` shows average time between trips, highlighting hourly and overall headways to visualize service intervals.
 ``` r
 GTFSwizard::plot_headways(for_bus_gtfs)
 ```
-<img align="center" src="figs/plot_headway.png" width="600"/>
+<img align="center" src="figs/plot_headway.png" width="700"/>
 
 - Planning views: `plot_servicespan()` shows the first departure and final arrival for each route-service pattern, `plot_serviceheatmap()` summarizes departures by weekday and hour, `plot_routeduration()` shows scheduled trip-duration distributions, and `plot_servicesupply()` reports scheduled vehicle-hours.
 
@@ -285,9 +285,9 @@ GTFSwizard::plot_routeduration(for_bus_gtfs)
 GTFSwizard::plot_servicesupply(for_bus_gtfs)
 ```
 
-<img align="center" src="figs/plot_serviceheatmap.png" width="600"/>
+<img align="center" src="figs/plot_serviceheatmap.png" width="700"/>
 
-<img align="center" src="figs/plot_servicespan.png" width="600"/>
+<img align="center" src="figs/plot_servicespan.png" width="700"/>
 
 ## Editing
 GTFSwizard provides functions to edit GTFS data directly.
@@ -367,7 +367,7 @@ gtfs <- GTFSwizard::for_bus_gtfs
 
 plot(gtfs)
 ```
-<img src="figs/plot.for_bus_gtfs.png" alt="plot.for_bus_gtfs" width="500"/>
+<img src="figs/plot.for_bus_gtfs.png" alt="plot.for_bus_gtfs" width="700"/>
 
 ## Applications
 The functions described facilitate the analysis, simulation, and evaluation of public
@@ -401,26 +401,27 @@ total trip durations and remove unused stops, representing the introduction of e
 services.
 
 ## Cheat Sheet
-_Under development..._
+See the [GTFSwizard cheat sheet](inst/cheatsheet/GTFSwizard-cheatsheet.md) for a compact guide to the main workflow:
+creating or reading feeds, selecting services, plotting operations, editing GTFS, exploring feeds interactively, and writing results.
 
 ## Contributing
 Contributions are welcome! To report a bug, suggest a feature, or contribute code, please use the repository’s [Issues](https://github.com/OPATP/GTFSwizard/issues).
 
 ## Related Packages
-GTFSwizard mainly uses dplyr for data handling, sf for spatial operations, and ggplot2 for static visualization. shiny and leaflet are optional dependencies for explore_gtfs(). tidytransit, data.table, and hms are optional dependencies used only by tidy_raptor().
+GTFSwizard mainly uses [dplyr](https://CRAN.R-project.org/package=dplyr) for data handling, [sf](https://CRAN.R-project.org/package=sf) for spatial operations, and [ggplot2](https://CRAN.R-project.org/package=ggplot2) for static visualization. [shiny](https://CRAN.R-project.org/package=shiny) and [leaflet](https://CRAN.R-project.org/package=leaflet) are optional dependencies for `explore_gtfs()`. [tidytransit](https://CRAN.R-project.org/package=tidytransit), [data.table](https://CRAN.R-project.org/package=data.table), and [hms](https://CRAN.R-project.org/package=hms) are optional dependencies used only by `tidy_raptor()`.
 
 ## Citation
 To cite package ‘GTFSwizard’ in publications use:
 
-- Quesado Filho, N. O. de, Guimarães, C. G. C., & Moraes de O. Neto, F. (2026). _GTFSwizard: Exploring and Manipulating GTFS Files._ R package version 1.1.1. [doi:10.32614/CRAN.package.GTFSwizard](https://cran.r-project.org/package=GTFSwizard).
+- Quesado Filho, N. O.; Guimaraes, C. G. C.; de Oliveira Neto, F. M. (2026). _GTFSwizard: Creating, Exploring and Manipulating GTFS Files._ R package version 1.2.1. [doi:10.32614/CRAN.package.GTFSwizard](https://cran.r-project.org/package=GTFSwizard).
 
 A BibTeX entry for LaTeX users is
 ``` tex
-  @Manual{quesado.guimaraes.2026,
-    title = {GTFSwizard: Exploring and Manipulating GTFS Files},
-    author = {Nelson de O. {Quesado Filho} and Caio G. C. {Guimarães} and Francisco Moraes de O. {Neto}},
+  @Manual{quesado.guimaraes.oliveiraneto.2026,
+    title = {GTFSwizard: Creating, Exploring and Manipulating GTFS Files},
+    author = {N. O. {Quesado Filho} and C. G. C. {Guimaraes} and F. M. {de Oliveira Neto}},
     year = {2026},
-    note = {R package version 1.1.1},
+    note = {R package version 1.2.1},
     url = {https://cran.r-project.org/package=GTFSwizard},
     doi = {10.32614/CRAN.package.GTFSwizard}}
 ```
