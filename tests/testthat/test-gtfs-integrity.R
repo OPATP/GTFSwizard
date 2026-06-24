@@ -24,6 +24,50 @@ test_that("conversion filters trips with fewer than two stop-time records", {
   expect_false("T_bad" %in% cleaned$stop_times$trip_id)
 })
 
+test_that("conversion filters stop-times referencing absent stops", {
+  feed <- minimal_feed()
+  feed$stop_times$stop_id[feed$stop_times$trip_id == "T1" &
+                            feed$stop_times$stop_sequence == 2] <- "missing-stop"
+
+  expect_warning(
+    cleaned <- as_wizardgtfs(feed, build_shapes = FALSE),
+    "removed 1 stop-time record\\(s\\) referencing stop_id values absent from `stops`"
+  )
+  expect_s3_class(cleaned, "wizardgtfs")
+  expect_false("missing-stop" %in% cleaned$stop_times$stop_id)
+  expect_true("T1" %in% cleaned$trips$trip_id)
+})
+
+test_that("conversion creates placeholder stops when all stop-times would be removed", {
+  feed <- minimal_feed()
+  feed$stop_times$stop_id <- paste0("missing-", feed$stop_times$stop_id)
+
+  expect_warning(
+    cleaned <- as_wizardgtfs(feed, build_shapes = FALSE),
+    "created 3 placeholder stop\\(s\\)"
+  )
+  expect_s3_class(cleaned, "wizardgtfs")
+  expect_true(all(feed$stop_times$stop_id %in% cleaned$stops$stop_id))
+  expect_equal(nrow(cleaned$trips), nrow(feed$trips))
+})
+
+test_that("placeholder stops warn when coordinates default to zero", {
+  feed <- minimal_feed()
+  feed$stop_times$stop_id <- paste0("missing-", feed$stop_times$stop_id)
+  feed$stops <- feed$stops[0, ]
+
+  expect_warning(
+    expect_warning(
+      cleaned <- as_wizardgtfs(feed, build_shapes = FALSE),
+      "created 3 placeholder stop\\(s\\)"
+    ),
+    "placeholder stop coordinates defaulted to \\(0, 0\\)"
+  )
+  placeholders <- cleaned$stops[grepl("^missing-", cleaned$stops$stop_id), ]
+  expect_true(all(placeholders$stop_lat == 0))
+  expect_true(all(placeholders$stop_lon == 0))
+})
+
 test_that("reading filters trips with fewer than two stop-time records", {
   feed <- minimal_feed()
   feed$trips <- rbind(feed$trips, feed$trips[1, ])
@@ -41,6 +85,47 @@ test_that("reading filters trips with fewer than two stop-time records", {
   )
   expect_s3_class(cleaned, "wizardgtfs")
   expect_false("T_bad" %in% cleaned$trips$trip_id)
+})
+
+test_that("reading supports UTF-16 encoded GTFS text files", {
+  feed <- minimal_feed()
+  stop_ids <- c(S1 = "001", S2 = "002", S3 = "003")
+  feed$stop_times$stop_id <- unname(stop_ids[feed$stop_times$stop_id])
+  feed$stops$stop_id <- unname(stop_ids[feed$stops$stop_id])
+  feed$dates_services <- NULL
+  class(feed) <- c("gtfs", "list")
+  tmpdir <- tempfile("utf16-gtfs-")
+  dir.create(tmpdir)
+  zipfile <- tempfile(fileext = ".zip")
+  on.exit(unlink(c(tmpdir, zipfile), recursive = TRUE), add = TRUE)
+
+  write_utf16_table <- function(data, path){
+    line <- function(x) paste(x, collapse = ",")
+    values <- apply(data, 1L, line)
+    con <- file(path, open = "w", encoding = "UTF-16LE")
+    tryCatch(
+      writeLines(c(line(names(data)), values), con, useBytes = FALSE),
+      finally = close(con)
+    )
+  }
+  for(table_name in names(feed)){
+    write_utf16_table(feed[[table_name]], file.path(tmpdir, paste0(table_name, ".txt")))
+  }
+  old_wd <- getwd()
+  tryCatch({
+    setwd(tmpdir)
+    utils::zip(zipfile, files = paste0(names(feed), ".txt"), flags = "-q")
+  }, finally = {
+    setwd(old_wd)
+  })
+
+  expect_silent(feed <- read_gtfs(zipfile))
+  expect_s3_class(feed, "wizardgtfs")
+  expect_true(all(c("001", "002", "003") %in% feed$stops$stop_id))
+  expect_warning(
+    read_gtfs(zipfile, quiet = FALSE),
+    "GTFS text files are encoded in UTF-16"
+  )
 })
 
 test_that("stop and time filters retain partial trips and valid references", {

@@ -31,25 +31,27 @@ plot_frequency <- function(gtfs){
     data$frequency, data$pattern_frequency, na.rm = TRUE
   )
 
-  ggplot2::ggplot(data, ggplot2::aes(hour, frequency)) +
-    ggplot2::geom_boxplot(
-      ggplot2::aes(group = hour),
-      width = 0.65, fill = colors[["light"]], color = colors[["gray"]],
-      outlier.alpha = 0.35
+  ggplot2::ggplot(hourly, ggplot2::aes(hour, frequency)) +
+    ggplot2::geom_col(
+      width = 0.82, fill = colors[["light"]], color = "white",
+      linewidth = 0.35
     ) +
     ggplot2::geom_line(
-      data = hourly, color = colors[["teal"]], linewidth = 1
+      color = colors[["teal"]], linewidth = 1
     ) +
     ggplot2::geom_point(
-      data = hourly, color = colors[["teal"]], size = 1.8
+      color = colors[["teal"]], size = 2
     ) +
     ggplot2::geom_hline(
       yintercept = overall, color = colors[["coral"]],
       linetype = "dashed", linewidth = 0.8
     ) +
     ggplot2::labs(
-      title = "System Frequency",
-      subtitle = paste("Overall weighted mean:", round(overall, 1), "trips per hour"),
+      title = "Scheduled Trips by Hour",
+      subtitle = paste(
+        "Bars are service-pattern weighted means; overall mean:",
+        round(overall, 1), "trips per hour"
+      ),
       x = "Hour", y = "Scheduled trips"
     ) +
     hour_scale(data$hour) +
@@ -216,24 +218,35 @@ plot_corridor <- function(gtfs, i = 0.01, min_length = 1500, ...){
   gtfs <- ensure_shapes(ensure_wizardgtfs(gtfs))
   shapes <- get_shapes_sf(gtfs$shapes)
   corridors <- get_corridor(gtfs, i = i, min_length = min_length)
+  base_plot <- ggplot2::ggplot() +
+    ggplot2::geom_sf(data = shapes, linewidth = 0.45, color = colors[["light"]]) +
+    ggplot2::coord_sf(datum = NA) +
+    theme_gtfswizard_map()
+  if(!nrow(corridors)){
+    return(
+      base_plot +
+        ggplot2::labs(
+          title = "High-Frequency Corridors",
+          subtitle = "No corridor meets the current filters and minimum length"
+        )
+    )
+  }
   corridor_values <- stats::setNames(
     gtfswizard_palette(nrow(corridors)), corridors$corridor
   )
-  ggplot2::ggplot() +
-    ggplot2::geom_sf(data = shapes, linewidth = 0.45, color = colors[["light"]]) +
+  base_plot +
     ggplot2::geom_sf(
       data = corridors,
       ggplot2::aes(color = corridor),
       linewidth = 1.4, lineend = "round"
     ) +
     ggplot2::scale_color_manual(values = corridor_values) +
-    ggplot2::coord_sf(datum = NA) +
+    ggplot2::guides(color = "none") +
     ggplot2::labs(
       title = "High-Frequency Corridors",
       subtitle = "Connected high-service stop pairs",
-      color = "Corridor"
-    ) +
-    theme_gtfswizard_map()
+      color = NULL
+    )
 }
 
 #' Plot Transit Hubs

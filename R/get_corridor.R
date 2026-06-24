@@ -60,7 +60,8 @@ get_corridor <- function(gtfs, i = 0.01, min_length = 1500, ...){
   segments <- segments[segments$trips >= cutoff, , drop = FALSE]
 
   stops <- gtfs$stops |>
-    dplyr::select(stop_id, stop_lon, stop_lat)
+    dplyr::select(stop_id, stop_lon, stop_lat) |>
+    dplyr::mutate(stop_id = as.character(stop_id))
   from <- dplyr::left_join(
     segments, stops, by = c("stop_from" = "stop_id")
   )

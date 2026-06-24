@@ -294,6 +294,83 @@ drop_short_stop_time_trips <- function(tables){
   filter_gtfs_tables_by_trips(tables, setdiff(trip_ids, invalid_trips))
 }
 
+drop_stop_times_missing_stops <- function(tables){
+  if(!all(c("stop_times", "stops") %in% names(tables)) ||
+     !"stop_id" %in% names(tables$stop_times) ||
+     !"stop_id" %in% names(tables$stops)){
+    return(tables)
+  }
+  valid <- as.character(tables$stop_times$stop_id) %in%
+    as.character(tables$stops$stop_id)
+  if(all(valid)){
+    return(tables)
+  }
+  removed <- sum(!valid)
+  remaining_counts <- table(as.character(tables$stop_times$trip_id[valid]))
+  trip_ids <- as.character(tables$trips$trip_id)
+  surviving_trips <- intersect(names(remaining_counts)[remaining_counts >= 2L], trip_ids)
+  if(!length(surviving_trips)){
+    missing_ids <- setdiff(
+      unique(as.character(tables$stop_times$stop_id)),
+      as.character(tables$stops$stop_id)
+    )
+    tables$stops <- add_placeholder_stops(tables$stops, missing_ids)
+    gw_warn(
+      "created ", length(missing_ids),
+      " placeholder stop(s) for stop_id values referenced by `stop_times` ",
+      "but absent from `stops`."
+    )
+    return(tables)
+  }
+  tables$stop_times <- tables$stop_times[valid, , drop = FALSE]
+  gw_warn(
+    "removed ", removed,
+    " stop-time record(s) referencing stop_id values absent from `stops`."
+  )
+  tables
+}
+
+add_placeholder_stops <- function(stops, stop_ids){
+  stop_ids <- sort(unique(as.character(stop_ids)))
+  if(!length(stop_ids)){
+    return(stops)
+  }
+  if(!"stop_name" %in% names(stops)){
+    stops$stop_name <- NA_character_
+  }
+  if(!"stop_lat" %in% names(stops)){
+    stops$stop_lat <- NA_real_
+  }
+  if(!"stop_lon" %in% names(stops)){
+    stops$stop_lon <- NA_real_
+  }
+  if(!"location_type" %in% names(stops)){
+    stops$location_type <- NA_integer_
+  }
+  lon <- suppressWarnings(as.numeric(stops$stop_lon))
+  lat <- suppressWarnings(as.numeric(stops$stop_lat))
+  has_lon <- any(is.finite(lon))
+  has_lat <- any(is.finite(lat))
+  center_lon <- if(has_lon) mean(lon[is.finite(lon)]) else 0
+  center_lat <- if(has_lat) mean(lat[is.finite(lat)]) else 0
+  if(!has_lon || !has_lat){
+    gw_warn(
+      "placeholder stop coordinates defaulted to (0, 0) because existing ",
+      "`stops` coordinates are unavailable."
+    )
+  }
+  placeholders <- stops[rep(NA_integer_, length(stop_ids)), , drop = FALSE]
+  placeholders$stop_id <- stop_ids
+  placeholders$stop_name <- paste("Placeholder stop", stop_ids)
+  placeholders$stop_lat <- center_lat
+  placeholders$stop_lon <- center_lon
+  placeholders$location_type <- 0L
+  if("parent_station" %in% names(placeholders)){
+    placeholders$parent_station <- ""
+  }
+  rbind(stops, placeholders)
+}
+
 filter_gtfs_tables_by_trips <- function(tables, trip_ids){
   trip_ids <- unique(as.character(trip_ids))
   tables$trips <- filter_table_key(tables$trips, "trip_id", trip_ids)

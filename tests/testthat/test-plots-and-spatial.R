@@ -56,6 +56,7 @@ test_that("map plots use readable layer order, labels, and legends", {
 
   corridors <- get_corridor(feed, i = 1, min_length = 0)
   expect_equal(corridors$corridor, "Corridor 1")
+  expect_null(plot_corridor(feed, i = 1, min_length = 0)$labels$colour)
 
   hubs <- plot_hubs(feed, i = 1)
   expect_lte(nrow(hubs$layers[[2]]$data), 40)
@@ -110,6 +111,16 @@ test_that("planning indicators expose schedule-based system and route metrics", 
   expect_lte(nrow(routes), 2L)
 })
 
+test_that("corridor plotting tolerates numeric stop IDs in stops table", {
+  feed <- minimal_feed()
+  ids <- stats::setNames(seq_len(nrow(feed$stops)), feed$stops$stop_id)
+  feed$stop_times$stop_id <- as.character(ids[feed$stop_times$stop_id])
+  feed$stops$stop_id <- seq_len(nrow(feed$stops))
+
+  expect_s3_class(get_corridor(feed, i = 1, min_length = 0), "sf")
+  expect_s3_class(plot_corridor(feed, i = 1, min_length = 0), "ggplot")
+})
+
 test_that("explorer requires an explicit feed outside interactive sessions", {
   skip_if_not_installed("shiny")
   skip_if_not_installed("leaflet")
@@ -118,6 +129,38 @@ test_that("explorer requires an explicit feed outside interactive sessions", {
   } else {
     expect_error(explore_gtfs(), "required in non-interactive sessions")
   }
+})
+
+test_that("explorer dispatches on a feed selected from the file browser", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("leaflet")
+  path <- tempfile(fileext = ".zip")
+  write_gtfs(minimal_feed(), path)
+
+  browse_explorer <- explore_gtfs
+  mock_environment <- new.env(parent = environment(browse_explorer))
+  mock_environment$interactive <- function() TRUE
+  mock_environment$file.choose <- function() path
+  environment(browse_explorer) <- mock_environment
+
+  expect_s3_class(browse_explorer(), "shiny.appobj")
+})
+
+test_that("explorer tolerates feeds without shape identifiers", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("leaflet")
+  feed <- minimal_feed()
+  feed$trips$shape_id <- NULL
+  feed$shapes <- feed$shapes[0, ]
+
+  app <- explore_gtfs(feed)
+  expect_s3_class(app, "shiny.appobj")
+  suppressMessages(suppressWarnings(
+    shiny::testServer(app, {
+      session$flushReact()
+      expect_s3_class(output$network_map, "json")
+    })
+  ))
 })
 
 test_that("summary returns a summary object", {

@@ -53,6 +53,7 @@ as_wizardgtfs.list <- function(gtfs_list, build_shapes = TRUE){
 
   gtfs_obj <- convert_to_tibble(gtfs_list)
   gtfs_obj$dates_services <- NULL
+  gtfs_obj <- drop_stop_times_missing_stops(gtfs_obj)
   gtfs_obj <- drop_short_stop_time_trips(gtfs_obj)
   validate_gtfs_tables(gtfs_obj)
   gtfs_obj <- convert_times_and_dates(gtfs_obj)

@@ -30,6 +30,7 @@
 explore_gtfs <- function(gtfs = NULL){
   require_pkg("shiny", "`explore_gtfs()`")
   require_pkg("leaflet", "`explore_gtfs()`")
+  feed_name <- deparse(substitute(gtfs))
   if(is.null(gtfs)){
     if(!interactive()){
       gw_stop("`gtfs` is required in non-interactive sessions.")
@@ -41,6 +42,11 @@ explore_gtfs <- function(gtfs = NULL){
       }
     )
     gtfs <- GTFSwizard::read_gtfs(selected_file)
+    attr(gtfs, "gw_source_name") <- basename(selected_file)
+    return(explore_gtfs.wizardgtfs(gtfs))
+  }
+  if(!identical(feed_name, "gtfs")){
+    attr(gtfs, "gw_source_name") <- feed_name
   }
   UseMethod('explore_gtfs')
 }
@@ -54,6 +60,10 @@ explore_gtfs.list <- function(gtfs){
 #' @exportS3Method GTFSwizard::explore_gtfs wizardgtfs
 explore_gtfs.wizardgtfs <- function(gtfs){
   gtfs <- ensure_shapes(ensure_wizardgtfs(gtfs))
+  feed_name <- attr(gtfs, "gw_source_name", exact = TRUE)
+  if(is.null(feed_name) || !nzchar(feed_name)){
+    feed_name <- "GTFS object"
+  }
 
   all_routes <- sort(unique(as.character(gtfs$routes$route_id)))
   patterns_table <- GTFSwizard::get_servicepattern(gtfs)
@@ -88,8 +98,13 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     }
     .gw-stat { font-size: 28px; font-weight: 700; line-height: 1; color: #17456b; }
     .gw-label { color: #5f6f7d; font-size: 12px; text-transform: uppercase; }
+    .gw-feed-info { color: #314457; font-size: 14px; }
+    .gw-help { color: #667785; font-size: 12px; margin-top: -4px; }
     .gw-map { border: 1px solid #d9e1ea; border-radius: 6px; overflow: hidden; }
     .gw-table-scroll { overflow-x: auto; max-height: 360px; overflow-y: auto; }
+    .selectize-control.multi .selectize-input {
+      max-height: 92px; overflow-x: hidden; overflow-y: auto;
+    }
     .form-group { margin-bottom: 10px; }
     @media (max-width: 767px) {
       .gw-page { padding: 12px; }
@@ -107,6 +122,17 @@ explore_gtfs.wizardgtfs <- function(gtfs){
   route_plot_height <- function(n, base = 520L){
     paste0(max(base, 220L + as.integer(n) * 18L), "px")
   }
+  pattern_plot_height <- function(n, base = 520L){
+    paste0(max(base, 300L + as.integer(n) * 18L), "px")
+  }
+  route_pattern_plot_height <- function(routes, patterns, base = 520L){
+    rows <- max(1L, as.integer(routes)) * max(1L, as.integer(patterns))
+    paste0(max(base, 240L + rows * 16L), "px")
+  }
+  calendar_plot_height <- function(g){
+    years <- unique(format(as.Date(g$dates_services$date), "%Y"))
+    paste0(max(520L, length(years) * 260L), "px")
+  }
 
   ui <- shiny::fluidPage(
     class = "gw-page",
@@ -118,24 +144,32 @@ explore_gtfs.wizardgtfs <- function(gtfs){
         shiny::selectizeInput(
           "selected_routes",
           "Routes",
-          choices = all_routes,
+          choices = NULL,
           selected = character(),
           multiple = TRUE,
           options = list(plugins = list("remove_button"), placeholder = "All routes")
         ),
-        shiny::checkboxGroupInput(
+        shiny::selectizeInput(
           "selected_patterns",
           "Service patterns",
-          choices = all_patterns,
-          selected = all_patterns
+          choices = NULL,
+          selected = character(),
+          multiple = TRUE,
+          options = list(
+            plugins = list("remove_button"),
+            placeholder = paste("All", length(all_patterns), "service patterns")
+          )
         ),
         shiny::selectizeInput(
           "selected_services",
           "Services",
-          choices = all_services,
-          selected = all_services,
+          choices = NULL,
+          selected = character(),
           multiple = TRUE,
-          options = list(plugins = list("remove_button"))
+          options = list(
+            plugins = list("remove_button"),
+            placeholder = paste("All", length(all_services), "services")
+          )
         ),
         shiny::selectizeInput(
           "selected_stops",
@@ -160,6 +194,14 @@ explore_gtfs.wizardgtfs <- function(gtfs){
           max = hour_limits[2],
           value = hour_limits,
           step = 1
+        ),
+        shiny::numericInput(
+          "plot_pattern_top_n",
+          "Service patterns shown in plots",
+          value = max(1L, min(12L, length(all_patterns))),
+          min = 1L,
+          max = max(1L, length(all_patterns)),
+          step = 1L
         ),
         shiny::div(
           class = "gw-card",
@@ -196,7 +238,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 "Headways",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("headway_plot", height = "520px")
+                  shiny::uiOutput("headway_plot_ui")
                 )
               ),
               shiny::tabPanel(
@@ -240,7 +282,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 "Fleet",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("fleet_plot", height = "520px")
+                  shiny::uiOutput("fleet_plot_ui")
                 )
               )
             )
@@ -298,7 +340,12 @@ explore_gtfs.wizardgtfs <- function(gtfs){
             "Calendar",
             shiny::div(
               class = "gw-card",
-              shiny::plotOutput("calendar_plot", height = "520px")
+              shiny::checkboxInput(
+                "calendar_fill_pattern",
+                "Fill by service pattern",
+                value = FALSE
+              ),
+              shiny::uiOutput("calendar_plot_ui")
             )
           ),
           shiny::tabPanel(
@@ -342,6 +389,10 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                         min = 0.001,
                         max = 1,
                         step = 0.005
+                      ),
+                      shiny::div(
+                        class = "gw-help",
+                        "Share of the highest-frequency stop-to-stop links retained as corridor candidates."
                       )
                     ),
                     shiny::column(
@@ -352,6 +403,10 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                         value = 1500,
                         min = 0,
                         step = 100
+                      ),
+                      shiny::div(
+                        class = "gw-help",
+                        "Shortest corridor candidate to display after connected high-frequency links are joined."
                       )
                     )
                   ),
@@ -372,6 +427,10 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                         min = 0.001,
                         max = 1,
                         step = 0.005
+                      ),
+                      shiny::div(
+                        class = "gw-help",
+                        "Share of the busiest stops retained as hub candidates."
                       )
                     )
                   ),
@@ -397,6 +456,15 @@ explore_gtfs.wizardgtfs <- function(gtfs){
   )
 
   server <- function(input, output, session){
+    shiny::updateSelectizeInput(
+      session, "selected_routes", choices = all_routes, server = TRUE
+    )
+    shiny::updateSelectizeInput(
+      session, "selected_patterns", choices = all_patterns, server = TRUE
+    )
+    shiny::updateSelectizeInput(
+      session, "selected_services", choices = all_services, server = TRUE
+    )
     shiny::updateSelectizeInput(
       session, "selected_stops", choices = stop_choices, server = TRUE
     )
@@ -468,6 +536,35 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       )
       g
     }
+    plot_gtfs <- function(){
+      g <- dashboard_gtfs()
+      top_n <- as.integer(value_or(input$plot_pattern_top_n, 12L))
+      patterns <- GTFSwizard::get_servicepattern(g)
+      pattern_order <- patterns |>
+        dplyr::arrange(dplyr::desc(.data$pattern_frequency), .data$service_pattern) |>
+        dplyr::pull(.data$service_pattern) |>
+        unique()
+      selected_patterns <- utils::head(pattern_order, top_n)
+      selected_services <- patterns$service_id[
+        patterns$service_pattern %in% selected_patterns
+      ]
+      if(length(selected_services) && length(selected_patterns) < length(unique(patterns$service_pattern))){
+        g <- GTFSwizard::filter_service(g, selected_services)
+      }
+      g
+    }
+    skip_output <- function(label, error){
+      shiny::validate(shiny::need(
+        FALSE,
+        paste0(label, " skipped: ", conditionMessage(error))
+      ))
+    }
+    safe_output <- function(label, expr){
+      tryCatch(
+        force(expr),
+        error = function(error) skip_output(label, error)
+      )
+    }
 
     output$summary_cards <- shiny::renderUI({
       g <- filtered_gtfs()
@@ -476,14 +573,25 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       }else{
         nrow(g$agency)
       }
-      shiny::fluidRow(
-        class = "gw-stats",
-        shiny::column(2, stat_card("Routes", nrow(g$routes))),
-        shiny::column(2, stat_card("Trips", nrow(g$trips))),
-        shiny::column(2, stat_card("Stops", nrow(g$stops))),
-        shiny::column(2, stat_card("Shapes", length(unique(g$shapes$shape_id)))),
-        shiny::column(2, stat_card("Service days", length(unique(g$dates_services$date)))),
-        shiny::column(2, stat_card("Agencies", agency_count))
+      shapes_count <- if(!is.null(g$shapes) && "shape_id" %in% names(g$shapes)){
+        length(unique(g$shapes$shape_id))
+      } else {
+        0L
+      }
+      shiny::tagList(
+        shiny::fluidRow(
+          class = "gw-stats",
+          shiny::column(2, stat_card("Routes", nrow(g$routes))),
+          shiny::column(2, stat_card("Trips", nrow(g$trips))),
+          shiny::column(2, stat_card("Stops", nrow(g$stops))),
+          shiny::column(2, stat_card("Shapes", shapes_count)),
+          shiny::column(2, stat_card("Service days", length(unique(g$dates_services$date)))),
+          shiny::column(2, stat_card("Agencies", agency_count))
+        ),
+        shiny::div(
+          class = "gw-card gw-feed-info",
+          shiny::strong("Feed: "), feed_name
+        )
       )
     })
 
@@ -492,8 +600,8 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     }, striped = TRUE, spacing = "xs")
 
     output$network_map <- leaflet::renderLeaflet({
-      g <- dashboard_gtfs()
-      shapes_sf <- GTFSwizard::get_shapes_sf(g$shapes)
+      safe_output("Network map", {
+        g <- dashboard_gtfs()
       stops_sf <- GTFSwizard::get_stops_sf(g$stops)
       stop_counts <- g$stop_times %>%
         dplyr::group_by(stop_id) %>%
@@ -501,46 +609,64 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       stops_sf <- stops_sf %>%
         dplyr::left_join(stop_counts, by = "stop_id") %>%
         dplyr::mutate(trips = tidyr::replace_na(trips, 0))
-      route_shapes <- g$trips |>
-        dplyr::select(route_id, shape_id) |>
-        dplyr::filter(!is.na(shape_id), nzchar(as.character(shape_id))) |>
-        dplyr::distinct() |>
-        dplyr::left_join(shapes_sf, by = "shape_id") |>
-        sf::st_as_sf()
-      routes <- sort(unique(route_shapes$route_id))
-      route_colors <- if(length(routes) <= 20L){
-        stats::setNames(gtfswizard_palette(length(routes)), routes)
+      stops_sf$.popup_name <- if("stop_name" %in% names(stops_sf)){
+        as.character(stops_sf$stop_name)
       } else {
-        stats::setNames(rep(gtfswizard_colors()[["blue"]], length(routes)), routes)
+        as.character(stops_sf$stop_id)
       }
-
-      leaflet::leaflet() %>%
+      has_shapes <- !is.null(g$shapes) && isTRUE(nrow(g$shapes) > 0L) &&
+        all(c("shape_id", "shape_pt_lat", "shape_pt_lon") %in% names(g$shapes)) &&
+        "shape_id" %in% names(g$trips)
+      route_shapes <- NULL
+      if(has_shapes){
+        shapes_sf <- GTFSwizard::get_shapes_sf(g$shapes)
+        route_shapes <- g$trips |>
+          dplyr::select(route_id, shape_id) |>
+          dplyr::filter(!is.na(shape_id), nzchar(as.character(shape_id))) |>
+          dplyr::distinct() |>
+          dplyr::left_join(shapes_sf, by = "shape_id") |>
+          sf::st_as_sf()
+        if(!nrow(route_shapes)){
+          route_shapes <- NULL
+        }
+      }
+      map <- leaflet::leaflet() %>%
         leaflet::addProviderTiles(leaflet::providers$CartoDB.Positron, group = "Light") %>%
         leaflet::addTiles(group = "OSM") %>%
-        leaflet::addLayersControl(baseGroups = c("Light", "OSM")) %>%
-        leaflet::addPolylines(
+        leaflet::addLayersControl(baseGroups = c("Light", "OSM"))
+      if(!is.null(route_shapes)){
+        routes <- sort(unique(route_shapes$route_id))
+        route_colors <- if(length(routes) <= 20L){
+          stats::setNames(gtfswizard_palette(length(routes)), routes)
+        } else {
+          stats::setNames(rep(gtfswizard_colors()[["blue"]], length(routes)), routes)
+        }
+        map <- map %>% leaflet::addPolylines(
           data = route_shapes,
           color = unname(route_colors[as.character(route_shapes$route_id)]),
           weight = 4,
           opacity = 0.88,
           popup = ~paste0("Route: ", route_id)
-        ) %>%
-        leaflet::addCircleMarkers(
+        )
+      }
+      map %>% leaflet::addCircleMarkers(
           data = stops_sf,
           radius = 2,
           stroke = FALSE,
           fillOpacity = 0.7,
           color = "#20a39e",
-          popup = ~paste0(stop_name, "<br>Trips: ", trips)
+          popup = ~paste0(.popup_name, "<br>Trips: ", trips)
         )
+      })
     })
 
     output$frequency_plot <- shiny::renderPlot({
-      GTFSwizard::plot_frequency(dashboard_gtfs())
+      safe_output("Frequency plot", GTFSwizard::plot_frequency(dashboard_gtfs()))
     })
 
     output$fleet_plot <- shiny::renderPlot({
-      fleet <- GTFSwizard::get_fleet(dashboard_gtfs(), method = "by_hour") %>%
+      safe_output("Fleet plot", {
+      fleet <- GTFSwizard::get_fleet(plot_gtfs(), method = "by_hour") %>%
         dplyr::mutate(hour = as.numeric(hour)) %>%
         dplyr::filter(is.finite(hour), is.finite(fleet))
 
@@ -555,9 +681,15 @@ explore_gtfs.wizardgtfs <- function(gtfs){
           color = "Service pattern"
         ) +
         theme_gtfswizard()
+      })
+    })
+    output$fleet_plot_ui <- shiny::renderUI({
+      n <- length(unique(GTFSwizard::get_servicepattern(plot_gtfs())$service_pattern))
+      shiny::plotOutput("fleet_plot", height = pattern_plot_height(n, 520L))
     })
 
     output$speed_plot <- shiny::renderPlot({
+      safe_output("Speed plot", {
       speed <- GTFSwizard::get_speeds(dashboard_gtfs(), method = "by_route") %>%
         dplyr::filter(
           is.finite(average.speed), is.finite(trips),
@@ -572,21 +704,28 @@ explore_gtfs.wizardgtfs <- function(gtfs){
           y = "Weighted route-pattern observations"
         ) +
         theme_gtfswizard()
+      })
     })
 
     output$headway_plot <- shiny::renderPlot({
-      GTFSwizard::plot_headways(dashboard_gtfs())
+      safe_output("Headway plot", GTFSwizard::plot_headways(plot_gtfs()))
+    })
+    output$headway_plot_ui <- shiny::renderUI({
+      n <- length(unique(GTFSwizard::get_servicepattern(plot_gtfs())$service_pattern))
+      shiny::plotOutput("headway_plot", height = pattern_plot_height(n, 520L))
     })
 
     output$service_heatmap_plot <- shiny::renderPlot({
-      GTFSwizard::plot_serviceheatmap(dashboard_gtfs())
+      safe_output("Weekday-hour plot", GTFSwizard::plot_serviceheatmap(dashboard_gtfs()))
     })
 
     output$service_span_plot <- shiny::renderPlot({
+      safe_output("Service span plot", {
       GTFSwizard::plot_servicespan(
-        dashboard_gtfs(),
+        plot_gtfs(),
         top_n = as.integer(value_or(input$service_span_top_n, 25L))
       )
+      })
     })
     output$service_span_plot_ui <- shiny::renderUI({
       n <- value_or(input$service_span_top_n, 25L)
@@ -594,6 +733,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
 
     output$dwell_plot <- shiny::renderPlot({
+      safe_output("Dwell-time plot", {
       dwell_time <- GTFSwizard::get_dwelltimes(dashboard_gtfs(), method = "by_hour") %>%
         dplyr::filter(
           is.finite(average.dwelltime), is.finite(trips),
@@ -608,13 +748,16 @@ explore_gtfs.wizardgtfs <- function(gtfs){
           y = "Weighted route-hour observations"
         ) +
         theme_gtfswizard()
+      })
     })
 
     output$route_duration_plot <- shiny::renderPlot({
+      safe_output("Route-duration plot", {
       GTFSwizard::plot_routeduration(
-        dashboard_gtfs(),
+        plot_gtfs(),
         top_n = as.integer(value_or(input$route_duration_top_n, 15L))
       )
+      })
     })
     output$route_duration_plot_ui <- shiny::renderUI({
       n <- value_or(input$route_duration_top_n, 15L)
@@ -622,10 +765,12 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
 
     output$service_supply_plot <- shiny::renderPlot({
+      safe_output("Service-supply plot", {
       GTFSwizard::plot_servicesupply(
-        dashboard_gtfs(),
+        plot_gtfs(),
         top_n = as.integer(value_or(input$service_supply_top_n, 15L))
       )
+      })
     })
     output$service_supply_plot_ui <- shiny::renderUI({
       n <- value_or(input$service_supply_top_n, 15L)
@@ -633,7 +778,15 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
 
     output$calendar_plot <- shiny::renderPlot({
-      GTFSwizard::plot_calendar(dashboard_gtfs(), facet_by_year = TRUE)
+      safe_output("Calendar plot", {
+      fill <- if(isTRUE(input$calendar_fill_pattern)) "service_pattern" else "trips"
+      GTFSwizard::plot_calendar(
+        dashboard_gtfs(), facet_by_year = TRUE, fill = fill
+      )
+      })
+    })
+    output$calendar_plot_ui <- shiny::renderUI({
+      shiny::plotOutput("calendar_plot", height = calendar_plot_height(dashboard_gtfs()))
     })
 
     planning_route_data <- shiny::reactive({
@@ -641,16 +794,30 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
 
     output$planning_system_table <- shiny::renderTable({
-      planning_system_indicators(
-        dashboard_gtfs(),
-        route_indicators = planning_route_data()
+      tryCatch(
+        planning_system_indicators(
+          dashboard_gtfs(),
+          route_indicators = planning_route_data()
+        ),
+        error = function(error){
+          data.frame(Message = paste0(
+            "Planning indicators skipped: ", conditionMessage(error)
+          ))
+        }
       )
     }, striped = TRUE, spacing = "xs")
 
     output$planning_route_table <- shiny::renderTable({
-      utils::head(
-        planning_route_data(),
-        as.integer(value_or(input$planning_top_n, 30L))
+      tryCatch(
+        utils::head(
+          planning_route_data(),
+          as.integer(value_or(input$planning_top_n, 30L))
+        ),
+        error = function(error){
+          data.frame(Message = paste0(
+            "Route indicators skipped: ", conditionMessage(error)
+          ))
+        }
       )
     }, striped = TRUE, spacing = "xs", digits = 1)
 
@@ -665,13 +832,13 @@ explore_gtfs.wizardgtfs <- function(gtfs){
           if(grepl("no consecutive stop pairs", conditionMessage(error), fixed = TRUE)){
             shiny::validate(shiny::need(FALSE, "No consecutive stop pairs match the selected filters."))
           }
-          stop(error)
+          skip_output("Corridor plot", error)
         }
       )
     })
 
     output$hubs_plot <- shiny::renderPlot({
-      GTFSwizard::plot_hubs(dashboard_gtfs(), i = input$hubs_i)
+      safe_output("Hub plot", GTFSwizard::plot_hubs(dashboard_gtfs(), i = input$hubs_i))
     })
 
     output$route_table <- shiny::renderTable({
@@ -691,15 +858,22 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     }, striped = TRUE, spacing = "xs")
 
     output$route_frequency_plot <- shiny::renderPlot({
-      g <- dashboard_gtfs()
+      safe_output("Route-frequency plot", {
+      g <- plot_gtfs()
       GTFSwizard::plot_routefrequency(
         g,
         top_n = as.integer(value_or(input$route_frequency_top_n, 25L))
       )
+      })
     })
     output$route_frequency_plot_ui <- shiny::renderUI({
-      n <- min(nrow(dashboard_gtfs()$routes), value_or(input$route_frequency_top_n, 25L))
-      shiny::plotOutput("route_frequency_plot", height = route_plot_height(n, 520L))
+      g <- plot_gtfs()
+      routes <- min(nrow(g$routes), value_or(input$route_frequency_top_n, 25L))
+      patterns <- length(unique(GTFSwizard::get_servicepattern(g)$service_pattern))
+      shiny::plotOutput(
+        "route_frequency_plot",
+        height = route_pattern_plot_height(routes, patterns, 520L)
+      )
     })
   }
 
@@ -754,12 +928,14 @@ planning_system_indicators <- function(gtfs, route_indicators = NULL){
     dplyr::group_by(stop_id) |>
     dplyr::summarise(routes = dplyr::n_distinct(route_id), .groups = "drop")
   spacing <- planning_stop_spacing(gtfs)
+  total_length <- planning_total_length(gtfs)
   peak_fleet <- planning_peak_fleet(trip_instances, trip_schedule)
 
   tibble::tibble(
     Indicator = c(
       "Median route headway", "Median commercial speed",
       "Median service span", "Median daily vehicle-hours",
+      "Total length",
       "Peak scheduled fleet", "Median consecutive-stop spacing",
       "Median routes per stop", "Maximum routes at one stop",
       "Explicit transfer rules"
@@ -769,6 +945,7 @@ planning_system_indicators <- function(gtfs, route_indicators = NULL){
       finite_median(route_indicators$average_speed_kmh),
       finite_median(spans$span_hours),
       finite_median(durations$vehicle_hours),
+      total_length,
       peak_fleet,
       spacing,
       finite_median(routes_per_stop$routes),
@@ -777,9 +954,26 @@ planning_system_indicators <- function(gtfs, route_indicators = NULL){
     ),
     Unit = c(
       "minutes", "km/h", "hours", "vehicle-hours",
-      "vehicles", "meters", "routes", "routes", "rules"
+      "km", "vehicles", "meters", "routes", "routes", "rules"
     )
   )
+}
+
+planning_total_length <- function(gtfs){
+  if(is.null(gtfs$shapes) || !"shape_id" %in% names(gtfs$trips)){
+    return(NA_real_)
+  }
+  used_shapes <- unique(as.character(gtfs$trips$shape_id))
+  used_shapes <- used_shapes[!is.na(used_shapes) & nzchar(used_shapes)]
+  if(!length(used_shapes)){
+    return(NA_real_)
+  }
+  shapes <- get_shapes_sf(gtfs$shapes) |>
+    dplyr::filter(.data$shape_id %in% used_shapes)
+  if(!nrow(shapes)){
+    return(NA_real_)
+  }
+  round(sum(as.numeric(sf::st_length(latlon2epsg(shapes))), na.rm = TRUE) / 1000, 1)
 }
 
 planning_route_indicators <- function(gtfs, top_n = 30L){
