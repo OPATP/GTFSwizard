@@ -146,6 +146,79 @@ test_that("explorer dispatches on a feed selected from the file browser", {
   expect_s3_class(browse_explorer(), "shiny.appobj")
 })
 
+test_that("explorer accepts optional plotly rendering", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("leaflet")
+  expect_s3_class(explore_gtfs(minimal_feed(), plotly = FALSE), "shiny.appobj")
+  if(requireNamespace("plotly", quietly = TRUE)){
+    expect_s3_class(explore_gtfs(minimal_feed(), plotly = TRUE), "shiny.appobj")
+  }
+})
+
+test_that("explorer keeps static plots for calendar and trip duration", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("leaflet")
+  app <- explore_gtfs(minimal_feed(), plotly = TRUE)
+
+  suppressMessages(suppressWarnings(
+    shiny::testServer(app, {
+      session$flushReact()
+      session$setInputs(calendar_fill_pattern = FALSE)
+      session$flushReact()
+      calendar_trips <- output$calendar_plot$src
+      session$setInputs(calendar_fill_pattern = TRUE)
+      session$flushReact()
+      expect_true(all(c("src", "width", "height") %in% names(output$calendar_plot)))
+      expect_true(all(c("src", "width", "height") %in% names(output$route_duration_plot)))
+      expect_false(identical(calendar_trips, output$calendar_plot$src))
+      expect_s3_class(output$frequency_plot, "json")
+    })
+  ))
+})
+
+test_that("explorer edit tab applies delay and split settings", {
+  skip_if_not_installed("shiny")
+  skip_if_not_installed("leaflet")
+  original <- minimal_feed()
+  original_trips <- original$trips
+  original_stop_times <- original$stop_times
+  app <- explore_gtfs(original)
+
+  suppressMessages(suppressWarnings(
+    shiny::testServer(app, {
+      session$flushReact()
+      session$setInputs(delay_enabled = TRUE, delay_duration = 60)
+      session$flushReact()
+      expect_match(output$edit_status, "Delay/advance: 60 seconds")
+
+      session$setInputs(
+        delay_enabled = FALSE,
+        edit_trips = "T1",
+        split_enabled = TRUE,
+        split_count = 1
+      )
+      session$flushReact()
+      expect_match(output$edit_status, "Split points: 1")
+      expect_match(output$edit_status, "3 trips")
+
+      export_path <- tempfile(fileext = ".zip")
+      session$setInputs(
+        export_directory = dirname(export_path),
+        export_filename = basename(export_path),
+        export_gtfs = 1
+      )
+      session$flushReact()
+      expect_true(file.exists(export_path))
+
+      session$setInputs(split_count = 2)
+      session$flushReact()
+      expect_error(output$edit_status, "`split` is too large")
+    })
+  ))
+  expect_identical(original$trips, original_trips)
+  expect_identical(original$stop_times, original_stop_times)
+})
+
 test_that("explorer tolerates feeds without shape identifiers", {
   skip_if_not_installed("shiny")
   skip_if_not_installed("leaflet")

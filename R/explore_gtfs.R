@@ -8,6 +8,9 @@
 #' @param gtfs A GTFS object, preferably of class `wizardgtfs`. When omitted
 #'   or `NULL` in an interactive session, a file-selection window opens so the
 #'   user can choose a GTFS `.zip` archive.
+#' @param plotly Logical. If `TRUE`, dashboard ggplot panels are rendered with
+#'   interactive plotly widgets. `plotly` is optional and only required when
+#'   this argument is `TRUE`.
 #'
 #' @return A Shiny app object.
 #'
@@ -27,9 +30,13 @@
 #' Cascetta, E. (2009). *Transportation Systems Analysis*.
 #'
 #' @export
-explore_gtfs <- function(gtfs = NULL){
+explore_gtfs <- function(gtfs = NULL, plotly = FALSE){
   require_pkg("shiny", "`explore_gtfs()`")
   require_pkg("leaflet", "`explore_gtfs()`")
+  gw_assert_flag(plotly, "plotly")
+  if(isTRUE(plotly)){
+    require_pkg("plotly", "`explore_gtfs(plotly = TRUE)`")
+  }
   feed_name <- deparse(substitute(gtfs))
   if(is.null(gtfs)){
     if(!interactive()){
@@ -43,7 +50,7 @@ explore_gtfs <- function(gtfs = NULL){
     )
     gtfs <- GTFSwizard::read_gtfs(selected_file)
     attr(gtfs, "gw_source_name") <- basename(selected_file)
-    return(explore_gtfs.wizardgtfs(gtfs))
+    return(explore_gtfs.wizardgtfs(gtfs, plotly = plotly))
   }
   if(!identical(feed_name, "gtfs")){
     attr(gtfs, "gw_source_name") <- feed_name
@@ -52,13 +59,17 @@ explore_gtfs <- function(gtfs = NULL){
 }
 
 #' @exportS3Method GTFSwizard::explore_gtfs list
-explore_gtfs.list <- function(gtfs){
+explore_gtfs.list <- function(gtfs, plotly = FALSE){
   gtfs <- ensure_wizardgtfs(gtfs)
-  explore_gtfs.wizardgtfs(gtfs)
+  explore_gtfs.wizardgtfs(gtfs, plotly = plotly)
 }
 
 #' @exportS3Method GTFSwizard::explore_gtfs wizardgtfs
-explore_gtfs.wizardgtfs <- function(gtfs){
+explore_gtfs.wizardgtfs <- function(gtfs, plotly = FALSE){
+  gw_assert_flag(plotly, "plotly")
+  if(isTRUE(plotly)){
+    require_pkg("plotly", "`explore_gtfs(plotly = TRUE)`")
+  }
   gtfs <- ensure_shapes(ensure_wizardgtfs(gtfs))
   feed_name <- attr(gtfs, "gw_source_name", exact = TRUE)
   if(is.null(feed_name) || !nzchar(feed_name)){
@@ -133,6 +144,44 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     years <- unique(format(as.Date(g$dates_services$date), "%Y"))
     paste0(max(520L, length(years) * 260L), "px")
   }
+  plot_ui <- function(output_id, height = "520px", interactive = TRUE){
+    if(isTRUE(plotly) && isTRUE(interactive)){
+      plotly::plotlyOutput(output_id, height = height)
+    } else {
+      shiny::plotOutput(output_id, height = height)
+    }
+  }
+  render_plot <- function(expr, interactive = TRUE){
+    expr <- substitute(expr)
+    env <- parent.frame()
+    if(isTRUE(plotly) && isTRUE(interactive)){
+      plotly::renderPlotly({
+        suppressWarnings(plotly::ggplotly(eval(expr, env)))
+      })
+    } else {
+      shiny::renderPlot(eval(expr, env))
+    }
+  }
+  export_filename <- function(name){
+    name <- gsub("\\.zip$", "", basename(name), ignore.case = TRUE)
+    name <- gsub("[^A-Za-z0-9_-]+", "-", name)
+    name <- gsub("(^-+|-+$)", "", name)
+    if(!nzchar(name)) name <- "gtfswizard-feed"
+    paste0(name, "-filtered.zip")
+  }
+  choose_export_directory <- function(){
+    if(.Platform$OS.type == "windows"){
+      path <- utils::choose.dir(default = getwd(), caption = "Choose export folder")
+      if(is.na(path)) return(character())
+      return(path)
+    }
+    if(requireNamespace("tcltk", quietly = TRUE)){
+      path <- tcltk::tk_choose.dir(default = getwd(), caption = "Choose export folder")
+      if(is.na(path) || !nzchar(path)) return(character())
+      return(path)
+    }
+    getwd()
+  }
 
   ui <- shiny::fluidPage(
     class = "gw-page",
@@ -205,6 +254,23 @@ explore_gtfs.wizardgtfs <- function(gtfs){
         ),
         shiny::div(
           class = "gw-card",
+          shiny::h4("Export"),
+          shiny::textInput(
+            "export_directory",
+            "Folder",
+            value = getwd()
+          ),
+          shiny::actionButton("choose_export_directory", "Choose folder"),
+          shiny::textInput(
+            "export_filename",
+            "File name",
+            value = export_filename(feed_name)
+          ),
+          shiny::actionButton("export_gtfs", "Export GTFS"),
+          shiny::div(class = "gw-help", shiny::textOutput("export_status"))
+        ),
+        shiny::div(
+          class = "gw-card",
           shiny::h4("Routes"),
           shiny::div(
             class = "gw-table-scroll",
@@ -231,7 +297,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 "Frequency",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("frequency_plot", height = "520px")
+                  plot_ui("frequency_plot", height = "520px")
                 )
               ),
               shiny::tabPanel(
@@ -275,7 +341,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 "Weekday and hour",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("service_heatmap_plot", height = "520px")
+                  plot_ui("service_heatmap_plot", height = "520px")
                 )
               ),
               shiny::tabPanel(
@@ -294,14 +360,14 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 "Speed",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("speed_plot", height = "520px")
+                  plot_ui("speed_plot", height = "520px")
                 )
               ),
               shiny::tabPanel(
                 "Dwell time",
                 shiny::div(
                   class = "gw-card",
-                  shiny::plotOutput("dwell_plot", height = "520px")
+                  plot_ui("dwell_plot", height = "520px")
                 )
               ),
               shiny::tabPanel(
@@ -410,7 +476,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                       )
                     )
                   ),
-                  shiny::plotOutput("corridor_plot", height = "620px")
+                  plot_ui("corridor_plot", height = "620px")
                 )
               ),
               shiny::tabPanel(
@@ -434,7 +500,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                       )
                     )
                   ),
-                  shiny::plotOutput("hubs_plot", height = "620px")
+                  plot_ui("hubs_plot", height = "620px")
                 )
               )
             )
@@ -448,6 +514,104 @@ explore_gtfs.wizardgtfs <- function(gtfs){
                 class = "gw-table-scroll",
                 shiny::tableOutput("agency_table")
               )
+            )
+          ),
+          shiny::tabPanel(
+            "Edit",
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Trips"),
+              shiny::selectizeInput(
+                "edit_trips",
+                "Trips for delay/split",
+                choices = NULL,
+                selected = character(),
+                multiple = TRUE,
+                options = list(
+                  plugins = list("remove_button"),
+                  placeholder = "Select trips; blank delays all retained trips"
+                )
+              ),
+              shiny::div(
+                class = "gw-help",
+                "Trip choices update after route, service, stop, date, and time filters. Split requires explicit trip selection."
+              )
+            ),
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Speed"),
+              shiny::checkboxInput("edit_speed_enabled", "Apply speed multiplier", FALSE),
+              shiny::numericInput(
+                "edit_speed_factor",
+                "Speed multiplier",
+                value = 1.25,
+                min = 0.01,
+                step = 0.05
+              ),
+              shiny::div(
+                class = "gw-help",
+                "Applies edit_speed() to all trips and stops retained by the current filters."
+              )
+            ),
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Dwell time"),
+              shiny::checkboxInput("edit_dwell_enabled", "Apply dwell-time multiplier", FALSE),
+              shiny::numericInput(
+                "edit_dwell_factor",
+                "Dwell-time multiplier",
+                value = 1.5,
+                min = 0,
+                step = 0.1
+              ),
+              shiny::checkboxInput("set_dwell_enabled", "Set dwell time", FALSE),
+              shiny::numericInput(
+                "set_dwell_duration",
+                "Dwell time (seconds)",
+                value = 30,
+                min = 0,
+                step = 5
+              ),
+              shiny::div(
+                class = "gw-help",
+                "Applies edit_dwelltime() and set_dwelltime() to all retained trip-stop calls."
+              )
+            ),
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Delay"),
+              shiny::checkboxInput("delay_enabled", "Shift selected trips in time", FALSE),
+              shiny::numericInput(
+                "delay_duration",
+                "Shift duration (seconds)",
+                value = 300,
+                step = 60
+              ),
+              shiny::div(
+                class = "gw-help",
+                "Applies delay_trip(). Positive values delay trips; negative values advance trips when valid."
+              )
+            ),
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Split"),
+              shiny::checkboxInput("split_enabled", "Split selected trips", FALSE),
+              shiny::numericInput(
+                "split_count",
+                "Split points",
+                value = 1L,
+                min = 1L,
+                step = 1L
+              ),
+              shiny::div(
+                class = "gw-help",
+                "Applies split_trip(). Each selected trip is split into split + 1 valid consecutive parts."
+              )
+            ),
+            shiny::div(
+              class = "gw-card",
+              shiny::h4("Current edit state"),
+              shiny::verbatimTextOutput("edit_status")
             )
           )
         )
@@ -528,8 +692,129 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       g
     })
 
-    dashboard_gtfs <- function(){
+    edit_trip_choices <- shiny::reactive({
       g <- filtered_gtfs()
+      trip_ids <- sort(unique(as.character(g$trips$trip_id)))
+      stats::setNames(trip_ids, trip_ids)
+    })
+
+    shiny::observeEvent(edit_trip_choices(), {
+      choices <- edit_trip_choices()
+      selected <- intersect(shiny::isolate(input$edit_trips), unname(choices))
+      shiny::updateSelectizeInput(
+        session, "edit_trips", choices = choices, selected = selected,
+        server = TRUE
+      )
+    }, ignoreNULL = FALSE)
+
+    selected_edit_trips <- function(g, require_selected = FALSE){
+      selected <- input$edit_trips
+      available <- unique(as.character(g$trips$trip_id))
+      if(is.null(selected) || !length(selected)){
+        if(require_selected){
+          shiny::validate(shiny::need(
+            FALSE,
+            "Select at least one trip in the Edit tab before splitting trips."
+          ))
+        }
+        return(available)
+      }
+      selected <- intersect(as.character(selected), available)
+      shiny::validate(shiny::need(
+        length(selected) > 0,
+        "Selected edit trips are not available after the current filters."
+      ))
+      selected
+    }
+
+    validate_split_request <- function(g, trip_ids, split){
+      stop_counts <- table(g$stop_times$trip_id[g$stop_times$trip_id %in% trip_ids])
+      missing <- setdiff(trip_ids, names(stop_counts))
+      shiny::validate(shiny::need(
+        !length(missing),
+        "Selected split trips have no retained stop-time records."
+      ))
+      limits <- stats::setNames(
+        pmax(0L, as.integer(stop_counts) - 2L),
+        names(stop_counts)
+      )
+      too_short <- names(limits)[limits < split]
+      shiny::validate(shiny::need(
+        !length(too_short),
+        paste0(
+          "`split` is too large for selected trip(s): ",
+          paste0(too_short, " (maximum ", limits[too_short], ")", collapse = ", "),
+          "."
+        )
+      ))
+      invisible(TRUE)
+    }
+
+    edited_gtfs <- shiny::reactive({
+      g <- filtered_gtfs()
+      if(isTRUE(input$edit_speed_enabled)){
+        factor <- as.numeric(value_or(input$edit_speed_factor, 1))
+        shiny::validate(shiny::need(
+          is.finite(factor) && factor > 0,
+          "Speed multiplier must be greater than zero."
+        ))
+        g <- suppressMessages(GTFSwizard::edit_speed(
+          g, trips = "all", stops = "all", factor = factor
+        ))
+      }
+      if(isTRUE(input$edit_dwell_enabled)){
+        factor <- as.numeric(value_or(input$edit_dwell_factor, 1))
+        shiny::validate(shiny::need(
+          is.finite(factor) && factor >= 0,
+          "Dwell-time multiplier must be non-negative."
+        ))
+        g <- suppressMessages(GTFSwizard::edit_dwelltime(
+          g, trips = "all", stops = "all", factor = factor
+        ))
+      }
+      if(isTRUE(input$set_dwell_enabled)){
+        duration <- as.numeric(value_or(input$set_dwell_duration, 30))
+        shiny::validate(shiny::need(
+          is.finite(duration) && duration >= 0,
+          "Dwell time must be non-negative."
+        ))
+        g <- suppressMessages(GTFSwizard::set_dwelltime(
+          g, duration = duration, trips = "all", stops = "all"
+        ))
+      }
+      if(isTRUE(input$delay_enabled)){
+        duration <- as.numeric(value_or(input$delay_duration, 300))
+        shiny::validate(shiny::need(
+          is.finite(duration),
+          "Delay duration must be one finite number of seconds."
+        ))
+        trip_ids <- selected_edit_trips(g, require_selected = FALSE)
+        shiny::validate(shiny::need(
+          length(trip_ids) > 0,
+          "No trips are available to delay after the current filters."
+        ))
+        g <- suppressMessages(GTFSwizard::delay_trip(
+          g, trip = trip_ids, duration = duration
+        ))
+      }
+      if(isTRUE(input$split_enabled)){
+        split_value <- as.numeric(value_or(input$split_count, 1L))
+        split <- as.integer(split_value)
+        shiny::validate(shiny::need(
+          is.finite(split_value) && split_value == split && split >= 1L,
+          "Split points must be a positive integer."
+        ))
+        trip_ids <- selected_edit_trips(g, require_selected = TRUE)
+        validate_split_request(g, trip_ids, split)
+        g <- suppressMessages(GTFSwizard::split_trip(
+          g, trip = trip_ids, split = split
+        ))
+      }
+      g
+    })
+
+    dashboard_gtfs <- function(){
+      g <- edited_gtfs()
       shiny::validate(
         shiny::need(nrow(g$trips) > 0, "No trips match the selected filters."),
         shiny::need(nrow(g$stop_times) > 0, "No stop calls match the selected filters.")
@@ -561,13 +846,90 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     }
     safe_output <- function(label, expr){
       tryCatch(
-        force(expr),
+        suppressMessages(force(expr)),
         error = function(error) skip_output(label, error)
       )
     }
+    export_message <- shiny::reactiveVal("")
+
+    output$export_status <- shiny::renderText(export_message())
+
+    shiny::observeEvent(input$choose_export_directory, {
+      directory <- choose_export_directory()
+      if(length(directory) && nzchar(directory)){
+        shiny::updateTextInput(session, "export_directory", value = directory)
+        export_message(paste("Export folder:", normalizePath(
+          directory, winslash = "/", mustWork = FALSE
+        )))
+      } else {
+        export_message("Folder selection cancelled.")
+      }
+    })
+
+    output$edit_status <- shiny::renderPrint({
+      edits <- c(
+        if(isTRUE(input$edit_speed_enabled)){
+          paste0("Speed multiplier: ", value_or(input$edit_speed_factor, 1))
+        },
+        if(isTRUE(input$edit_dwell_enabled)){
+          paste0("Dwell-time multiplier: ", value_or(input$edit_dwell_factor, 1))
+        },
+        if(isTRUE(input$set_dwell_enabled)){
+          paste0("Set dwell time: ", value_or(input$set_dwell_duration, 30), " seconds")
+        },
+        if(isTRUE(input$delay_enabled)){
+          trip_text <- if(length(input$edit_trips)){
+            paste0(length(input$edit_trips), " selected trip(s)")
+          } else {
+            "all retained trips"
+          }
+          paste0("Delay/advance: ", value_or(input$delay_duration, 300), " seconds for ", trip_text)
+        },
+        if(isTRUE(input$split_enabled)){
+          trip_text <- if(length(input$edit_trips)){
+            paste0(length(input$edit_trips), " selected trip(s)")
+          } else {
+            "no trips selected"
+          }
+          paste0("Split points: ", value_or(input$split_count, 1L), " for ", trip_text)
+        }
+      )
+      if(!length(edits)){
+        cat("No edits enabled.\n")
+      } else {
+        cat(paste(edits, collapse = "\n"), "\n")
+      }
+      g <- edited_gtfs()
+      cat("Current filtered/edited feed:", nrow(g$routes), "routes,",
+          nrow(g$trips), "trips,", nrow(g$stops), "stops.\n")
+    })
+
+    shiny::observeEvent(input$export_gtfs, {
+      tryCatch({
+        directory <- value_or(input$export_directory, getwd())
+        if(!length(directory) || !nzchar(directory) || !dir.exists(directory)){
+          export_message("Choose a valid export folder before saving.")
+          shiny::showNotification(export_message(), type = "error")
+          return(invisible(NULL))
+        }
+        filename <- value_or(input$export_filename, export_filename(feed_name))
+        if(!grepl("\\.zip$", filename, ignore.case = TRUE)){
+          filename <- paste0(filename, ".zip")
+        }
+        filename <- basename(filename)
+        zipfile <- file.path(directory, filename)
+        GTFSwizard::write_gtfs(dashboard_gtfs(), zipfile)
+        export_message(paste("Saved:", normalizePath(zipfile, winslash = "/", mustWork = FALSE)))
+        shiny::showNotification(export_message(), type = "message")
+      }, error = function(error){
+        message <- paste("Export failed:", conditionMessage(error))
+        export_message(message)
+        shiny::showNotification(message, type = "error")
+      })
+    })
 
     output$summary_cards <- shiny::renderUI({
-      g <- filtered_gtfs()
+      g <- edited_gtfs()
       agency_count <- if("agency_id" %in% names(g$agency)){
         length(unique(g$agency$agency_id))
       }else{
@@ -596,7 +958,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
 
     output$agency_table <- shiny::renderTable({
-      filtered_gtfs()$agency
+      edited_gtfs()$agency
     }, striped = TRUE, spacing = "xs")
 
     output$network_map <- leaflet::renderLeaflet({
@@ -660,11 +1022,11 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       })
     })
 
-    output$frequency_plot <- shiny::renderPlot({
+    output$frequency_plot <- render_plot({
       safe_output("Frequency plot", GTFSwizard::plot_frequency(dashboard_gtfs()))
     })
 
-    output$fleet_plot <- shiny::renderPlot({
+    output$fleet_plot <- render_plot({
       safe_output("Fleet plot", {
       fleet <- GTFSwizard::get_fleet(plot_gtfs(), method = "by_hour") %>%
         dplyr::mutate(hour = as.numeric(hour)) %>%
@@ -685,10 +1047,10 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
     output$fleet_plot_ui <- shiny::renderUI({
       n <- length(unique(GTFSwizard::get_servicepattern(plot_gtfs())$service_pattern))
-      shiny::plotOutput("fleet_plot", height = pattern_plot_height(n, 520L))
+      plot_ui("fleet_plot", height = pattern_plot_height(n, 520L))
     })
 
-    output$speed_plot <- shiny::renderPlot({
+    output$speed_plot <- render_plot({
       safe_output("Speed plot", {
       speed <- GTFSwizard::get_speeds(dashboard_gtfs(), method = "by_route") %>%
         dplyr::filter(
@@ -707,19 +1069,19 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       })
     })
 
-    output$headway_plot <- shiny::renderPlot({
+    output$headway_plot <- render_plot({
       safe_output("Headway plot", GTFSwizard::plot_headways(plot_gtfs()))
     })
     output$headway_plot_ui <- shiny::renderUI({
       n <- length(unique(GTFSwizard::get_servicepattern(plot_gtfs())$service_pattern))
-      shiny::plotOutput("headway_plot", height = pattern_plot_height(n, 520L))
+      plot_ui("headway_plot", height = pattern_plot_height(n, 520L))
     })
 
-    output$service_heatmap_plot <- shiny::renderPlot({
+    output$service_heatmap_plot <- render_plot({
       safe_output("Weekday-hour plot", GTFSwizard::plot_serviceheatmap(dashboard_gtfs()))
     })
 
-    output$service_span_plot <- shiny::renderPlot({
+    output$service_span_plot <- render_plot({
       safe_output("Service span plot", {
       GTFSwizard::plot_servicespan(
         plot_gtfs(),
@@ -729,10 +1091,10 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
     output$service_span_plot_ui <- shiny::renderUI({
       n <- value_or(input$service_span_top_n, 25L)
-      shiny::plotOutput("service_span_plot", height = route_plot_height(n, 720L))
+      plot_ui("service_span_plot", height = route_plot_height(n, 720L))
     })
 
-    output$dwell_plot <- shiny::renderPlot({
+    output$dwell_plot <- render_plot({
       safe_output("Dwell-time plot", {
       dwell_time <- GTFSwizard::get_dwelltimes(dashboard_gtfs(), method = "by_hour") %>%
         dplyr::filter(
@@ -751,20 +1113,24 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       })
     })
 
-    output$route_duration_plot <- shiny::renderPlot({
+    output$route_duration_plot <- render_plot({
       safe_output("Route-duration plot", {
       GTFSwizard::plot_routeduration(
         plot_gtfs(),
         top_n = as.integer(value_or(input$route_duration_top_n, 15L))
       )
       })
-    })
+    }, interactive = FALSE)
     output$route_duration_plot_ui <- shiny::renderUI({
       n <- value_or(input$route_duration_top_n, 15L)
-      shiny::plotOutput("route_duration_plot", height = route_plot_height(n, 680L))
+      plot_ui(
+        "route_duration_plot",
+        height = route_plot_height(n, 680L),
+        interactive = FALSE
+      )
     })
 
-    output$service_supply_plot <- shiny::renderPlot({
+    output$service_supply_plot <- render_plot({
       safe_output("Service-supply plot", {
       GTFSwizard::plot_servicesupply(
         plot_gtfs(),
@@ -774,19 +1140,23 @@ explore_gtfs.wizardgtfs <- function(gtfs){
     })
     output$service_supply_plot_ui <- shiny::renderUI({
       n <- value_or(input$service_supply_top_n, 15L)
-      shiny::plotOutput("service_supply_plot", height = route_plot_height(n, 680L))
+      plot_ui("service_supply_plot", height = route_plot_height(n, 680L))
     })
 
-    output$calendar_plot <- shiny::renderPlot({
+    output$calendar_plot <- render_plot({
       safe_output("Calendar plot", {
       fill <- if(isTRUE(input$calendar_fill_pattern)) "service_pattern" else "trips"
       GTFSwizard::plot_calendar(
         dashboard_gtfs(), facet_by_year = TRUE, fill = fill
       )
       })
-    })
+    }, interactive = FALSE)
     output$calendar_plot_ui <- shiny::renderUI({
-      shiny::plotOutput("calendar_plot", height = calendar_plot_height(dashboard_gtfs()))
+      plot_ui(
+        "calendar_plot",
+        height = calendar_plot_height(dashboard_gtfs()),
+        interactive = FALSE
+      )
     })
 
     planning_route_data <- shiny::reactive({
@@ -821,7 +1191,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       )
     }, striped = TRUE, spacing = "xs", digits = 1)
 
-    output$corridor_plot <- shiny::renderPlot({
+    output$corridor_plot <- render_plot({
       tryCatch(
         GTFSwizard::plot_corridor(
           dashboard_gtfs(),
@@ -837,12 +1207,12 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       )
     })
 
-    output$hubs_plot <- shiny::renderPlot({
+    output$hubs_plot <- render_plot({
       safe_output("Hub plot", GTFSwizard::plot_hubs(dashboard_gtfs(), i = input$hubs_i))
     })
 
     output$route_table <- shiny::renderTable({
-      g <- filtered_gtfs()
+      g <- edited_gtfs()
       routes_summary <- g$routes %>%
         dplyr::left_join(
           g$trips %>%
@@ -857,7 +1227,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
         )))
     }, striped = TRUE, spacing = "xs")
 
-    output$route_frequency_plot <- shiny::renderPlot({
+    output$route_frequency_plot <- render_plot({
       safe_output("Route-frequency plot", {
       g <- plot_gtfs()
       GTFSwizard::plot_routefrequency(
@@ -870,7 +1240,7 @@ explore_gtfs.wizardgtfs <- function(gtfs){
       g <- plot_gtfs()
       routes <- min(nrow(g$routes), value_or(input$route_frequency_top_n, 25L))
       patterns <- length(unique(GTFSwizard::get_servicepattern(g)$service_pattern))
-      shiny::plotOutput(
+      plot_ui(
         "route_frequency_plot",
         height = route_pattern_plot_height(routes, patterns, 520L)
       )
