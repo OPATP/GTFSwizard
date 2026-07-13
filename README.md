@@ -1,4 +1,4 @@
-# GTFSwizard <img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" height="180">
+<img align="right" src="figs/GTFSwizard_logo.png?raw=true" alt="logo" height="180">
 ##### Development version 1.2.1 (2026-06-21)
 ##### CRAN version 1.2.0 (2026-06-16)
 
@@ -298,17 +298,20 @@ GTFSwizard::plot_servicesupply(for_bus_gtfs)
 ## Editing
 GTFSwizard provides functions to edit GTFS data directly.
 The `delay_trip()` function allows users to apply a delay to specific trips.
-The `split_trip()` function equally divides a trip in `split` number of points, creating `split + 1` separate trips. This can be useful for analyzing partial routes or for simulating route adjustments.
+The `split_trip()` function divides a trip into valid consecutive parts. Trips can be split into `split + 1` approximately equal parts, or at selected internal stop IDs using the `stops` argument. This can be useful for analyzing partial routes or for simulating route adjustments.
 The `edit_speed()` function adjusts the travel speeds between stops in a GTFS dataset by modifying trip durations based on a specified speed multiplier. It allows selective adjustments for specific trips and stops or applies changes globally.
 The `set_dwelltime()` function overwrites dwell times preserving start time and end time of trips. The `edit_dwelltime()` function edit dwell times adjusting the total duration of trips.
 The `merge_gtfs()` function combines two GTFS files, allowing for the integration of distinct GTFS datasets into a single dataset.
 
 ```r
 # Delay trips by 5 minutes (300 seconds)
-delayed_gtfs <- GTFSwizard::delay_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$trip_id[1:2], delay = 300)
+delayed_gtfs <- GTFSwizard::delay_trip(for_bus_gtfs, trip = for_bus_gtfs$trips$trip_id[1:2], duration = 300)
 
 # Split a trip in 3 sections (2 splits)
-split_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip_id = for_bus_gtfs$trips$trip_id[1:2], split = 2)
+split_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip = for_bus_gtfs$trips$trip_id[1:2], split = 2)
+
+# Split a trip at selected stop IDs
+split_at_stop_gtfs <- GTFSwizard::split_trip(for_bus_gtfs, trip = for_bus_gtfs$trips$trip_id[1], stops = for_bus_gtfs$stop_times$stop_id[2])
 
 # Merge two GTFS files into one
 merged_gtfs <- GTFSwizard::merge_gtfs(for_bus_gtfs, for_rail_gtfs)
