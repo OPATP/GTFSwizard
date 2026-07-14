@@ -5,7 +5,7 @@
 [![Lifecycle: experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Development version: 1.2.1](https://img.shields.io/badge/dev%20version-1.2.1-0073B7.svg)](https://github.com/OPATP/GTFSwizard)
 [![CRAN version](https://www.r-pkg.org/badges/version/GTFSwizard)](https://CRAN.R-project.org/package=GTFSwizard)
-[![R CMD check](https://img.shields.io/github/actions/workflow/status/OPATP/GTFSwizard/rhub.yaml?branch=main&label=R%20CMD%20check)](https://github.com/OPATP/GTFSwizard/actions/workflows/rhub.yaml)
+[![R CMD check](https://img.shields.io/github/actions/workflow/status/OPATP/GTFSwizard/R-CMD-check.yaml?branch=main&label=R%20CMD%20check)](https://github.com/OPATP/GTFSwizard/actions/workflows/R-CMD-check.yaml)
 [![Coverage](https://codecov.io/gh/OPATP/GTFSwizard/branch/main/graph/badge.svg)](https://app.codecov.io/gh/OPATP/GTFSwizard)
 [![License: GPL-3](https://img.shields.io/cran/l/GTFSwizard.svg)](https://CRAN.R-project.org/package=GTFSwizard)
 [![Dependencies](https://tinyverse.netlify.app/badge/GTFSwizard)](https://CRAN.R-project.org/package=GTFSwizard)
