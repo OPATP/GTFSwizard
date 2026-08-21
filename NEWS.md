@@ -1,5 +1,15 @@
 # GTFSwizard 1.2.1
 
+* Refreshed the README figures and package website from the current plotting
+  code, and added a reproducible figure-generation script for maintainers.
+
+* Improved the year-faceted service calendar for dense feeds and retained the
+  supplied object name in the `explore_gtfs()` dashboard.
+
+* Organized the package website by workflow, added task-based function
+  reference sections, and added vignettes for getting started, service
+  analysis, filtering and editing, and the interactive dashboard.
+
 * Standardized public method values with underscores: `by_trip`, `by_route`,
   `by_hour`, `by_stop`, and `by_shape`. Legacy dotted values remain accepted.
 
@@ -58,11 +68,11 @@
 
 # GTFSwizard 1.1.0
 
-* Now featuring travel time matrices, trip speed and dweel time edition, corridors, hubs, and more!
+* Now featuring travel time matrices, trip speed and dwell-time editing, corridors, hubs, and more!
 
 * New functions
   - tidy_raptor() estimates travel time matrices from gtfs feeds;
-  - edit_speeds() Adjust Travel Speed in a GTFS Dataset
+  - edit_speed() adjusts travel speed in a GTFS dataset;
   - edit_dwelltime() modifies the dwell time of trips;
   - set_dwelltime() overwrites the dwell time of trips;
   - get_hubs() estimates high integration potential stops;
@@ -80,7 +90,7 @@
   - Minor bug fixed on filter_date() and get_shapes_sf();
   - get_headways() output fixed;
   - split_trip() can now be used after filter_time();
-  - get_speed(), get_durations() and get_distances() now accepts 'trips = ' argument.
+  - get_speeds(), get_durations() and get_distances() now accept the `trips` argument.
 
 # GTFSwizard 1.0.0
 
