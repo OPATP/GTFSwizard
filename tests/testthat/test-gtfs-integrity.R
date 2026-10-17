@@ -165,6 +165,43 @@ test_that("time edits propagate without wrapping at midnight", {
   expect_equal(t1$arrival_time[3], "24:21:00")
 })
 
+test_that("speed edits wrap extreme times to the next service day", {
+  feed <- minimal_feed()
+  edited <- edit_speed(feed, trips = "T1", stops = "all", factor = 0.001)
+  times <- gtfs_time_to_seconds(c(
+    edited$stop_times$arrival_time,
+    edited$stop_times$departure_time
+  ))
+
+  expect_true(all(times < 48 * 60 * 60, na.rm = TRUE))
+  expect_true(any(times >= 24 * 60 * 60, na.rm = TRUE))
+
+  t1 <- edited$stop_times[edited$stop_times$trip_id == "T1", ]
+  expect_true(all(diff(gtfs_time_to_seconds(t1$arrival_time)) >= 0))
+  expect_true(all(gtfs_time_to_seconds(t1$departure_time) >=
+                    gtfs_time_to_seconds(t1$arrival_time)))
+})
+
+test_that("dwell and delay edits wrap extreme times to the next service day", {
+  feed <- minimal_feed()
+  edits <- list(
+    edit_dwelltime(feed, trips = "T1", stops = "S2", factor = 100000),
+    set_dwelltime(feed, duration = 100000000, trips = "T1", stops = "S2"),
+    delay_trip(feed, trip = "T1", duration = 100000000)
+  )
+
+  for(edited in edits){
+    t1 <- edited$stop_times[edited$stop_times$trip_id == "T1", ]
+    arrival <- gtfs_time_to_seconds(t1$arrival_time)
+    departure <- gtfs_time_to_seconds(t1$departure_time)
+
+    expect_true(all(arrival < 48 * 60 * 60, na.rm = TRUE))
+    expect_true(all(departure < 48 * 60 * 60, na.rm = TRUE))
+    expect_true(all(diff(arrival) >= 0))
+    expect_true(all(departure >= arrival))
+  }
+})
+
 test_that("merge and split update identifiers and references", {
   feed <- minimal_feed()
   merged <- merge_gtfs(feed, feed)
@@ -208,6 +245,56 @@ test_that("merge and split update identifiers and references", {
   expect_error(
     split_trip(feed, "T1", stops = "S1"),
     "no matching internal stop"
+  )
+})
+
+test_that("split_trip keeps selected boundary stops in adjacent parts", {
+  feed <- minimal_feed()
+  extra_stops <- data.frame(
+    stop_id = c("S4", "S5"), stop_name = c("Four", "Five"),
+    stop_lat = c(-3.733, -3.734), stop_lon = c(-38.523, -38.524)
+  )
+  extra_times <- data.frame(
+    trip_id = "T1",
+    arrival_time = c("24:35:00", "24:50:00"),
+    departure_time = c("24:35:00", "24:50:00"),
+    stop_id = c("S4", "S5"), stop_sequence = c(4L, 5L)
+  )
+  feed$stops <- rbind(feed$stops, extra_stops)
+  feed$stop_times <- rbind(feed$stop_times, extra_times)
+
+  equal_split <- split_trip(feed, "T1", split = 1L)
+  expect_equal(
+    equal_split$stop_times$stop_id[
+      equal_split$stop_times$trip_id == "T1.part1"
+    ],
+    c("S1", "S2", "S3")
+  )
+  expect_equal(
+    equal_split$stop_times$stop_id[
+      equal_split$stop_times$trip_id == "T1.part2"
+    ],
+    c("S3", "S4", "S5")
+  )
+
+  selected_split <- split_trip(feed, "T1", stops = c("S4", "S2"))
+  expect_equal(
+    selected_split$stop_times$stop_id[
+      selected_split$stop_times$trip_id == "T1.part1"
+    ],
+    c("S1", "S2")
+  )
+  expect_equal(
+    selected_split$stop_times$stop_id[
+      selected_split$stop_times$trip_id == "T1.part2"
+    ],
+    c("S2", "S3", "S4")
+  )
+  expect_equal(
+    selected_split$stop_times$stop_id[
+      selected_split$stop_times$trip_id == "T1.part3"
+    ],
+    c("S4", "S5")
   )
 })
 
