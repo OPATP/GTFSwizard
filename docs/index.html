@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="index.html">GTFSwizard</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,7 @@
   <ul class="dropdown-menu" aria-labelledby="dropdown-guides">
 <li><h6 class="dropdown-header" data-toc-skip>Start here</h6></li>
     <li><a class="dropdown-item" href="articles/getting-started.html">Getting started</a></li>
+    <li><a class="dropdown-item" href="articles/validation.html">Validating a feed</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>Analyze and visualize</h6></li>
     <li><a class="dropdown-item" href="articles/service-analysis.html">Service analysis</a></li>
     <li><h6 class="dropdown-header" data-toc-skip>Modify and explore</h6></li>
@@ -64,13 +65,13 @@
 <div class="page-header"><h1 id="gtfswizard">GTFSwizard<a class="anchor" aria-label="anchor" href="#gtfswizard"></a>
 </h1></div>
 <div class="section level5">
-<h5 id="development-version-121-2026-08-14">Development version 1.2.1 (2026-08-14)<a class="anchor" aria-label="anchor" href="#development-version-121-2026-08-14"></a>
+<h5 id="development-version-122-snapshot-2026-10-19">Development version 1.2.2 (snapshot: 2026-10-19)<a class="anchor" aria-label="anchor" href="#development-version-122-snapshot-2026-10-19"></a>
 </h5>
 </div>
 <div class="section level5">
-<h5 id="cran-version-120-2026-06-16">CRAN version 1.2.0 (2026-06-16)<a class="anchor" aria-label="anchor" href="#cran-version-120-2026-06-16"></a>
+<h5 id="cran-version-121-published-2026-08-21">CRAN version 1.2.1 (published: 2026-08-21)<a class="anchor" aria-label="anchor" href="#cran-version-121-published-2026-08-21"></a>
 </h5>
-<p><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/nelsonquesado/GTFSwizard" class="external-link"><img src="https://img.shields.io/badge/dev%20version-1.2.1-0073B7.svg" alt="Development version: 1.2.1"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://www.r-pkg.org/badges/version/GTFSwizard" alt="CRAN version"></a> <a href="https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main" alt="R CMD check"></a> <a href="https://app.codecov.io/gh/nelsonquesado/GTFSwizard" class="external-link"><img src="https://codecov.io/gh/nelsonquesado/GTFSwizard/branch/main/graph/badge.svg" alt="Coverage"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://img.shields.io/cran/l/GTFSwizard.svg" alt="License: GPL-3"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://tinyverse.netlify.app/badge/GTFSwizard" alt="Dependencies"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/GTFSwizard?color=blue" alt="CRAN/METACRAN Total downloads"></a></p>
+<p><a href="https://lifecycle.r-lib.org/articles/stages.html" class="external-link"><img src="https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg" alt="Lifecycle: experimental"></a> <a href="https://github.com/nelsonquesado/GTFSwizard" class="external-link"><img src="https://img.shields.io/badge/dev%20version-1.2.2-0073B7.svg" alt="Development version: 1.2.2"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://www.r-pkg.org/badges/version/GTFSwizard" alt="CRAN version"></a> <a href="https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main" alt="R CMD check"></a> <a href="https://app.codecov.io/gh/nelsonquesado/GTFSwizard" class="external-link"><img src="https://codecov.io/gh/nelsonquesado/GTFSwizard/branch/main/graph/badge.svg" alt="Coverage"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://img.shields.io/cran/l/GTFSwizard.svg" alt="License: GPL-3"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://tinyverse.netlify.app/badge/GTFSwizard" alt="Dependencies"></a> <a href="https://CRAN.R-project.org/package=GTFSwizard" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/GTFSwizard?color=blue" alt="CRAN/METACRAN Total downloads"></a></p>
 <p>GTFSwizard is a set of tools for creating, exploring, and manipulating <a href="https://gtfs.org/" class="external-link">General Transit Feed Specification (GTFS)</a> files in R.</p>
 <p>Its main purpose is to give researchers and practitioners a straightforward way to explore and simulate changes within GTFS files, which represent public transportation schedules and geographic data.</p>
 </div>
@@ -91,7 +92,7 @@
 </h2>
 <ul>
 <li>
-<strong>Create and validate:</strong> build feeds from data frames with <a href="reference/create_gtfs.html"><code>create_gtfs()</code></a>, or import an existing archive with <a href="reference/read_gtfs.html"><code>read_gtfs()</code></a>.</li>
+<strong>Create and validate:</strong> build feeds from data frames with <a href="reference/create_gtfs.html"><code>create_gtfs()</code></a>, or import an existing archive with <a href="reference/read_gtfs.html"><code>read_gtfs()</code></a>. Check the original archive against the GTFS specification with <a href="reference/validate_gtfs.html"><code>validate_gtfs()</code></a>.</li>
 <li>
 <strong>Analyze service:</strong> calculate frequency, headways, dwell time, duration, speed, fleet requirements, service span, corridors, and hubs.</li>
 <li>
@@ -105,7 +106,7 @@
 </h2>
 <p>The package includes compact rail and larger bus feeds, so the main workflows can be tried without downloading external data.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/OPATP/GTFSwizard" class="external-link">GTFSwizard</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/nelsonquesado/GTFSwizard" class="external-link">GTFSwizard</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">gtfs</span> <span class="op">&lt;-</span> <span class="va">for_rail_gtfs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">gtfs</span><span class="op">)</span></span>
@@ -123,6 +124,7 @@
 </h2>
 <ul>
 <li><a href="articles/getting-started.html">Getting started</a></li>
+<li><a href="articles/validation.html">Validating a feed</a></li>
 <li><a href="articles/service-analysis.html">Service analysis and visualization</a></li>
 <li><a href="articles/filtering-editing.html">Filtering, selecting, and editing</a></li>
 <li><a href="articles/explore-dashboard.html">Interactive dashboard</a></li>

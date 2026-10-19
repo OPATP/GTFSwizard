@@ -1,0 +1,276 @@
+# GTFSwizard
+
+![GTFSwizard
+logo](https://raw.githubusercontent.com/nelsonquesado/GTFSwizard/main/figs/GTFSwizard_logo.png)
+
+##### Development version 1.2.2 (snapshot: 2026-10-19)
+
+##### CRAN version 1.2.1 (published: 2026-08-21)
+
+[![Lifecycle:
+experimental](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
+[![Development version:
+1.2.2](https://img.shields.io/badge/dev%20version-1.2.2-0073B7.svg)](https://github.com/nelsonquesado/GTFSwizard)
+[![CRAN
+version](https://www.r-pkg.org/badges/version/GTFSwizard)](https://CRAN.R-project.org/package=GTFSwizard)
+[![R CMD
+check](https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml/badge.svg?branch=main)](https://github.com/nelsonquesado/GTFSwizard/actions/workflows/R-CMD-check.yaml)
+[![Coverage](https://codecov.io/gh/nelsonquesado/GTFSwizard/branch/main/graph/badge.svg)](https://app.codecov.io/gh/nelsonquesado/GTFSwizard)
+[![License:
+GPL-3](https://img.shields.io/cran/l/GTFSwizard.svg)](https://CRAN.R-project.org/package=GTFSwizard)
+[![Dependencies](https://tinyverse.netlify.app/badge/GTFSwizard)](https://CRAN.R-project.org/package=GTFSwizard)
+[![CRAN/METACRAN Total
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/GTFSwizard?color=blue)](https://CRAN.R-project.org/package=GTFSwizard)
+
+GTFSwizard is a set of tools for creating, exploring, and manipulating
+[General Transit Feed Specification (GTFS)](https://gtfs.org/) files in
+R.
+
+Its main purpose is to give researchers and practitioners a
+straightforward way to explore and simulate changes within GTFS files,
+which represent public transportation schedules and geographic data.
+
+## Install
+
+``` r
+
+# Stable release
+install.packages("GTFSwizard")
+
+# Development version
+remotes::install_github(
+  "nelsonquesado/GTFSwizard@main"
+)
+```
+
+## Work With GTFS
+
+- **Create and validate:** build feeds from data frames with
+  [`create_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/create_gtfs.md),
+  or import an existing archive with
+  [`read_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/read_gtfs.md).
+  Check the original archive against the GTFS specification with
+  [`validate_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/validate_gtfs.md).
+- **Analyze service:** calculate frequency, headways, dwell time,
+  duration, speed, fleet requirements, service span, corridors, and
+  hubs.
+- **Build scenarios:** filter routes, services, dates, stops, and time
+  windows; then delay, split, merge, or edit scheduled trips.
+- **Explore visually:** use
+  [`explore_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/explore_gtfs.md)
+  for interactive maps, planning indicators, service plots, editing, and
+  export.
+
+## Quick Start
+
+The package includes compact rail and larger bus feeds, so the main
+workflows can be tried without downloading external data.
+
+``` r
+
+library(GTFSwizard)
+
+gtfs <- for_rail_gtfs
+summary(gtfs)
+
+get_frequency(gtfs, method = "by_route")
+plot_calendar(gtfs, fill = "service_pattern", facet_by_year = TRUE)
+```
+
+Launch the dashboard from an object, or omit the object to choose a GTFS
+zip archive interactively.
+
+``` r
+
+explore_gtfs(for_rail_gtfs)
+# explore_gtfs()
+```
+
+![GTFSwizard dashboard showing a transit
+network](https://raw.githubusercontent.com/nelsonquesado/GTFSwizard/main/figs/exploregtfs.png)
+
+## Guides
+
+- [Getting
+  started](https://nelsonquesado.github.io/GTFSwizard/articles/getting-started.md)
+- [Validating a
+  feed](https://nelsonquesado.github.io/GTFSwizard/articles/validation.md)
+- [Service analysis and
+  visualization](https://nelsonquesado.github.io/GTFSwizard/articles/service-analysis.md)
+- [Filtering, selecting, and
+  editing](https://nelsonquesado.github.io/GTFSwizard/articles/filtering-editing.md)
+- [Interactive
+  dashboard](https://nelsonquesado.github.io/GTFSwizard/articles/explore-dashboard.md)
+- [Complete function
+  reference](https://nelsonquesado.github.io/GTFSwizard/reference/index.md)
+- [Cheat
+  sheet](https://github.com/nelsonquesado/GTFSwizard/blob/main/inst/cheatsheet/GTFSwizard-cheatsheet.html)
+
+## Citation
+
+Use `citation("GTFSwizard")` to obtain the current package citation.
+Related publications and project details are listed in the [repository
+README](https://github.com/nelsonquesado/GTFSwizard#readme).
+
+# Package index
+
+## Package overview
+
+- [`GTFSwizard`](https://nelsonquesado.github.io/GTFSwizard/reference/GTFSwizard-package.md)
+  [`GTFSwizard-package`](https://nelsonquesado.github.io/GTFSwizard/reference/GTFSwizard-package.md)
+  : GTFSwizard: Create, Explore, and Edit GTFS Feeds
+
+## Create, read, and export feeds
+
+Build the GTFSwizard object used throughout the package.
+
+- [`create_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/create_gtfs.md)
+  : Create a GTFS Feed from Tables
+- [`read_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/read_gtfs.md)
+  : Read a GTFS Feed
+- [`as_wizardgtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/as_wizardgtfs.md)
+  : Convert a GTFS Feed to \`wizardgtfs\`
+- [`validate_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/validate_gtfs.md)
+  : Validate a GTFS Schedule Feed
+- [`write_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/write_gtfs.md)
+  : Write a GTFS Feed
+- [`merge_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/merge_gtfs.md)
+  : Merge Two GTFS Feeds
+
+## Filter, select, and group
+
+Focus an analysis while retaining a valid, internally consistent feed.
+
+- [`filter_servicepattern()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_date()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_service()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_route()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_trip()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_stop()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  [`filter_time()`](https://nelsonquesado.github.io/GTFSwizard/reference/filter_functions.md)
+  : Filter a GTFS Feed
+- [`selection()`](https://nelsonquesado.github.io/GTFSwizard/reference/selection.md)
+  [`unselection()`](https://nelsonquesado.github.io/GTFSwizard/reference/selection.md)
+  : Group or Select GTFS Records Without Filtering the Feed
+
+## Analyze scheduled service
+
+Calculate service patterns and planning or operational indicators.
+
+- [`get_servicepattern()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_servicepattern.md)
+  : Identify Recurring Daily Service Patterns
+- [`get_frequency()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_frequency.md)
+  : Calculate Scheduled Service Frequency
+- [`get_headways()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_headways.md)
+  : Calculate Scheduled Headways
+- [`get_dwelltimes()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_dwelltimes.md)
+  : Calculate Dwell Times in GTFS Data
+- [`get_durations()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_durations.md)
+  : Calculate Trip Durations in GTFS Data
+- [`get_distances()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_distances.md)
+  : Calculate Distances in GTFS Data
+- [`get_speeds()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_speeds.md)
+  : Calculate Scheduled Speeds
+- [`get_fleet()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_fleet.md)
+  : Estimate Simultaneous Vehicles
+- [`get_1stdeparture()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_1stdeparture.md)
+  : Get the First Departure of Each Trip
+
+## Analyze geography and networks
+
+Work with stops, shapes, corridors, hubs, and metric coordinate systems.
+
+- [`get_stops_sf()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_stops_sf.md)
+  : Convert GTFS Stops to Simple Features
+- [`get_shapes()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_shapes.md)
+  : Infer Straight-Line Shapes from Stop Sequences
+- [`get_shapes_sf()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_shapes_sf.md)
+  : Convert GTFS Shapes to Simple Features
+- [`get_shapes_df()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_shapes_df.md)
+  : Convert Shape Geometries to a GTFS Shapes Table
+- [`latlon2epsg()`](https://nelsonquesado.github.io/GTFSwizard/reference/latlon2epsg.md)
+  : Transform Spatial Data to a Local Metric CRS
+- [`get_corridor()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_corridor.md)
+  : Identify High-Frequency Transit Corridors
+- [`get_hubs()`](https://nelsonquesado.github.io/GTFSwizard/reference/get_hubs.md)
+  : Identify Stops Serving Multiple Routes
+
+## Edit scheduled service
+
+Apply timetable and trip-structure scenarios to a copy of a feed.
+
+- [`delay_trip()`](https://nelsonquesado.github.io/GTFSwizard/reference/delay_trip.md)
+  : Shift Trips in Time
+- [`split_trip()`](https://nelsonquesado.github.io/GTFSwizard/reference/split_trip.md)
+  : Split Trips into Consecutive Parts
+- [`edit_speed()`](https://nelsonquesado.github.io/GTFSwizard/reference/edit_speed.md)
+  : Scale In-Vehicle Travel Speed
+- [`set_dwelltime()`](https://nelsonquesado.github.io/GTFSwizard/reference/set_dwelltime.md)
+  : Set Dwell Times
+- [`edit_dwelltime()`](https://nelsonquesado.github.io/GTFSwizard/reference/edit_dwelltime.md)
+  : Scale Dwell Times
+
+## Visualize feeds and service
+
+Produce the package’s consistent static network and service plots.
+
+- [`print(`*`<wizardgtfs>`*`)`](https://nelsonquesado.github.io/GTFSwizard/reference/wizardgtfs-methods.md)
+  [`summary(`*`<wizardgtfs>`*`)`](https://nelsonquesado.github.io/GTFSwizard/reference/wizardgtfs-methods.md)
+  [`print(`*`<summary.wizardgtfs>`*`)`](https://nelsonquesado.github.io/GTFSwizard/reference/wizardgtfs-methods.md)
+  [`plot(`*`<wizardgtfs>`*`)`](https://nelsonquesado.github.io/GTFSwizard/reference/wizardgtfs-methods.md)
+  : Print, Summarize, and Plot \`wizardgtfs\` Objects
+- [`plot_calendar()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_calendar.md)
+  : Plot the GTFS Service Calendar
+- [`plot_frequency()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_frequency.md)
+  : Plot System Frequency by Hour
+- [`plot_routefrequency()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_routefrequency.md)
+  : Plot Route Frequency by Hour
+- [`plot_headways()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_headways.md)
+  : Plot System Headway by Hour
+- [`plot_servicespan()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_servicespan.md)
+  : Plot Scheduled Service Span by Route
+- [`plot_serviceheatmap()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_serviceheatmap.md)
+  : Plot Average Scheduled Departures by Weekday and Hour
+- [`plot_routeduration()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_routeduration.md)
+  : Plot Scheduled Trip Duration by Route
+- [`plot_servicesupply()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_servicesupply.md)
+  : Plot Scheduled Vehicle-Hours by Route
+- [`plot_corridor()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_corridor.md)
+  : Plot High-Frequency Corridors
+- [`plot_hubs()`](https://nelsonquesado.github.io/GTFSwizard/reference/plot_hubs.md)
+  : Plot Transit Hubs
+
+## Explore and route interactively
+
+- [`explore_gtfs()`](https://nelsonquesado.github.io/GTFSwizard/reference/explore_gtfs.md)
+  : Explore GTFS Data in an Interactive Shiny Dashboard
+- [`tidy_raptor()`](https://nelsonquesado.github.io/GTFSwizard/reference/tidy_raptor.md)
+  : Calculate Travel Times with RAPTOR Algorithm
+
+## Example feeds
+
+- [`for_bus_gtfs`](https://nelsonquesado.github.io/GTFSwizard/reference/for_bus_gtfs.md)
+  : GTFS Data for Fortaleza (Bus System), Brazil.
+- [`for_rail_gtfs`](https://nelsonquesado.github.io/GTFSwizard/reference/for_rail_gtfs.md)
+  : GTFS Data for Fortaleza (Rail System), Brazil
+
+# Articles
+
+### Start here
+
+- [Getting started with
+  GTFSwizard](https://nelsonquesado.github.io/GTFSwizard/articles/getting-started.md):
+- [Validating GTFS
+  feeds](https://nelsonquesado.github.io/GTFSwizard/articles/validation.md):
+
+### Analyze and visualize
+
+- [Service analysis and
+  visualization](https://nelsonquesado.github.io/GTFSwizard/articles/service-analysis.md):
+
+### Modify and explore
+
+- [Filtering, selecting, and editing
+  feeds](https://nelsonquesado.github.io/GTFSwizard/articles/filtering-editing.md):
+- [Using the interactive GTFS
+  dashboard](https://nelsonquesado.github.io/GTFSwizard/articles/explore-dashboard.md):
