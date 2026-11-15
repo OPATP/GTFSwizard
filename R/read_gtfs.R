@@ -2,7 +2,8 @@
 #'
 #' Imports a GTFS zip archive and converts it to `wizardgtfs`.
 #'
-#' @param file_path Path to a GTFS `.zip` archive.
+#' @param file_path Optional path to a GTFS `.zip` archive. When omitted in an
+#'   interactive session, a file-selection window opens.
 #' @param files Optional character vector of table names without `.txt`.
 #' @param quiet Logical. Suppress importer messages and UTF-16 conversion warnings.
 #' @param ... Additional arguments passed to [gtfsio::import_gtfs()], including
@@ -29,8 +30,9 @@ read_gtfs <- function(file_path = NULL, files = NULL, quiet = TRUE, ...){
   )
   file_path <- resolved$value
   dots <- resolved$dots
+  if(is.null(file_path)) file_path <- choose_gtfs_path()
   if(!is.character(file_path) || length(file_path) != 1L ||
-     !file.exists(file_path)){
+     !file.exists(file_path) || dir.exists(file_path)){
     gw_stop("`file_path` must point to an existing GTFS zip archive.")
   }
   gw_assert_flag(quiet, "quiet")
@@ -149,16 +151,16 @@ convert_gtfs_utf16 <- function(path, encoding){
         if(length(bytes) >= 2L && identical(bytes[1:2], bom)) bytes <- bytes[-(1:2)]
       }
       if(length(bytes) %% 2L){
-        pending <- tail(bytes, 1L)
-        bytes <- head(bytes, -1L)
+        pending <- utils::tail(bytes, 1L)
+        bytes <- utils::head(bytes, -1L)
       }
       if(length(bytes) >= 2L){
-        last <- as.integer(tail(bytes, 2L))
+        last <- as.integer(utils::tail(bytes, 2L))
         code <- if(encoding == "UTF-16LE") last[1] + 256L * last[2] else
           256L * last[1] + last[2]
         if(code >= 0xd800 && code <= 0xdbff){
-          pending <- c(tail(bytes, 2L), pending)
-          bytes <- head(bytes, -2L)
+          pending <- c(utils::tail(bytes, 2L), pending)
+          bytes <- utils::head(bytes, -2L)
         }
       }
       if(length(bytes)){
