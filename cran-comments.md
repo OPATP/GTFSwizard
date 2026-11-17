@@ -1,42 +1,34 @@
-## Update to version 1.2.2
+## GTFSwizard 1.2.2
 
-Prepared on 2026-11-16 as an update to CRAN version 1.2.1 (published 2026-08-21).
-The package license and maintainer are unchanged.
+This update adds spatial selection, auditable feed repairs, scenario comparisons,
+and consistent trip and segment distance calculations. `tidy_raptor()` prepares
+routing data internally. Additional changes include optional MobilityData
+validation, UTF-16 import support, an AMB Barcelona example feed, and fixes for
+frequency-based services and calendar handling.
 
-This update adds an optional external GTFS validator, UTF-16 import support,
-interactive file selection, a historical AMB Barcelona feed, and fixes for parent
-stations and frequency-based service calculations. Validator downloads require
-an explicit opt-in; examples and tests do not download or run external Java code.
+The license and maintainer are unchanged.
 
-## Verification
+## Test environment
 
-Verified on macOS arm64 with R 4.6.2 (2026-10-29), on 2026-11-17:
+macOS Tahoe 26.6.2, arm64, R 4.6.2 (2026-10-29).
+Pandoc 3.10 and HTML Tidy 5.8.0 were configured for the latest maintainer check.
 
-- R CMD build completed successfully, including all vignettes.
-- Installation of the built source tarball completed successfully.
-- Latest full source test suite: 395 passed, 0 failures, 0 warnings, 0 skips.
-- All 46 help files passed Rd validation; code references and dataset compression
-  were verified.
-- The pkgdown website and all vignettes were rebuilt successfully.
-- The AMB dataset retains its full calendar, 2017-01-27 through 2026-12-31.
-- The source archive excludes raw ZIP files and development artifacts.
-- Source tarball: 3,598,118 bytes; installed data: 5,514,243 bytes.
+## R CMD check results
 
-The test suite does not require downloading the optional Java validator or
-opening a browser. Interactive file dialogs are exercised with mocks.
+The maintainer ran `devtools::check(args = "--as-cran", run_dont_test = TRUE)`
+on 2026-11-17. The supplied console log reports successful vignette creation
+and **0 errors, 0 warnings and 0 notes**.
 
-The maintainer ran `devtools::check(remote = TRUE, force_suggests = TRUE,
-run_dont_test = TRUE)` on macOS Tahoe 26.6.2 (aarch64-apple-darwin23), with
-R 4.6.2, on 2026-11-17. The supplied log reports `--run-donttest --no-manual
---as-cran`: 0 errors, 0 warnings, and 0 notes, including CRAN incoming
-feasibility, examples, tests, and vignette rebuilding. A subsequent
-`devtools::test()` reports 393 passes, 0 failures, 0 warnings, and 0 skips.
-No Windows or R-devel checks are claimed here.
+That run used `NOT_CRAN=true`, disabled CRAN incoming checks, and set
+`_R_CHECK_FORCE_SUGGESTS_=FALSE`. No Windows, Linux or R-devel check is claimed.
 
-Since that check, the only code change wraps two simulated validation reports
-in `expect_output()` inside the tests. This prevents confusing console output
-and adds two assertions; no package functions were changed. The full source
-test suite was rerun successfully with 395 passes, and the source tarball was
-rebuilt including all vignettes. R CMD check was not rerun after this test-only
-adjustment, at the maintainer's request.
+An earlier independent archive check required all suggested packages and passed
+425 assertions with 0 failures, 0 warnings and 0 skips. Its sole environment
+note concerned the older HTML Tidy available before the maintainer's update.
+The complete verification history is retained in the development record.
 
+## Documentation
+
+The README, NEWS, reference documentation and vignettes describe the current
+API. `prepare_raptor()` is internal. All five vignettes were built successfully.
+The pkgdown site was rebuilt and its 73 HTML pages passed local-link checks.
