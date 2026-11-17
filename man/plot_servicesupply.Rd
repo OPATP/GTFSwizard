@@ -4,12 +4,15 @@
 \alias{plot_servicesupply}
 \title{Plot Scheduled Vehicle-Hours by Route}
 \usage{
-plot_servicesupply(gtfs, top_n = 20L)
+plot_servicesupply(gtfs, top_n = 20L, max_patterns = 12L)
 }
 \arguments{
 \item{gtfs}{A GTFS object.}
 
 \item{top_n}{Maximum number of routes to display.}
+
+\item{max_patterns}{Maximum number of the most frequent service patterns
+to display. Use `Inf` to display all patterns.}
 }
 \value{
 A `ggplot` object. Each bar is scheduled vehicle-hours for one
@@ -18,6 +21,7 @@ A `ggplot` object. Each bar is scheduled vehicle-hours for one
 \description{
 Sums scheduled end-to-end trip durations for each route and service
 pattern.
+Frequency-based trips contribute all departures at their headway intervals.
 }
 \examples{
 plot_servicesupply(for_rail_gtfs)
